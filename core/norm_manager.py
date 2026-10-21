@@ -246,8 +246,8 @@ class NormManager:
         variants = self.load_project_variants()
         return variants.get(variant_id)
 
-    def get_variants_for_norm(self, norm_code: str) -> List[Dict[str, Any]]:
-        """Retrieve all active variant profiles belonging to a given base norm code."""
+    def get_variants_for_norm(self, norm_code: str) -> Dict[str, Dict[str, Any]]:
+        """Retrieve all active variant profiles belonging to a given base norm code as a dict mapping variant_id to profile."""
         code = (norm_code or "").strip()
         variants = self.load_project_variants()
         results = [v for v in variants.values() if v.get("norm_code", "").strip() == code]
@@ -265,7 +265,7 @@ class NormManager:
                     "k_step": 1.0,
                     "work_steps": base_steps
                 })
-        return results
+        return {v.get("variant_id", "A0"): v for v in results}
 
     def create_or_update_variant(
         self,
