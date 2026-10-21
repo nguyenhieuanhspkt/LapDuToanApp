@@ -178,6 +178,10 @@ class ExcelGenerator:
         r_total_nc = 7 + len(labor_list)
         r_total_mac = 7 + len(machines_list)
 
+        # Compute quote items sum if any
+        quote_items = [it for it in work_items if it.get("is_quote")]
+        quote_sum = sum(float(it.get("unit_price_quote", 0.0)) * float(it.get("volume", 0.0)) for it in quote_items)
+
         # 3. Create Sheet: TH_KinhPhi (BẢNG TỔNG HỢP KINH PHÍ DỰ TOÁN - SHEET ĐẦU TIÊN)
         self._build_sheet_th_kinh_phi(
             wb=wb,
@@ -189,7 +193,9 @@ class ExcelGenerator:
             r_total_mac=r_total_mac,
             materials=materials_list,
             labor=labor_list,
-            machines=machines_list
+            machines=machines_list,
+            quote_sum=quote_sum,
+            quote_count=len(quote_items)
         )
 
         # 4. Create Sheet: Khối lượng-Định mức-ĐVT (Bảng tiên lượng công việc)
@@ -261,7 +267,9 @@ class ExcelGenerator:
         r_total_mac: int,
         materials: List[Dict[str, Any]],
         labor: List[Dict[str, Any]],
-        machines: List[Dict[str, Any]]
+        machines: List[Dict[str, Any]],
+        quote_sum: float = 0.0,
+        quote_count: int = 0
     ):
         """
         Builds the summary cost estimation sheet (Bảng tổng hợp dự toán chi phí xây dựng)
@@ -304,25 +312,63 @@ class ExcelGenerator:
         lt_basis = coefficients.get("lt", {}).get("basis", "Thông tư 11/2021/TT-BXD")
 
         # Row Data Definitions: (STT, Content, Calculation_Text, Formula_Value, Symbol, Note, is_bold, is_highlight)
-        rows_spec = [
-            ("I", "Chi phí trực tiếp", "=D7+D9+D11", "=D7+D9+D11", "T", "T = VL + NC + M", True, True),
-            ("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False),
-            ("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False),
-            ("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False),
-            ("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False),
-            ("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False),
-            ("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False),
-            ("II", "Chi phí gián tiếp", "=D14+D15", "=D14+D15", "GT", "GT = C + TT", True, True),
-            ("1", "Chi phí chung", f"=D6*{c_rate}%", f"=D6*{c_rate/100:.6f}", "C", c_basis, False, False),
-            ("2", "Chi phí một số công việc không xác định được KL từ thiết kế", f"=D6*{tt_rate}%", f"=D6*{tt_rate/100:.6f}", "TT", tt_basis, False, False),
-            ("III", "Thu nhập chịu thuế tính trước", f"=(D6+D13)*{tl_rate}%", f"=(D6+D13)*{tl_rate/100:.6f}", "TL", tl_basis, True, True),
-            ("", "Chi phí xây dựng trước thuế", "=D6+D13+D16", "=D6+D13+D16", "G", "G = T + GT + TL", True, False),
-            ("IV", "Thuế giá trị gia tăng", f"=D17*{vat_rate}%", f"=D17*{vat_rate/100:.6f}", "GTGT", vat_basis, True, True),
-            ("", "CHI PHÍ XÂY DỰNG SAU THUẾ", "=D17+D18", "=D17+D18", "Gxd", "Gxd = G + GTGT", True, True),
-            ("V", "Chi phí nhà tạm để ở và điều hành thi công", f"=D17*{lt_rate}%*(1+{vat_rate}%)", f"=D17*{lt_rate/100:.6f}*(1+{vat_rate/100:.6f})", "LT", lt_basis, True, False),
-            ("", "Tổng cộng", "=D19+D20", "=D19+D20", "", "", True, True),
-            ("", "Làm tròn", "=ROUND(D21,-3)", "=ROUND(D21,-3)", "", "", True, True)
-        ]
+        rows_spec = []
+        r_T = 6
+        if quote_sum > 0:
+            formula_T = "=D7+D9+D11+D13"
+            calc_T = "T = VL + NC + M + BG"
+            r_GT = 15
+            r_C = 16
+            r_TT = 17
+            r_TL = 18
+            r_G = 19
+            r_VAT = 20
+            r_GXD = 21
+            r_LT = 22
+            r_TOT = 23
+
+            rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
+            rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
+            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+            rows_spec.append(("4", "Chi phí công tác báo giá / tạm tính", "=D14", "=D14", "BG", f"{quote_count} công việc báo giá trọn gói", True, False))
+            rows_spec.append(("", " - Chi phí báo giá trước thuế", "Theo báo giá cạnh tranh / PAKT", f"{quote_sum:.2f}", "BGHT", "Hồ sơ PAKT & Báo giá", False, False))
+        else:
+            formula_T = "=D7+D9+D11"
+            calc_T = "T = VL + NC + M"
+            r_GT = 13
+            r_C = 14
+            r_TT = 15
+            r_TL = 16
+            r_G = 17
+            r_VAT = 18
+            r_GXD = 19
+            r_LT = 20
+            r_TOT = 21
+
+            rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
+            rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
+            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+
+        rows_spec.extend([
+            ("II", "Chi phí gián tiếp", f"=D{r_C}+D{r_TT}", f"=D{r_C}+D{r_TT}", "GT", "GT = C + TT", True, True),
+            ("1", "Chi phí chung", f"=D{r_T}*{c_rate}%", f"=D{r_T}*{c_rate/100:.6f}", "C", c_basis, False, False),
+            ("2", "Chi phí một số công việc không xác định được KL từ thiết kế", f"=D{r_T}*{tt_rate}%", f"=D{r_T}*{tt_rate/100:.6f}", "TT", tt_basis, False, False),
+            ("III", "Thu nhập chịu thuế tính trước", f"=(D{r_T}+D{r_GT})*{tl_rate}%", f"=(D{r_T}+D{r_GT})*{tl_rate/100:.6f}", "TL", tl_basis, True, True),
+            ("", "Chi phí xây dựng trước thuế", f"=D{r_T}+D{r_GT}+D{r_TL}", f"=D{r_T}+D{r_GT}+D{r_TL}", "G", "G = T + GT + TL", True, False),
+            ("IV", "Thuế giá trị gia tăng", f"=D{r_G}*{vat_rate}%", f"=D{r_G}*{vat_rate/100:.6f}", "GTGT", vat_basis, True, True),
+            ("", "CHI PHÍ XÂY DỰNG SAU THUẾ", f"=D{r_G}+D{r_VAT}", f"=D{r_G}+D{r_VAT}", "Gxd", "Gxd = G + GTGT", True, True),
+            ("V", "Chi phí nhà tạm để ở và điều hành thi công", f"=D{r_G}*{lt_rate}%*(1+{vat_rate}%)", f"=D{r_G}*{lt_rate/100:.6f}*(1+{vat_rate/100:.6f})", "LT", lt_basis, True, False),
+            ("", "Tổng cộng", f"=D{r_GXD}+D{r_LT}", f"=D{r_GXD}+D{r_LT}", "", "", True, True),
+            ("", "Làm tròn", f"=ROUND(D{r_TOT},-3)", f"=ROUND(D{r_TOT},-3)", "", "", True, True)
+        ])
 
         curr_r = 6
         for stt, name, calc, formula, sym, note, is_b, is_hl in rows_spec:
@@ -365,7 +411,7 @@ class ExcelGenerator:
         sum_vl = sum(m.get("total_qty", 0.0) * (m.get("price_notice", 0) - m.get("price_base", 0)) for m in materials)
         sum_nc = sum(l.get("total_qty", 0.0) * (l.get("price_current", 0) - l.get("price_base", 0)) for l in labor)
         sum_mac = sum(mac.get("total_qty", 0.0) * (mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0)) - mac.get("price_base", 0)) for mac in machines)
-        t_est = sum_vl + sum_nc + sum_mac
+        t_est = sum_vl + sum_nc + sum_mac + quote_sum
         c_est = t_est * (c_rate / 100.0)
         tt_est = t_est * (tt_rate / 100.0)
         gt_est = c_est + tt_est
@@ -500,7 +546,7 @@ class ExcelGenerator:
                 ws.cell(r, 6, item.get("unit", "")).alignment = self.align_center
                 
                 norm = self.norm_manager.get_norm(item.get("norm_code", ""))
-                basis_str = norm.get("legal_basis", "") if norm else ""
+                basis_str = (norm.get("legal_basis", "") if norm else "") or item.get("quote_legal_basis", "") or item.get("basis", "")
                 ws.cell(r, 7, basis_str).alignment = self.align_left
                 ws.cell(r, 8, item.get("notes", "")).alignment = self.align_left
 
@@ -846,10 +892,13 @@ class ExcelGenerator:
             cell.border = self.border_cell
 
         curr_r = 6
-        for item_idx, item in enumerate(work_items, start=1):
+        norm_work_items = [it for it in work_items if not it.get("is_quote")]
+        for item_idx, item in enumerate(norm_work_items, start=1):
             stt = item.get("stt", item_idx)
             code = item["norm_code"]
             norm = self.norm_manager.get_norm(code)
+            if not norm:
+                continue
             coords = norm_cell_map.get(code, {"materials": {}, "labor": {}, "machines": {}})
 
             # Job Header Row

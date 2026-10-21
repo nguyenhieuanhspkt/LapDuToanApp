@@ -42,7 +42,19 @@ def run_trial_export():
         {"stt": 10, "norm_code": "E6C.3.05", "job_name": "Sửa chữa, bảo dưỡng trung tâm báo cháy FMZ 5000", "description": "Bảo dưỡng tủ điều khiển chữa cháy tại chỗ và tủ trung gian", "unit": "trung tâm", "volume": 3},
         {"stt": 11, "norm_code": "E6C.3.06", "job_name": "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet hệ PCCC", "description": "Bảo dưỡng cuộn hút, van xả tràn Deluge và đồng hồ áp", "unit": "Cái", "volume": 12},
         {"stt": 12, "norm_code": "E6B.1.13.01", "job_name": "Kiểm tra bình accu chuyên dụng phục vụ hệ thống PCCC", "description": "Đo nội trở, dung lượng Ah, vô mỡ cọc bình và châm nước cất", "unit": "Bình", "volume": 50},
-        {"stt": 13, "norm_code": "E6C.1.31", "job_name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2", "description": "Bơm khí chuẩn hiệu chuẩn điểm Zero & Span cho đầu đo khí", "unit": "Bộ", "volume": 4}
+        {"stt": 13, "norm_code": "E6C.1.31", "job_name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2", "description": "Bơm khí chuẩn hiệu chuẩn điểm Zero & Span cho đầu đo khí", "unit": "Bộ", "volume": 4},
+        {
+            "stt": 14,
+            "norm_code": "BG.01",
+            "job_name": "Dịch vụ tích hợp phần mềm giám sát Scada PCCC chuyên dụng",
+            "description": "Báo giá trọn gói cấu hình Scada trạm PCCC trung tâm",
+            "unit": "Hệ thống",
+            "volume": 1,
+            "is_quote": True,
+            "unit_price_quote": 25000000.0,
+            "quote_legal_basis": "Báo giá số 128/BG-SCADA ngày 15/03/2026 của Công ty TNHH Giải Pháp Kỹ Thuật Số",
+            "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi (Lắp đặt - Thay mới)"
+        }
     ]
 
     output_file = OUTPUT_DIR / "DU_TOAN_THIET_KE_TEST.xlsx"
@@ -62,10 +74,11 @@ def run_trial_export():
     assert sheet_names[0] == "TH_KinhPhi", f"First sheet is not TH_KinhPhi: {sheet_names[0]}"
     ws_kp = wb["TH_KinhPhi"]
     assert ws_kp["B6"].value == "Chi phí trực tiếp", "Row 6 of TH_KinhPhi is not Chi phí trực tiếp"
-    assert ws_kp["D6"].value == "=D7+D9+D11", "Formula D6 mismatch"
-    assert ws_kp["D22"].value == "=ROUND(D21,-3)", "Formula D22 mismatch"
-    assert str(ws_kp["B23"].value).startswith("Bằng chữ:"), "Row 23 text mismatch"
-    print(f"[PASS] Sheet 'TH_KinhPhi' is in 1st position with dynamic formulas and text: {ws_kp['B23'].value}")
+    assert ws_kp["D6"].value == "=D7+D9+D11+D13", f"Formula D6 mismatch: {ws_kp['D6'].value}"
+    assert ws_kp["B13"].value == "Chi phí công tác báo giá / tạm tính", f"Row 13 mismatch: {ws_kp['B13'].value}"
+    assert ws_kp["D24"].value == "=ROUND(D23,-3)", f"Formula D24 mismatch: {ws_kp['D24'].value}"
+    assert str(ws_kp["B25"].value).startswith("Bằng chữ:"), f"Row 25 text mismatch: {ws_kp['B25'].value}"
+    print(f"[PASS] Sheet 'TH_KinhPhi' is in 1st position with dynamic quote support and text: {ws_kp['B25'].value}")
 
     # 2. Verify Sheet Khối lượng is the SECOND sheet!
     assert sheet_names[1] == "Khối lượng-Định mức-ĐVT", f"Second sheet is not Khối lượng: {sheet_names[1]}"
