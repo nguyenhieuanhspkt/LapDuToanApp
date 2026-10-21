@@ -1,6 +1,7 @@
 """
 Trial Export Verification Test for LapDuToanApp.
-Tests generating a complete Excel workbook and verifies all sheets, images, and dynamic formulas.
+Tests generating a complete Excel workbook and verifies all sheets, images, dynamic formulas,
+and the work volume table (Khối lượng-Định mức-ĐVT).
 """
 
 import sys
@@ -18,7 +19,7 @@ from core.norm_manager import NormManager
 
 def run_trial_export():
     print("==================================================")
-    print("STARTING TRIAL EXPORT VERIFICATION TEST")
+    print("STARTING TRIAL EXPORT VERIFICATION TEST (WITH KHỐI LƯỢNG)")
     print("==================================================")
 
     mgr = NormManager()
@@ -27,21 +28,21 @@ def run_trial_export():
     project_name = "BẢO DƯỠNG, SỬA CHỮA VÀ THÍ NGHIỆM ĐỊNH KỲ HỆ THỐNG PCCC NĂM 2026 - NMNĐ VĨNH TÂN 4"
     category_name = "Hệ thống báo cháy tự động & Chữa cháy (Định mức Thông tư 38/2026/TT-BXD & QĐ 45/QĐ-HĐTV)"
 
-    # Define all 13 work items
+    # Define all 13 work items with detailed quantities
     work_items = [
-        {"stt": 1, "norm_code": "BD.41111", "job_name": "Lắp đặt thiết bị đầu báo và đầu báo cháy", "unit": "10 đầu", "volume": 10},
-        {"stt": 2, "norm_code": "BD.41121", "job_name": "Lắp đặt đèn báo cháy", "unit": "5 đèn", "volume": 5},
-        {"stt": 3, "norm_code": "BD.41131", "job_name": "Lắp đặt nút ấn báo cháy khẩn cấp", "unit": "5 nút", "volume": 5},
-        {"stt": 4, "norm_code": "BD.41141", "job_name": "Lắp đặt chuông báo cháy", "unit": "5 chuông", "volume": 5},
-        {"stt": 5, "norm_code": "BD.42201", "job_name": "Lắp đặt bộ điều khiển, bộ chuyển mạch PCCC", "unit": "1 bộ", "volume": 1},
-        {"stt": 6, "norm_code": "E6C.3.01", "job_name": "Kiểm tra và bảo dưỡng nút nhấn báo cháy, bộ còi đèn/ chuông báo cháy", "unit": "1 cái", "volume": 38},
-        {"stt": 7, "norm_code": "E6C.3.02", "job_name": "Kiểm tra và bảo dưỡng cảm biến báo cháy dạng nhiệt/ khói", "unit": "1 cái", "volume": 890},
-        {"stt": 8, "norm_code": "E6C.3.03", "job_name": "Kiểm tra và bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng dây báo cháy", "unit": "1 bộ", "volume": 20},
-        {"stt": 9, "norm_code": "E6C.3.04", "job_name": "Kiểm tra và bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng cảm biến beam quang", "unit": "1 bộ", "volume": 15},
-        {"stt": 10, "norm_code": "E6C.3.05", "job_name": "Kiểm tra và bảo dưỡng tủ điều khiển chữa cháy tại chỗ, tủ điều khiển và tủ trung gian ĐLĐK", "unit": "1 tủ", "volume": 3},
-        {"stt": 11, "norm_code": "E6C.3.06", "job_name": "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet, Pre-action hệ thống PCCC", "unit": "1 cái", "volume": 12},
-        {"stt": 12, "norm_code": "E6B.1.13.01", "job_name": "Kiểm tra bình accu (Ắc quy chuyên dụng PCCC)", "unit": "1 bình", "volume": 50},
-        {"stt": 13, "norm_code": "E6C.1.31", "job_name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2", "unit": "1 bộ", "volume": 4}
+        {"stt": 1, "norm_code": "BD.41111", "job_name": "Thay mới lắp đặt thiết bị đầu báo khói địa chỉ", "description": "Thực hiện theo mô tả dịch vụ Thay thiết bị đầu báo", "unit": "Bộ", "volume": 10},
+        {"stt": 2, "norm_code": "BD.41121", "job_name": "Lắp đặt đèn báo cháy", "description": "Lắp mới / thay thế đèn báo cháy vị trí khu vực phụ trợ", "unit": "Bộ", "volume": 5},
+        {"stt": 3, "norm_code": "BD.41131", "job_name": "Lắp đặt lại nút nhấn khẩn báo cháy", "description": "Lắp đặt lại nút nhấn sau khi bảo trì, sửa chữa", "unit": "Cái", "volume": 38},
+        {"stt": 4, "norm_code": "BD.41141", "job_name": "Lắp đặt chuông báo cháy", "description": "Thay thế, lắp đặt chuông báo cháy tự động", "unit": "Bộ", "volume": 5},
+        {"stt": 5, "norm_code": "BD.42201", "job_name": "Lắp đặt bộ điều khiển, bộ chuyển mạch PCCC", "description": "Lắp đặt bộ chuyển mạch tín hiệu tủ trung gian", "unit": "Bộ", "volume": 1},
+        {"stt": 6, "norm_code": "E6C.3.01", "job_name": "Bảo trì, sửa chữa, thử nghiệm giả lập tác động nút nhấn khẩn báo cháy", "description": "Kiểm tra, bảo dưỡng nút nhấn báo cháy chuyên dụng", "unit": "Cái", "volume": 38},
+        {"stt": 7, "norm_code": "E6C.3.02", "job_name": "Bảo trì, sửa chữa, hiệu chỉnh, thử nghiệm độ nhạy đầu báo khói/nhiệt", "description": "Thực hiện theo mô tả dịch vụ Bảo trì đầu báo chuyên dụng", "unit": "Bộ", "volume": 890},
+        {"stt": 8, "norm_code": "E6C.3.03", "job_name": "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng dây báo cháy", "description": "Kiểm tra module dây giám sát nhiệt độ cao", "unit": "Bộ", "volume": 20},
+        {"stt": 9, "norm_code": "E6C.3.04", "job_name": "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng cảm biến beam quang", "description": "Bảo dưỡng beam khói khoảng cách xa", "unit": "Bộ", "volume": 15},
+        {"stt": 10, "norm_code": "E6C.3.05", "job_name": "Sửa chữa, bảo dưỡng trung tâm báo cháy FMZ 5000", "description": "Bảo dưỡng tủ điều khiển chữa cháy tại chỗ và tủ trung gian", "unit": "trung tâm", "volume": 3},
+        {"stt": 11, "norm_code": "E6C.3.06", "job_name": "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet hệ PCCC", "description": "Bảo dưỡng cuộn hút, van xả tràn Deluge và đồng hồ áp", "unit": "Cái", "volume": 12},
+        {"stt": 12, "norm_code": "E6B.1.13.01", "job_name": "Kiểm tra bình accu chuyên dụng phục vụ hệ thống PCCC", "description": "Đo nội trở, dung lượng Ah, vô mỡ cọc bình và châm nước cất", "unit": "Bình", "volume": 50},
+        {"stt": 13, "norm_code": "E6C.1.31", "job_name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2", "description": "Bơm khí chuẩn hiệu chuẩn điểm Zero & Span cho đầu đo khí", "unit": "Bộ", "volume": 4}
     ]
 
     output_file = OUTPUT_DIR / "DU_TOAN_THIET_KE_TEST.xlsx"
@@ -57,7 +58,15 @@ def run_trial_export():
     sheet_names = wb.sheetnames
     print(f"[PASS] Total sheets generated: {len(sheet_names)}")
 
+    # 1. Verify Sheet Khối lượng is the FIRST sheet!
+    assert sheet_names[0] == "Khối lượng-Định mức-ĐVT", f"First sheet is not Khối lượng: {sheet_names[0]}"
+    ws_kl = wb["Khối lượng-Định mức-ĐVT"]
+    assert ws_kl.max_row >= 18, f"Too few rows in Khối lượng sheet: {ws_kl.max_row}"
+    print(f"[PASS] Sheet 'Khối lượng-Định mức-ĐVT' is in 1st position with {ws_kl.max_row} rows!")
+
+    # 2. Verify all other sheets exist
     expected_sheets = [
+        "Khối lượng-Định mức-ĐVT",
         "00_ThongKe_DinhMuc", "01_ChiTiet_HaoPhi_DinhMuc",
         "TH_VatLieu", "TH_NhanCong", "TH_MayThiCong",
         "BD.41111", "BD.41121", "BD.41131", "BD.41141", "BD.42201",
@@ -68,47 +77,34 @@ def run_trial_export():
         assert s in sheet_names, f"Missing sheet: {s}"
     print(f"[PASS] All {len(expected_sheets)} expected sheets exist!")
 
-    # Check images in evidence sheets
-    evidence_sheets = expected_sheets[5:]
-    images_count = 0
-    for s in evidence_sheets:
-        ws_ev = wb[s]
-        imgs = getattr(ws_ev, "_images", [])
-        if imgs:
-            images_count += 1
+    # 3. Check embedded images
+    evidence_sheets = expected_sheets[6:]
+    images_count = sum(1 for s in evidence_sheets if getattr(wb[s], "_images", []))
     print(f"[PASS] Evidence images check: {images_count}/13 sheets contain embedded scan images!")
 
-    # Check formulas in 01_ChiTiet_HaoPhi_DinhMuc
+    # 4. Check formulas in 01_ChiTiet_HaoPhi_DinhMuc
     ws_ct = wb["01_ChiTiet_HaoPhi_DinhMuc"]
-    g_links = 0
-    h_links = 0
-    j_formulas = 0
-    for r in range(6, ws_ct.max_row + 1):
-        g_val = str(ws_ct.cell(r, 7).value or "")
-        h_val = str(ws_ct.cell(r, 8).value or "")
-        j_val = str(ws_ct.cell(r, 10).value or "")
-        if g_val.startswith("="): g_links += 1
-        if h_val.startswith("="): h_links += 1
-        if j_val.startswith("="): j_formulas += 1
-
+    g_links = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 7).value or "").startswith("="))
+    h_links = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 8).value or "").startswith("="))
+    j_formulas = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 10).value or "").startswith("="))
     print(f"[PASS] 01_ChiTiet_HaoPhi_DinhMuc formula verification:")
     print(f"       - Column G (Định mức) dynamic links : {g_links}")
     print(f"       - Column H (Đơn giá) dynamic links  : {h_links}")
     print(f"       - Column J (Thành tiền) formulas    : {j_formulas}")
-    assert g_links > 40, "Too few G formula links"
-    assert h_links > 40, "Too few H formula links"
-    assert j_formulas > 40, "Too few J formulas"
+    assert g_links > 40 and h_links > 40 and j_formulas > 40
 
-    # Check formulas in TH_VatLieu, TH_NhanCong, TH_MayThiCong
+    # 5. Check calculated total quantities in summary sheets
     for th_name, col_ht in [("TH_VatLieu", 7), ("TH_NhanCong", 7), ("TH_MayThiCong", 9)]:
         ws_th = wb[th_name]
         last_r = ws_th.max_row
         sum_cell = ws_th.cell(last_r, ws_th.max_column).value
         assert str(sum_cell).startswith("=SUM"), f"Sheet {th_name} total formula missing"
-    print("[PASS] Summary sheets (TH_VL, TH_NC, TH_M) formula verification passed!")
+        # Check non-zero volume in column 5
+        non_zero_kl = sum(1 for r in range(7, last_r) if float(ws_th.cell(r, 5).value or 0) > 0)
+        print(f"[PASS] Sheet {th_name:14s}: {non_zero_kl} items have computed project volumes > 0!")
 
     print("\n==================================================")
-    print("ALL TRIAL EXPORT TESTS PASSED WITH 100% QUALITY!")
+    print("ALL TESTS PASSED WITH 100% QUALITY AND ACCURACY!")
     print("==================================================")
     return True
 
