@@ -21,10 +21,20 @@ class NormManager:
         self.load_all()
 
     def load_all(self):
-        """Load norms and prices from JSON database."""
+        """Load norms and prices from JSON database with automatic header-row sanitization."""
         if self.norms_file.exists():
             with open(self.norms_file, "r", encoding="utf-8") as f:
-                self.norms = json.load(f)
+                raw_norms = json.load(f)
+                # Ensure no phantom header rows in resources
+                for c, nm in raw_norms.items():
+                    res = nm.get("resources", {})
+                    for cat in ["materials", "labor", "machines"]:
+                        if cat in res:
+                            res[cat] = [
+                                it for it in res[cat] 
+                                if it.get("code") and it.get("name", "").strip() not in ["1. Vật liệu", "2. Nhân công", "3. Máy thi công"]
+                            ]
+                self.norms = raw_norms
         else:
             self.norms = {}
 

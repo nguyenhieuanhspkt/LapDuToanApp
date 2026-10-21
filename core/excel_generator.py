@@ -803,7 +803,7 @@ class ExcelGenerator:
         res = norm.get("resources", {})
 
         # Materials
-        mats = res.get("materials", [])
+        mats = [m for m in res.get("materials", []) if m.get("code") and m.get("name", "").strip() != "1. Vật liệu"]
         if mats:
             ws.cell(curr_r, 16, "1. Vật liệu").font = self.font_ev_cat
             for c in range(16, 21): ws.cell(curr_r, c).border = self.border_cell
@@ -821,7 +821,7 @@ class ExcelGenerator:
                 curr_r += 1
 
         # Labor
-        labs = res.get("labor", [])
+        labs = [l for l in res.get("labor", []) if l.get("code") and l.get("name", "").strip() != "2. Nhân công"]
         if labs:
             cat_lbl = "2. Nhân công" if mats else "1. Nhân công trực tiếp"
             ws.cell(curr_r, 16, cat_lbl).font = self.font_ev_cat
@@ -843,7 +843,7 @@ class ExcelGenerator:
                 curr_r += 1
 
         # Machines
-        macs = res.get("machines", [])
+        macs = [mac for mac in res.get("machines", []) if mac.get("code") and mac.get("name", "").strip() != "3. Máy thi công"]
         if macs:
             cat_lbl = "3. Máy thi công" if mats else "2. Máy thi công"
             ws.cell(curr_r, 16, cat_lbl).font = self.font_ev_cat
@@ -921,7 +921,7 @@ class ExcelGenerator:
             subtotal_rows = []
 
             # 1. Materials
-            mats = res.get("materials", [])
+            mats = [m for m in res.get("materials", []) if m.get("code") and m.get("name", "").strip() != "1. Vật liệu"]
             if mats:
                 ws.cell(curr_r, 5, "Vật liệu").font = self.font_cat
                 curr_r += 1
@@ -959,7 +959,7 @@ class ExcelGenerator:
                 subtotal_rows.append(job_hdr_r + 1)
 
             # 2. Labor
-            labs = res.get("labor", [])
+            labs = [l for l in res.get("labor", []) if l.get("code") and l.get("name", "").strip() != "2. Nhân công"]
             if labs:
                 ws.cell(curr_r, 5, "Nhân công").font = self.font_cat
                 curr_r += 1
@@ -994,7 +994,7 @@ class ExcelGenerator:
                 subtotal_rows.append(lab_start_r - 1)
 
             # 3. Machines
-            macs = res.get("machines", [])
+            macs = [mac for mac in res.get("machines", []) if mac.get("code") and mac.get("name", "").strip() != "3. Máy thi công"]
             if macs:
                 ws.cell(curr_r, 5, "Máy thi công").font = self.font_cat
                 curr_r += 1
