@@ -473,10 +473,10 @@ with tab1:
             
             st.markdown("##### 📝 Chọn các bước thành phần công việc áp dụng cho Biến thể này:")
             s_edit_data = []
-            for s in base_steps:
+            for idx_s, s in enumerate(base_steps, start=1):
                 s_edit_data.append({
-                    "step_no": s.get("step_no", 1),
-                    "step_name": s.get("step_name", ""),
+                    "step_no": s.get("step") or s.get("step_no") or idx_s,
+                    "step_name": s.get("name") or s.get("step_name") or "",
                     "rate_base": float(s.get("rate_base", 0.0)),
                     "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
                 })
@@ -738,10 +738,10 @@ with tab1:
 
                             # Display table for step selection
                             step_editor_data = []
-                            for s in curr_steps:
+                            for idx_s, s in enumerate(curr_steps, start=1):
                                 step_editor_data.append({
-                                    "step_no": s.get("step_no", 1),
-                                    "step_name": s.get("step_name", ""),
+                                    "step_no": s.get("step") or s.get("step_no") or idx_s,
+                                    "step_name": s.get("name") or s.get("step_name") or "",
                                     "rate_base": float(s.get("rate_base", 0.0)),
                                     "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
                                 })

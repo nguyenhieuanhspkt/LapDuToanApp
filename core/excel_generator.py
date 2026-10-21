@@ -593,10 +593,12 @@ class ExcelGenerator:
 
             start_steps_r = curr_r
             steps = vdata["raw_steps"]
-            for s in steps:
+            for idx_s, s in enumerate(steps, start=1):
                 ws.row_dimensions[curr_r].height = 20
-                ws.cell(curr_r, 1, s.get("step_no", 1)).alignment = self.align_center
-                ws.cell(curr_r, 2, s.get("step_name", "")).alignment = self.align_left
+                st_no = s.get("step") or s.get("step_no") or idx_s
+                st_name = s.get("name") or s.get("step_name") or ""
+                ws.cell(curr_r, 1, st_no).alignment = self.align_center
+                ws.cell(curr_r, 2, st_name).alignment = self.align_left
                 ws.cell(curr_r, 3, s.get("dvt_step", "")).alignment = self.align_center
                 
                 c_base = ws.cell(curr_r, 4, float(s.get("rate_base", 0.0)))
