@@ -41,3 +41,8 @@ htmlcov/
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Exports
+output/*.xlsx
+output/*.pdf
+output/*.csv

@@ -90,8 +90,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize Session State
-if "norm_manager" not in st.session_state:
-    st.session_state.norm_manager = NormManager()
+if "norm_manager" not in st.session_state or not hasattr(st.session_state.norm_manager, "load_work_items"):
+    import importlib
+    import core.norm_manager
+    importlib.reload(core.norm_manager)
+    st.session_state.norm_manager = core.norm_manager.NormManager()
 
 if "coefficients" not in st.session_state:
     st.session_state.coefficients = {
@@ -102,26 +105,11 @@ if "coefficients" not in st.session_state:
         "lt": {"rate": 1.1, "basis": "Thông tư số 11/2021/TT-BXD (Nhà tạm ngoài đô thị)"}
     }
 
-if "work_items" not in st.session_state:
-    # Default 13 work items with groups
-    st.session_state.work_items = [
-        {"stt": 1, "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi", "norm_code": "BD.41111", "job_name": "Thay mới lắp đặt thiết bị đầu báo khói địa chỉ", "description": "Dịch vụ Thay thiết bị đầu báo", "volume": 10.0, "unit": "Bộ"},
-        {"stt": 2, "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi", "norm_code": "BD.41121", "job_name": "Lắp đặt đèn báo cháy", "description": "Lắp mới / thay thế đèn báo cháy vị trí khu vực phụ trợ", "volume": 5.0, "unit": "Bộ"},
-        {"stt": 3, "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi", "norm_code": "BD.41131", "job_name": "Lắp đặt lại nút nhấn khẩn báo cháy", "description": "Lắp đặt lại nút nhấn sau khi bảo trì", "volume": 38.0, "unit": "Cái"},
-        {"stt": 4, "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi", "norm_code": "BD.41141", "job_name": "Lắp đặt chuông báo cháy", "description": "Thay thế, lắp đặt chuông báo cháy tự động", "volume": 5.0, "unit": "Bộ"},
-        {"stt": 5, "group": "Hệ thống báo cháy tự động và thiết bị ngoại vi", "norm_code": "BD.42201", "job_name": "Lắp đặt bộ điều khiển, bộ chuyển mạch PCCC", "description": "Lắp đặt bộ chuyển mạch tín hiệu tủ trung gian", "volume": 1.0, "unit": "Bộ"},
-        {"stt": 6, "group": "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "norm_code": "E6C.3.01", "job_name": "Bảo trì, sửa chữa, thử nghiệm giả lập tác động nút nhấn khẩn", "description": "Kiểm tra, bảo dưỡng nút nhấn báo cháy chuyên dụng", "volume": 38.0, "unit": "Cái"},
-        {"stt": 7, "group": "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "norm_code": "E6C.3.02", "job_name": "Bảo trì, sửa chữa, hiệu chỉnh, thử nghiệm độ nhạy đầu báo khói/nhiệt", "description": "Dịch vụ Bảo trì đầu báo chuyên dụng", "volume": 890.0, "unit": "Bộ"},
-        {"stt": 8, "group": "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "norm_code": "E6C.3.03", "job_name": "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng dây báo cháy", "description": "Kiểm tra module dây giám sát nhiệt độ cao", "volume": 20.0, "unit": "Bộ"},
-        {"stt": 9, "group": "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "norm_code": "E6C.3.04", "job_name": "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng beam quang", "description": "Bảo dưỡng beam khói khoảng cách xa", "volume": 15.0, "unit": "Bộ"},
-        {"stt": 10, "group": "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "norm_code": "E6C.3.05", "job_name": "Sửa chữa, bảo dưỡng trung tâm báo cháy FMZ 5000", "description": "Bảo dưỡng tủ điều khiển chữa cháy tại chỗ và tủ trung gian", "volume": 3.0, "unit": "trung tâm"},
-        {"stt": 11, "group": "Bảo dưỡng van xả tràn Deluge, ắc quy và đo khí", "norm_code": "E6C.3.06", "job_name": "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet hệ PCCC", "description": "Bảo dưỡng cuộn hút, van xả tràn Deluge và đồng hồ áp", "volume": 12.0, "unit": "Cái"},
-        {"stt": 12, "group": "Bảo dưỡng van xả tràn Deluge, ắc quy và đo khí", "norm_code": "E6B.1.13.01", "job_name": "Kiểm tra bình accu chuyên dụng phục vụ hệ thống PCCC", "description": "Đo nội trở, dung lượng Ah, vô mỡ cọc bình và châm nước cất", "volume": 50.0, "unit": "Bình"},
-        {"stt": 13, "group": "Bảo dưỡng van xả tràn Deluge, ắc quy và đo khí", "norm_code": "E6C.1.31", "job_name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2", "description": "Bơm khí chuẩn hiệu chuẩn điểm Zero & Span cho đầu đo khí", "volume": 4.0, "unit": "Bộ"}
-    ]
-
 mgr = st.session_state.norm_manager
 generator = ExcelGenerator(mgr)
+
+if "work_items" not in st.session_state:
+    st.session_state.work_items = mgr.load_work_items()
 
 # =============================================================================
 # SIDEBAR
@@ -139,6 +127,46 @@ with st.sidebar:
         value="Hệ thống báo cháy tự động & Chữa cháy (Định mức Thông tư 38/2026/TT-BXD & QĐ 45/QĐ-HĐTV)",
         height=75
     )
+    st.divider()
+
+    st.markdown("### 🗺️ ĐỊA BÀN & ĐƠN GIÁ ĐỊA PHƯƠNG")
+    selected_province = st.selectbox(
+        "Tỉnh / Địa bàn thực hiện:",
+        options=["Lâm Đồng (Mặc định)", "Khánh Hòa"],
+        index=0,
+        help="Mặc định áp dụng tỉnh Lâm Đồng khi chưa rõ địa điểm cụ thể."
+    )
+    is_lam_dong = "Lâm Đồng" in selected_province
+    
+    if is_lam_dong:
+        region_options = [
+            "Vùng IV (Đơn vị xã, huyện còn lại - MẶC ĐỊNH)",
+            "Vùng II (Đà Lạt, Bảo Lộc)",
+            "Vùng III (Đức Trọng, Đơn Dương...)"
+        ]
+        default_idx = 0
+    else:
+        region_options = [
+            "Vùng III (Địa bàn Khánh Hòa - MẶC ĐỊNH)",
+            "Vùng II (Nha Trang, Cam Ranh)",
+            "Vùng IV"
+        ]
+        default_idx = 0
+        
+    selected_region = st.selectbox(
+        "Vùng áp dụng đơn giá Nhân công & Ca máy:",
+        options=region_options,
+        index=default_idx
+    )
+    
+    if "Vùng II" in selected_region:
+        current_region_key = "vung_2"
+    elif "Vùng III" in selected_region:
+        current_region_key = "vung_3"
+    else:
+        current_region_key = "vung_4"
+        
+    st.caption(f"📌 Đang áp dụng: **{'Lâm Đồng' if is_lam_dong else 'Khánh Hòa'}** | **{selected_region.split('(')[0].strip()}**")
     st.divider()
 
     st.markdown("### 📈 THỐNG KÊ NHANH")
@@ -319,6 +347,12 @@ with tab1:
             with col_f4:
                 inp_unit = st.text_input("ĐVT:", value=selected_option["unit"], key=f"inp_unit_{sel_code}")
 
+            col_extra1, col_extra2 = st.columns([5, 7])
+            with col_extra1:
+                inp_extra_quote = st.number_input("Đơn giá báo giá vật tư/phụ kiện kèm theo trước thuế (đ - nếu có):", min_value=0, value=0, step=500000, key=f"inp_extra_quote_{sel_code}")
+            with col_extra2:
+                inp_extra_basis = st.text_input("Căn cứ chào giá kèm theo (nếu có):", value="", key=f"inp_extra_basis_{sel_code}", placeholder="Ví dụ: Theo Báo giá số ... của hãng")
+
             st.caption(f"📌 Căn cứ pháp lý gốc: *{selected_option['basis']}*")
 
             if st.button("➕ Thêm công tác định mức vào nhóm", type="primary"):
@@ -332,8 +366,11 @@ with tab1:
                     "job_name": inp_job_name,
                     "description": inp_desc,
                     "volume": float(inp_vol),
-                    "unit": inp_unit
+                    "unit": inp_unit,
+                    "unit_price_quote": float(inp_extra_quote),
+                    "quote_basis": inp_extra_basis
                 })
+                mgr.save_work_items(st.session_state.work_items)
                 st.success(f"Đã thêm công tác '{inp_job_name}' vào nhóm '{final_group}'!")
                 st.rerun()
 
@@ -386,6 +423,7 @@ with tab1:
                     "quote_basis": inp_q_basis,
                     "apply_overhead": apply_oh
                 })
+                mgr.save_work_items(st.session_state.work_items)
                 st.success(f"Đã thêm công tác báo giá '{inp_q_job}' ({inp_q_price:,.0f} đ/{inp_q_unit}) vào nhóm '{final_group}'!")
                 st.rerun()
 
@@ -399,6 +437,9 @@ with tab1:
         g = (it.get("group") or "Công việc chung").strip() or "Công việc chung"
         if g not in groups_dict: groups_dict[g] = []
         groups_dict[g].append(it)
+
+    if not groups_dict:
+        st.info("ℹ️ Hiện tại dự toán chưa có công tác nào. Bạn có thể sử dụng mục '➕ THÊM CÔNG TÁC MỚI VÀO DỰ TOÁN' ở trên để thêm công việc mới.")
 
     norm_codes_list = mgr.get_all_norm_codes()
 
@@ -415,6 +456,7 @@ with tab1:
                         for it in st.session_state.work_items:
                             if it.get("group", "").strip() == g_name:
                                 it["group"] = new_group_title.strip()
+                        mgr.save_work_items(st.session_state.work_items)
                         st.success(f"Đã đổi tên nhóm thành: {new_group_title.strip()}")
                         st.rerun()
             with col_del_grp:
@@ -423,6 +465,7 @@ with tab1:
                     st.session_state.work_items = [it for it in st.session_state.work_items if it.get("group", "").strip() != g_name]
                     for i, it in enumerate(st.session_state.work_items, start=1):
                         it["stt"] = i
+                    mgr.save_work_items(st.session_state.work_items)
                     st.success(f"Đã xóa toàn bộ công tác thuộc nhóm '{g_name}'!")
                     st.rerun()
 
@@ -435,49 +478,143 @@ with tab1:
             )
 
             if "1. Bảng Đơn Giá Hàng Ngang" in view_mode:
-                # Build Horizontal Rates Table
-                h_rows = []
-                total_group_amount = 0.0
-                for item in items_in_g:
-                    rates = mgr.calculate_item_unit_rate(item, st.session_state.coefficients)
-                    h_rows.append({
-                        "STT": item.get("stt"),
-                        "Mã hiệu": item.get("norm_code"),
-                        "Bản chất kỹ thuật": item.get("tech_profile") or mgr.get_default_tech_profile(item.get("norm_code", "")),
-                        "Tên công tác (PAKT)": item.get("job_name"),
-                        "ĐVT": item.get("unit"),
-                        "Khối lượng": item.get("volume", 0.0),
-                        "ĐG Vật liệu (đ)": rates["dg_vl"],
-                        "ĐG Nhân công (đ)": rates["dg_nc"],
-                        "ĐG Ca máy (đ)": rates["dg_m"],
-                        "ĐG Trực tiếp T (đ)": rates["dg_tt"],
-                        "ĐG Đầy đủ trước thuế (đ)": rates["dg_truoc_thue"],
-                        "Thành tiền trước thuế (đ)": rates["thanh_tien_truoc_thue"]
-                    })
-                    total_group_amount += rates["thanh_tien_truoc_thue"]
+                if not items_in_g:
+                    st.warning(f"Nhóm '{g_name}' hiện chưa có công tác nào.")
+                else:
+                    # Build Horizontal Rates Table
+                    h_rows = []
+                    total_group_amount = 0.0
+                    for item in items_in_g:
+                        rates = mgr.calculate_item_unit_rate(item, st.session_state.coefficients)
+                        h_rows.append({
+                            "STT": item.get("stt"),
+                            "Mã hiệu": item.get("norm_code"),
+                            "Bản chất kỹ thuật": item.get("tech_profile") or mgr.get_default_tech_profile(item.get("norm_code", "")),
+                            "Tên công tác (PAKT)": item.get("job_name"),
+                            "ĐVT": item.get("unit"),
+                            "Khối lượng": item.get("volume", 0.0),
+                            "Thành phần ĐM": f"{rates['k_pct_str']} ({rates['active_steps_count']}/{rates['total_steps_count']})" if rates.get("total_steps_count", 0) > 0 else "100%",
+                            "ĐG Vật liệu (đ)": rates["dg_vl"],
+                            "ĐG Nhân công (đ)": rates["dg_nc"],
+                            "ĐG Ca máy (đ)": rates["dg_m"],
+                            "ĐG Trực tiếp T (đ)": rates["dg_tt"],
+                            "ĐG ĐM trước thuế (đ)": rates["dg_dm_truoc_thue"],
+                            "ĐG Báo giá (đ)": rates["unit_price_quote"],
+                            "ĐG Đầy đủ trước thuế (đ)": rates["dg_truoc_thue"],
+                            "Thành tiền trước thuế (đ)": rates["thanh_tien_truoc_thue"]
+                        })
+                        total_group_amount += rates["thanh_tien_truoc_thue"]
 
-                df_h = pd.DataFrame(h_rows)
-                st.dataframe(
-                    df_h.style.format({
-                        "Khối lượng": "{:,.2f}",
-                        "ĐG Vật liệu (đ)": "{:,.0f}",
-                        "ĐG Nhân công (đ)": "{:,.0f}",
-                        "ĐG Ca máy (đ)": "{:,.0f}",
-                        "ĐG Trực tiếp T (đ)": "{:,.0f}",
-                        "ĐG Đầy đủ trước thuế (đ)": "{:,.0f}",
-                        "Thành tiền trước thuế (đ)": "{:,.0f}"
-                    }),
-                    use_container_width=True,
-                    hide_index=True
-                )
+                    df_h = pd.DataFrame(h_rows)
+                    st.dataframe(
+                        df_h.style.format({
+                            "Khối lượng": "{:,.2f}",
+                            "ĐG Vật liệu (đ)": "{:,.0f}",
+                            "ĐG Nhân công (đ)": "{:,.0f}",
+                            "ĐG Ca máy (đ)": "{:,.0f}",
+                            "ĐG Trực tiếp T (đ)": "{:,.0f}",
+                            "ĐG ĐM trước thuế (đ)": "{:,.0f}",
+                            "ĐG Báo giá (đ)": "{:,.0f}",
+                            "ĐG Đầy đủ trước thuế (đ)": "{:,.0f}",
+                            "Thành tiền trước thuế (đ)": "{:,.0f}"
+                        }),
+                        use_container_width=True,
+                        hide_index=True
+                    )
 
-                st.markdown(f"""
-                <div class="metric-card">
-                    <b>TỔNG CỘNG NHÓM {g_idx}:</b> 
-                    <span style="font-size:18px; color:#002060; font-weight:bold;">{total_group_amount:,.0f} đồng</span> 
-                    <i>(Thành tiền trước thuế đã bao gồm Chi phí chung {st.session_state.coefficients['c']['rate']}%, TT {st.session_state.coefficients['tt']['rate']}%, Thu nhập tính trước {st.session_state.coefficients['tl']['rate']}%)</i>
-                </div>
-                """, unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <b>TỔNG CỘNG NHÓM {g_idx}:</b> 
+                        <span style="font-size:18px; color:#002060; font-weight:bold;">{total_group_amount:,.0f} đồng</span> 
+                        <i>(Thành tiền trước thuế đã bao gồm Chi phí chung {st.session_state.coefficients['c']['rate']}%, TT {st.session_state.coefficients['tt']['rate']}%, Thu nhập tính trước {st.session_state.coefficients['tl']['rate']}%)</i>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # Step adjustment expander for items with norm
+                    norm_items_in_g = [it for it in items_in_g if mgr.get_norm(it.get("norm_code", ""))]
+                    with st.expander("⚙️ **ĐIỀU CHỈNH THÀNH PHẦN CÔNG VIỆC ĐỊNH MỨC (TÍNH GIẢM HAO PHÍ NC, VL, MÁY)**", expanded=False):
+                        if not norm_items_in_g:
+                            st.info("ℹ️ Nhóm này không có công tác định mức nào (tất cả là công tác báo giá trọn gói).")
+                        else:
+                            st.markdown("""
+                            > **Quy tắc điều chỉnh tỷ lệ**: Khi người dùng không thực hiện toàn bộ các bước trong thành phần định mức gốc:
+                            > - Hệ số áp dụng: $k = \\frac{\\sum \\text{Hao phí bước chọn}}{\\sum \\text{Hao phí toàn bộ định mức}}$
+                            > - **Nhân công**: Được tính trực tiếp theo các bước công việc được chọn.
+                            > - **Vật liệu & Máy thi công**: Giảm tỷ lệ tương ứng theo hệ số $k$.
+                            """)
+                            sel_adj_stt = st.selectbox(
+                                "Chọn công tác cần điều chỉnh thành phần:",
+                                options=[it["stt"] for it in norm_items_in_g],
+                                format_func=lambda x: f"STT {x}: {[it['job_name'] for it in norm_items_in_g if it['stt'] == x][0]} (Mã: {[it['norm_code'] for it in norm_items_in_g if it['stt'] == x][0]})",
+                                key=f"sel_adj_item_{g_idx}"
+                            )
+                            target_it = next(it for it in items_in_g if it["stt"] == sel_adj_stt)
+                            eff_info = mgr.get_effective_item_resources(target_it)
+                            curr_steps = eff_info["raw_steps"]
+
+                            # Display table for step selection
+                            step_editor_data = []
+                            for s in curr_steps:
+                                step_editor_data.append({
+                                    "step_no": s.get("step_no", 1),
+                                    "step_name": s.get("step_name", ""),
+                                    "rate_base": float(s.get("rate_base", 0.0)),
+                                    "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
+                                })
+                            df_step_edit = pd.DataFrame(step_editor_data)
+
+                            edited_steps = st.data_editor(
+                                df_step_edit,
+                                column_config={
+                                    "step_no": st.column_config.NumberColumn("Bước", width="small", disabled=True),
+                                    "step_name": st.column_config.TextColumn("Nội dung thành phần công việc", width="large", disabled=True),
+                                    "rate_base": st.column_config.NumberColumn("Hao phí chuẩn (công)", format="%.4f", width="small", disabled=True),
+                                    "apply_flag": st.column_config.CheckboxColumn("Thực hiện", width="small")
+                                },
+                                use_container_width=True,
+                                hide_index=True,
+                                key=f"step_editor_grid_{g_idx}_{sel_adj_stt}"
+                            )
+
+                            col_act_save, col_act_reset = st.columns([6, 6])
+                            with col_act_save:
+                                if st.button(f"💾 Lưu điều chỉnh thành phần cho STT {sel_adj_stt}", key=f"btn_save_steps_{g_idx}_{sel_adj_stt}", type="primary"):
+                                    new_steps_list = []
+                                    for idx_s, row_s in edited_steps.iterrows():
+                                        orig_s = dict(curr_steps[idx_s])
+                                        orig_s["apply_flag"] = 1 if row_s["apply_flag"] else 0
+                                        new_steps_list.append(orig_s)
+                                    target_it["work_steps"] = new_steps_list
+                                    mgr.save_work_items(st.session_state.work_items)
+                                    st.success(f"Đã lưu thành phần công việc cho công tác STT {sel_adj_stt}!")
+                                    st.rerun()
+                            with col_act_reset:
+                                if st.button(f"🔄 Khôi phục 100% định mức gốc cho STT {sel_adj_stt}", key=f"btn_reset_steps_{g_idx}_{sel_adj_stt}"):
+                                    if "work_steps" in target_it:
+                                        del target_it["work_steps"]
+                                    mgr.save_work_items(st.session_state.work_items)
+                                    st.success(f"Đã khôi phục 100% định mức gốc cho STT {sel_adj_stt}!")
+                                    st.rerun()
+
+                    # Quick delete single work item inside this group
+                    with st.expander("🗑️ **Xóa nhanh một công tác khỏi nhóm này**", expanded=False):
+                        col_del_item_sel, col_del_item_btn = st.columns([8, 4])
+                        with col_del_item_sel:
+                            del_item_stt = st.selectbox(
+                                "Chọn công tác cần xóa:",
+                                options=[it["stt"] for it in items_in_g],
+                                format_func=lambda x: f"STT {x}: {[it['job_name'] for it in items_in_g if it['stt'] == x][0]} ({[it['norm_code'] for it in items_in_g if it['stt'] == x][0]})",
+                                key=f"quick_del_sel_{g_idx}"
+                            )
+                        with col_del_item_btn:
+                            st.write("")
+                            if st.button("Xác nhận xóa công tác", key=f"quick_del_btn_{g_idx}", use_container_width=True):
+                                st.session_state.work_items = [it for it in st.session_state.work_items if it.get("stt") != del_item_stt]
+                                for i, it in enumerate(st.session_state.work_items, start=1):
+                                    it["stt"] = i
+                                mgr.save_work_items(st.session_state.work_items)
+                                st.success(f"Đã xóa công tác STT {del_item_stt} thành công!")
+                                st.rerun()
 
             else:
                 # Editor Mode
@@ -487,8 +624,10 @@ with tab1:
                     df_g["tech_profile"] = df_g["norm_code"].apply(lambda c: mgr.get_default_tech_profile(str(c)))
                 if "is_quote" not in df_g.columns:
                     df_g["is_quote"] = False
+                if "unit_price_quote" not in df_g.columns:
+                    df_g["unit_price_quote"] = 0.0
 
-                disp_cols = ["stt", "norm_code", "tech_profile", "job_name", "description", "volume", "unit"]
+                disp_cols = ["stt", "norm_code", "tech_profile", "job_name", "description", "volume", "unit", "unit_price_quote"]
                 edited_group_df = st.data_editor(
                     df_g[disp_cols],
                     column_config={
@@ -499,6 +638,7 @@ with tab1:
                         "description": st.column_config.TextColumn("Mô tả công việc thực tế", width="medium"),
                         "volume": st.column_config.NumberColumn("Khối lượng", format="%.2f", min_value=0.0, step=1.0, required=True),
                         "unit": st.column_config.TextColumn("Đơn vị tính", width="small", required=True),
+                        "unit_price_quote": st.column_config.NumberColumn("ĐG Báo giá trước thuế (đ)", format="%d", min_value=0.0, step=500000.0)
                     },
                     num_rows="dynamic",
                     use_container_width=True,
@@ -508,12 +648,22 @@ with tab1:
 
                 if st.button(f"💾 Lưu cập nhật Nhóm {g_idx}", key=f"save_group_{g_idx}", type="primary"):
                     updated_g_records = edited_group_df.to_dict("records")
+                    old_items_map = {it.get("stt"): it for it in items_in_g}
                     for r in updated_g_records:
                         r["group"] = g_name
-                        # Preserve quote flags if code starts with BG or TT
-                        c_str = str(r.get("norm_code", "")).strip()
-                        if c_str.startswith("BG") or c_str.startswith("TT"):
-                            r["is_quote"] = True
+                        orig = old_items_map.get(r.get("stt"))
+                        if orig:
+                            if "work_steps" in orig:
+                                r["work_steps"] = orig["work_steps"]
+                            if orig.get("is_quote"):
+                                r["is_quote"] = True
+                                r["quote_basis"] = orig.get("quote_basis", "")
+                                r["apply_overhead"] = orig.get("apply_overhead", False)
+                        else:
+                            c_str = str(r.get("norm_code", "")).strip()
+                            if c_str.startswith("BG") or c_str.startswith("TT"):
+                                r["is_quote"] = True
+                        r["unit_price_quote"] = float(r.get("unit_price_quote", 0.0) or 0.0)
                     
                     other_items = [it for it in st.session_state.work_items if it.get("group", "").strip() != g_name]
                     new_all_items = []
@@ -526,6 +676,7 @@ with tab1:
                     for i, it in enumerate(new_all_items, start=1):
                         it["stt"] = i
                     st.session_state.work_items = new_all_items
+                    mgr.save_work_items(st.session_state.work_items)
                     st.success(f"Đã lưu các thay đổi cho Nhóm {g_idx} thành công!")
                     st.rerun()
 
@@ -536,23 +687,23 @@ with tab2:
     st.markdown("#### 💰 QUẢN LÝ ĐƠN GIÁ TÀI NGUYÊN & CƠ SỞ PHÁP LÝ")
     st.caption("Cột Khối lượng được tính toán tự động từ bảng Tiên lượng. Người dùng tùy chỉnh Đơn giá và Căn cứ pháp lý.")
 
-    # Calculate real-time resource quantities from work_items
+    # Calculate real-time resource quantities from work_items taking into account item-level step adjustments
     mat_qty = {}
     lab_qty = {}
     mac_qty = {}
     for item in st.session_state.work_items:
-        c = item["norm_code"]
+        c = item.get("norm_code")
         v = float(item.get("volume", 0.0))
         norm = mgr.get_norm(c)
         if not norm: continue
         u_str = norm.get("unit", "")
         div = 10.0 if "10" in u_str else (5.0 if "5" in u_str else 1.0)
-        res = norm.get("resources", {})
-        for m in res.get("materials", []):
+        eff = mgr.get_effective_item_resources(item)
+        for m in eff.get("materials", []):
             if m.get("code"): mat_qty[m["code"]] = mat_qty.get(m["code"], 0.0) + (v * float(m.get("rate", 0.0)) / div)
-        for l in res.get("labor", []):
+        for l in eff.get("labor", []):
             if l.get("code"): lab_qty[l["code"]] = lab_qty.get(l["code"], 0.0) + (v * float(l.get("rate", 0.0)) / div)
-        for mac in res.get("machines", []):
+        for mac in eff.get("machines", []):
             if mac.get("code"): mac_qty[mac["code"]] = mac_qty.get(mac["code"], 0.0) + (v * float(mac.get("rate", 0.0)) / div)
 
     sub_t1, sub_t2, sub_t3, sub_t4 = st.tabs([
@@ -865,6 +1016,88 @@ with tab2:
                     st.success("Đã cập nhật bảng giá máy thi công thành công!")
                     st.rerun()
 
+        # Tra cứu Bảng giá ca máy Lâm Đồng năm 2026 (QĐ 21/QĐ-SXD)
+        st.divider()
+        with st.expander("🏛️ TRA CỨU BẢNG GIÁ CA MÁY LÂM ĐỒNG NĂM 2026 (QĐ 21/QĐ-SXD)", expanded=False):
+            st.markdown("##### 📖 Cơ sở dữ liệu 698 máy thi công tỉnh Lâm Đồng năm 2026")
+            st.caption("Căn cứ Quyết định số 21/QĐ-SXD ngày 14/01/2026 của Sở Xây dựng Lâm Đồng.")
+            
+            lam_dong_machines = mgr.get_province_machines("lam_dong")
+            if lam_dong_machines:
+                search_kw = st.text_input("🔍 Tìm kiếm theo mã máy hoặc tên máy:", "", key="search_ld_mac")
+                filtered_mac = lam_dong_machines
+                if search_kw:
+                    kw = search_kw.lower()
+                    filtered_mac = [m for m in lam_dong_machines if kw in m.get("code", "").lower() or kw in m.get("name", "").lower()]
+                
+                rows_show = []
+                for m in filtered_mac:
+                    rows_show.append({
+                        "Mã hiệu": m.get("code"),
+                        "Tên máy & Quy cách": m.get("name"),
+                        "ĐVT": m.get("unit", "ca"),
+                        "Thợ ĐK": m.get("driver", ""),
+                        "Nguyên giá (1000đ)": m.get("original_price_1k", 0),
+                        "CP Nhiên liệu (đ)": m.get("fuel_cost", 0),
+                        "Lương thợ Vùng IV (đ)": m.get("labor_cost", {}).get("vung_4", 0),
+                        "Giá ca máy Vùng II (đ)": m.get("price", {}).get("vung_2", 0),
+                        "Giá ca máy Vùng III (đ)": m.get("price", {}).get("vung_3", 0),
+                        "Giá ca máy Vùng IV (đ - MẶC ĐỊNH)": m.get("price", {}).get("vung_4", 0)
+                    })
+                
+                df_show = pd.DataFrame(rows_show)
+                num_cols = [
+                    "Nguyên giá (1000đ)", "CP Nhiên liệu (đ)", "Lương thợ Vùng IV (đ)",
+                    "Giá ca máy Vùng II (đ)", "Giá ca máy Vùng III (đ)", "Giá ca máy Vùng IV (đ - MẶC ĐỊNH)"
+                ]
+                for col in num_cols:
+                    if col in df_show.columns:
+                        df_show[col] = pd.to_numeric(df_show[col], errors="coerce").fillna(0).astype("int64")
+
+                st.dataframe(
+                    df_show.style.format({
+                        "Nguyên giá (1000đ)": "{:,.0f}",
+                        "CP Nhiên liệu (đ)": "{:,.0f}",
+                        "Lương thợ Vùng IV (đ)": "{:,.0f}",
+                        "Giá ca máy Vùng II (đ)": "{:,.0f}",
+                        "Giá ca máy Vùng III (đ)": "{:,.0f}",
+                        "Giá ca máy Vùng IV (đ - MẶC ĐỊNH)": "{:,.0f}"
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_exp1, col_exp2 = st.columns([5, 5])
+                with col_exp1:
+                    excel_path_ld = Path(r"D:\TaskApp_kiet\LapDuToanApp\gia_ca_may_lam_dong_2026.xlsx")
+                    if excel_path_ld.exists():
+                        with open(excel_path_ld, "rb") as f_ex:
+                            st.download_button(
+                                "📥 Tải File Excel Bảng Giá Ca Máy Lâm Đồng 2026 (.xlsx)",
+                                data=f_ex.read(),
+                                file_name="gia_ca_may_lam_dong_2026.xlsx",
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                use_container_width=True
+                            )
+                with col_exp2:
+                    if st.button("⚡ Tự Động Áp Giá Ca Máy Lâm Đồng Vào Dự Toán Hiện Tại", key="btn_apply_ld_prices"):
+                        curr_prices = mgr.get_resource_prices()
+                        updated_count = 0
+                        for mac_row in curr_prices.get("machines", []):
+                            code = mac_row.get("code")
+                            lookup = mgr.lookup_machine_price(code, "lam_dong", current_region_key)
+                            if lookup and lookup["price_current"] > 0:
+                                mac_row["price_notice"] = lookup["price_current"]
+                                mac_row["price_current"] = lookup["price_current"]
+                                mac_row["legal_basis"] = f"QĐ 21/QĐ-SXD Lâm Đồng 2026 ({selected_region.split('(')[0].strip()})"
+                                updated_count += 1
+                        if updated_count > 0:
+                            mgr.update_resource_prices(curr_prices)
+                            st.success(f"Đã cập nhật giá cho {updated_count} máy thi công theo {selected_region}!")
+                            st.rerun()
+                        else:
+                            st.info("Các mã máy trong dự toán hiện tại không trùng khớp với danh mục máy chuẩn xây dựng của QĐ 21.")
+
     with sub_t4:
         st.markdown("##### 4. QUẢN LÝ ĐƠN GIÁ THEO BẢN CHẤT KỸ THUẬT (CHUẨN HÓA ĐƠN GIÁ)")
         st.caption("Đảm bảo nguyên tắc thẩm định dự toán EVN: Các công việc có CÙNG BẢN CHẤT KỸ THUẬT thì phải áp dụng CÙNG 1 ĐƠN GIÁ, không có sự sai lệch giá giữa các vị trí/nhóm công tác.")
@@ -896,19 +1129,22 @@ with tab2:
                 "Trạng thái": "🟢 100% Đồng nhất đơn giá"
             })
 
-        st.dataframe(
-            pd.DataFrame(tech_rows).style.format({
-                "Tổng khối lượng toàn DA": "{:,.2f}",
-                "ĐG Vật liệu (đ)": "{:,.0f}",
-                "ĐG Nhân công (đ)": "{:,.0f}",
-                "ĐG Ca máy (đ)": "{:,.0f}",
-                "ĐG Trực tiếp T (đ)": "{:,.0f}",
-                "ĐG Đầy đủ trước thuế (đ)": "{:,.0f}",
-                "Tổng tiền trước thuế (đ)": "{:,.0f}"
-            }),
-            use_container_width=True,
-            hide_index=True
-        )
+        if tech_rows:
+            st.dataframe(
+                pd.DataFrame(tech_rows).style.format({
+                    "Tổng khối lượng toàn DA": "{:,.2f}",
+                    "ĐG Vật liệu (đ)": "{:,.0f}",
+                    "ĐG Nhân công (đ)": "{:,.0f}",
+                    "ĐG Ca máy (đ)": "{:,.0f}",
+                    "ĐG Trực tiếp T (đ)": "{:,.0f}",
+                    "ĐG Đầy đủ trước thuế (đ)": "{:,.0f}",
+                    "Tổng tiền trước thuế (đ)": "{:,.0f}"
+                }),
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.info("ℹ️ Hiện tại dự toán chưa có công tác nào để hiển thị bảng đơn giá theo bản chất kỹ thuật.")
 
         st.info("💡 **Hệ thống tự động thực thi:** Đơn giá trực tiếp và trước thuế được tính toán từ CSDL giá tài nguyên tập trung. Khi có nhiều công việc nằm ở các khu vực/hạng mục khác nhau nhưng cùng bản chất kỹ thuật, hệ thống luôn đảm bảo đơn giá hoàn toàn nhất quán.")
 
@@ -1047,50 +1283,57 @@ with tab4:
         nc_p_map = {l["code"]: l.get("price_current", 0) for l in mgr.get_resource_prices().get("labor", [])}
         mac_p_map = {mac["code"]: mac.get("price_current", 0) for mac in mgr.get_resource_prices().get("machines", [])}
 
-        sel_stt = st.selectbox(
-            "Chọn công việc cần kiểm tra chiết tính:",
-            options=[item["stt"] for item in st.session_state.work_items],
-            format_func=lambda x: f"Công tác {x}: {[it['job_name'] for it in st.session_state.work_items if it['stt'] == x][0]} ({[it['norm_code'] for it in st.session_state.work_items if it['stt'] == x][0]})"
-        )
-        it_sel = [it for it in st.session_state.work_items if it["stt"] == sel_stt][0]
-        n_info = mgr.get_norm(it_sel["norm_code"])
-
-        if n_info:
-            c1, c2, c3 = st.columns([5, 2, 2])
-            with c1:
-                st.markdown(f"**Tên công việc:** {it_sel['job_name']}")
-                st.caption(f"Căn cứ: {n_info.get('legal_basis', '')}")
-            with c2:
-                st.metric("Khối lượng dự án", f"{it_sel['volume']:,.2f} {it_sel['unit']}")
-            with c3:
-                st.metric("Định mức gốc tính cho", n_info.get("unit", ""))
-
-            rows = []
-            t_vl, t_nc, t_m = 0.0, 0.0, 0.0
-            res = n_info.get("resources", {})
-            for m in res.get("materials", []):
-                dg = vl_p_map.get(m["code"], 0)
-                tt = m["rate"] * dg if m["code"] != "V00750" else 0
-                rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m["code"], "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": m["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
-                t_vl += tt
-            for l in res.get("labor", []):
-                dg = nc_p_map.get(l["code"], 0)
-                tt = l["rate"] * dg
-                rows.append({"Phân loại": "Nhân công", "Mã hiệu": l["code"], "Tên tài nguyên": l["name"], "ĐVT": l["unit"], "Định mức": l["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
-                t_nc += tt
-            for mac in res.get("machines", []):
-                dg = mac_p_map.get(mac["code"], 0)
-                tt = mac["rate"] * dg
-                rows.append({"Phân loại": "Máy thi công", "Mã hiệu": mac["code"], "Tên tài nguyên": mac["name"], "ĐVT": mac["unit"], "Định mức": mac["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
-                t_m += tt
-
-            st.dataframe(
-                pd.DataFrame(rows).style.format({
-                    "Định mức": "{:,.2f}", "Đơn giá (đ)": "{:,.0f}", "Thành tiền (đ)": "{:,.0f}"
-                }),
-                use_container_width=True, hide_index=True
+        if not st.session_state.work_items:
+            st.info("ℹ️ Hiện tại dự toán chưa có công tác nào. Vui lòng thêm công tác mới tại Tab 1 để kiểm tra chiết tính đơn giá.")
+        else:
+            sel_stt = st.selectbox(
+                "Chọn công việc cần kiểm tra chiết tính:",
+                options=[item["stt"] for item in st.session_state.work_items],
+                format_func=lambda x: f"Công tác {x}: {[it['job_name'] for it in st.session_state.work_items if it['stt'] == x][0]} ({[it['norm_code'] for it in st.session_state.work_items if it['stt'] == x][0]})"
             )
-            st.info(f"Tổng đơn giá cho 1 đơn vị định mức: **{(t_vl + t_nc + t_m):,.0f} đ** (Vật liệu: {t_vl:,.0f} đ | Nhân công: {t_nc:,.0f} đ | Máy: {t_m:,.0f} đ)")
+            matching_items = [it for it in st.session_state.work_items if it["stt"] == sel_stt]
+            if matching_items:
+                it_sel = matching_items[0]
+                n_info = mgr.get_norm(it_sel.get("norm_code", ""))
+
+                if n_info:
+                    c1, c2, c3 = st.columns([5, 2, 2])
+                    with c1:
+                        st.markdown(f"**Tên công việc:** {it_sel['job_name']}")
+                        st.caption(f"Căn cứ: {n_info.get('legal_basis', '')}")
+                    with c2:
+                        st.metric("Khối lượng dự án", f"{it_sel['volume']:,.2f} {it_sel['unit']}")
+                    with c3:
+                        st.metric("Định mức gốc tính cho", n_info.get("unit", ""))
+
+                    rows = []
+                    t_vl, t_nc, t_m = 0.0, 0.0, 0.0
+                    res = n_info.get("resources", {})
+                    for m in res.get("materials", []):
+                        dg = vl_p_map.get(m["code"], 0)
+                        tt = m["rate"] * dg if m["code"] != "V00750" else 0
+                        rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m["code"], "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": m["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
+                        t_vl += tt
+                    for l in res.get("labor", []):
+                        dg = nc_p_map.get(l["code"], 0)
+                        tt = l["rate"] * dg
+                        rows.append({"Phân loại": "Nhân công", "Mã hiệu": l["code"], "Tên tài nguyên": l["name"], "ĐVT": l["unit"], "Định mức": l["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
+                        t_nc += tt
+                    for mac in res.get("machines", []):
+                        dg = mac_p_map.get(mac["code"], 0)
+                        tt = mac["rate"] * dg
+                        rows.append({"Phân loại": "Máy thi công", "Mã hiệu": mac["code"], "Tên tài nguyên": mac["name"], "ĐVT": mac["unit"], "Định mức": mac["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
+                        t_m += tt
+
+                    st.dataframe(
+                        pd.DataFrame(rows).style.format({
+                            "Định mức": "{:,.2f}", "Đơn giá (đ)": "{:,.0f}", "Thành tiền (đ)": "{:,.0f}"
+                        }),
+                        use_container_width=True, hide_index=True
+                    )
+                    st.info(f"Tổng đơn giá cho 1 đơn vị định mức: **{(t_vl + t_nc + t_m):,.0f} đ** (Vật liệu: {t_vl:,.0f} đ | Nhân công: {t_nc:,.0f} đ | Máy: {t_m:,.0f} đ)")
+                else:
+                    st.info(f"💡 Công tác '{it_sel.get('job_name', '')}' ({it_sel.get('norm_code', '')}) là công tác áp dụng báo giá trọn gói / tạm tính, không phân tích chiết tính định mức tài nguyên.")
 
     with sub_e2:
         code_view = st.selectbox("Chọn mã định mức xem ảnh minh chứng scan gốc:", options=mgr.get_all_norm_codes(), key="sel_scan_code")
@@ -1146,27 +1389,30 @@ with tab5:
     export_filename = st.text_input("Tên tệp Excel xuất ra:", value="DU_TOAN_PCCC_2026_THAM_DINH.xlsx")
 
     if st.button("🚀 BẮT ĐẦU TẠO FILE EXCEL 20 SHEET", type="primary", use_container_width=True):
-        out_target = OUTPUT_DIR / export_filename
-        with st.spinner("Đang tổng hợp dữ liệu, tạo bảng TH_KinhPhi chuẩn mực, chèn ảnh scan và thiết lập 100% công thức liên kết động..."):
-            try:
-                generator.generate(
-                    project_name=project_name,
-                    category_name=category_name,
-                    work_items=st.session_state.work_items,
-                    output_path=out_target,
-                    coefficients=st.session_state.coefficients
-                )
-                st.success(f"✅ ĐÃ TẠO FILE EXCEL THÀNH CÔNG: {out_target.name}")
-                
-                with open(out_target, "rb") as f:
-                    excel_bytes = f.read()
+        if not st.session_state.work_items:
+            st.warning("⚠️ Dự toán chưa có công tác nào. Vui lòng thêm ít nhất 1 công tác tại Tab 1 trước khi xuất file Excel thẩm định.")
+        else:
+            out_target = OUTPUT_DIR / export_filename
+            with st.spinner("Đang tổng hợp dữ liệu, tạo bảng TH_KinhPhi chuẩn mực, chèn ảnh scan và thiết lập 100% công thức liên kết động..."):
+                try:
+                    generator.generate(
+                        project_name=project_name,
+                        category_name=category_name,
+                        work_items=st.session_state.work_items,
+                        output_path=out_target,
+                        coefficients=st.session_state.coefficients
+                    )
+                    st.success(f"✅ ĐÃ TẠO FILE EXCEL THÀNH CÔNG: {out_target.name}")
                     
-                st.download_button(
-                    label="📥 TẢI FILE EXCEL VỀ MÁY TÍNH",
-                    data=excel_bytes,
-                    file_name=export_filename,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True
-                )
-            except Exception as e:
-                st.error(f"Lỗi trong quá trình tạo file: {e}")
+                    with open(out_target, "rb") as f:
+                        excel_bytes = f.read()
+                    
+                    st.download_button(
+                        label="📥 TẢI FILE EXCEL VỀ MÁY TÍNH",
+                        data=excel_bytes,
+                        file_name=export_filename,
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                except Exception as e:
+                    st.error(f"Lỗi trong quá trình tạo file: {e}")

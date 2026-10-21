@@ -10,7 +10,7 @@ from pathlib import Path
 SOURCE_DIR = Path(__file__).resolve().parent
 
 # App Data Directory on OneDrive EVN
-DEFAULT_DATA_DIR = Path(r"D:\onedrive_hieuna\OneDrive - EVN\Tổ Thẩm định\Hiếu\2026_LAPDUTOAN_APP")
+DEFAULT_DATA_DIR = Path(r"D:\OneDrive_Hieuna\OneDrive - EVN\Tổ Thẩm định\Hiếu\2026_LAPDUTOAN_APP")
 DATA_DIR = Path(os.environ.get("LAPDUTOAN_DATA_DIR", DEFAULT_DATA_DIR))
 
 # Subdirectories
@@ -18,11 +18,17 @@ DATABASE_DIR = DATA_DIR / "database"
 IMAGES_DIR = DATA_DIR / "images_evidence"
 TEMPLATES_DIR = DATA_DIR / "templates"
 OUTPUT_DIR = DATA_DIR / "output"
+PROVINCES_DIR = DATABASE_DIR / "provinces"
+LAM_DONG_DIR = PROVINCES_DIR / "lam_dong"
+KHANH_HOA_DIR = PROVINCES_DIR / "khanh_hoa"
 
 # File Paths
 NORMS_DB_FILE = DATABASE_DIR / "norms_database.json"
 PRICES_DB_FILE = DATABASE_DIR / "resource_prices.json"
 TEMPLATE_XLSX = TEMPLATES_DIR / "DU_TOAN_PCCC_2026_LATEST.xlsx"
+LAM_DONG_MACHINES_FILE = LAM_DONG_DIR / "machines_2026.json"
+PROJECT_ITEMS_FILE = DATABASE_DIR / "current_project_items.json"
+LOCAL_PROJECT_ITEMS_FILE = SOURCE_DIR / "database" / "current_project_items.json"
 
 def check_environment():
     """Verify that all required data directories and files exist."""
