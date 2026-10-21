@@ -155,12 +155,81 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "🚀 5. Xuất File Excel Thẩm Định"
 ])
 
+# Dictionary of PAKT Job Name Suggestions mapped by norm code
+PAKT_JOB_SUGGESTIONS = {
+    "BD.41111": [
+        "Thay mới lắp đặt thiết bị đầu báo khói địa chỉ",
+        "Lắp đặt đầu báo khói quang điện tử địa chỉ",
+        "Thay thế đầu báo nhiệt gia tăng khu vực gian máy",
+        "Lắp đặt thiết bị đầu báo và đầu báo cháy (Đầu báo khói, báo nhiệt)"
+    ],
+    "BD.41121": [
+        "Lắp đặt đèn báo cháy",
+        "Lắp mới / thay thế đèn báo cháy vị trí khu vực phụ trợ",
+        "Lắp đặt đèn báo cháy phòng điều khiển trung tâm"
+    ],
+    "BD.41131": [
+        "Lắp đặt lại nút nhấn khẩn báo cháy",
+        "Lắp đặt lại nút nhấn sau khi bảo trì, sửa chữa",
+        "Lắp đặt nút ấn báo cháy khẩn cấp gắn tường"
+    ],
+    "BD.41141": [
+        "Lắp đặt chuông báo cháy",
+        "Thay thế, lắp đặt chuông báo cháy tự động",
+        "Lắp đặt chuông báo cháy âm thanh cao"
+    ],
+    "BD.42201": [
+        "Lắp đặt bộ điều khiển, bộ chuyển mạch PCCC",
+        "Lắp đặt bộ chuyển mạch tín hiệu tủ trung gian",
+        "Lắp đặt module điều khiển giám sát PCCC"
+    ],
+    "E6C.3.01": [
+        "Bảo trì, sửa chữa, thử nghiệm giả lập tác động nút nhấn khẩn báo cháy",
+        "Kiểm tra, bảo dưỡng nút nhấn báo cháy chuyên dụng",
+        "Thử nghiệm chức năng tác động nút nhấn báo cháy"
+    ],
+    "E6C.3.02": [
+        "Bảo trì, sửa chữa, hiệu chỉnh, thử nghiệm độ nhạy đầu báo khói/nhiệt",
+        "Dịch vụ Bảo trì đầu báo chuyên dụng",
+        "Kiểm tra độ nhạy và vệ sinh buồng khói đầu báo địa chỉ"
+    ],
+    "E6C.3.03": [
+        "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng dây báo cháy",
+        "Kiểm tra module dây giám sát nhiệt độ cao"
+    ],
+    "E6C.3.04": [
+        "Bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng cảm biến beam quang",
+        "Bảo dưỡng beam khói khoảng cách xa",
+        "Hiệu chuẩn căn chỉnh trục thu phát đầu báo beam quang học"
+    ],
+    "E6C.3.05": [
+        "Sửa chữa, bảo dưỡng trung tâm báo cháy FMZ 5000",
+        "Bảo dưỡng tủ điều khiển chữa cháy tại chỗ và tủ trung gian",
+        "Kiểm tra toàn diện phần cứng và phần mềm tủ trung tâm báo cháy"
+    ],
+    "E6C.3.06": [
+        "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet hệ PCCC",
+        "Bảo dưỡng cuộn hút, van xả tràn Deluge và đồng hồ áp",
+        "Thí nghiệm tác động cuộn solenoid van Deluge hệ thống foam/nước"
+    ],
+    "E6B.1.13.01": [
+        "Kiểm tra bình accu chuyên dụng phục vụ hệ thống PCCC",
+        "Đo nội trở, dung lượng Ah, vô mỡ cọc bình và châm nước cất",
+        "Bảo dưỡng hệ thống ắc quy nguồn dự phòng 24VDC tủ PCCC"
+    ],
+    "E6C.1.31": [
+        "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2",
+        "Bơm khí chuẩn hiệu chuẩn điểm Zero & Span cho đầu đo khí",
+        "Hiệu chuẩn cảm biến phát hiện rò rỉ khí phòng hóa chất"
+    ]
+}
+
 # -----------------------------------------------------------------------------
 # TAB 1: KHỐI LƯỢNG TIÊN LƯỢNG (TRA CỨU, PHÂN NHÓM & CRUD)
 # -----------------------------------------------------------------------------
 with tab1:
-    st.markdown("#### 📋 BẢNG TIÊN LƯỢNG KHỐI LƯỢNG & TRA CỨU ĐỊNH MỨC")
-    st.caption("Tra cứu định mức có sẵn trong CSDL, tổ chức công tác theo Nhóm/Hạng mục, thêm sửa xóa linh hoạt.")
+    st.markdown("#### 📋 BẢNG TIÊN LƯỢNG KHỐI LƯỢNG & QUẢN LÝ THEO NHÓM")
+    st.caption("Tra cứu định mức, gợi ý tên công tác theo PAKT, quản lý chỉnh sửa và đổi tên nhóm trực tiếp trong từng nhóm.")
 
     # 1. Tra cứu & Thêm công tác mới
     with st.expander("➕ **TRA CỨU ĐỊNH MỨC & THÊM CÔNG TÁC MỚI**", expanded=False):
@@ -181,32 +250,47 @@ with tab1:
             selected_option = st.selectbox(
                 "Gõ từ khóa để tra cứu định mức (Mã hoặc Tên):",
                 options=norm_options,
-                format_func=lambda x: x["label"]
+                format_func=lambda x: x["label"],
+                key="add_norm_search"
             )
         with col_grp:
             # Existing groups
             existing_groups = list(dict.fromkeys([it.get("group", "Nhóm công việc chung") for it in st.session_state.work_items if it.get("group")]))
-            if not existing_groups: existing_groups = ["Hệ thống báo cháy tự động", "Bảo dưỡng thiết bị ngoại vi"]
-            selected_group_choice = st.selectbox("Chọn nhóm công tác:", options=existing_groups + ["➕ [Tạo nhóm mới...]"])
+            if not existing_groups: existing_groups = ["Hệ thống báo cháy tự động và thiết bị ngoại vi (Lắp đặt - Thay mới)", "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy", "Bảo dưỡng van tràn Deluge, hệ thống ắc quy và thiết bị đo khí"]
+            selected_group_choice = st.selectbox("Chọn nhóm công tác:", options=existing_groups + ["➕ [Tạo nhóm mới...]"], key="add_norm_group_sel")
             if selected_group_choice == "➕ [Tạo nhóm mới...]":
-                new_group_name = st.text_input("Nhập tên nhóm mới:", value="Nhóm công việc mới")
+                new_group_name = st.text_input("Nhập tên nhóm mới:", value="Nhóm công việc mới", key="add_norm_group_new")
                 final_group = new_group_name.strip()
             else:
                 final_group = selected_group_choice
 
+        # PAKT Suggestions based on selected norm
+        sel_code = selected_option["code"]
+        raw_suggestions = PAKT_JOB_SUGGESTIONS.get(sel_code, [])
+        if selected_option["name"] not in raw_suggestions:
+            raw_suggestions = raw_suggestions + [selected_option["name"]]
+        
+        st.markdown("**💡 Gợi ý tên danh mục công việc theo PAKT (chọn để tự động điền):**")
+        selected_sugg = st.selectbox(
+            "Danh sách gợi ý phổ biến cho mã này:",
+            options=raw_suggestions,
+            index=0,
+            key=f"pakt_sugg_{sel_code}"
+        )
+
         col_f1, col_f2, col_f3, col_f4 = st.columns([5, 4, 2, 2])
         with col_f1:
-            inp_job_name = st.text_input("Tên danh mục công việc (Theo PAKT):", value=selected_option["name"])
+            inp_job_name = st.text_input("Tên danh mục công việc (Theo PAKT):", value=selected_sugg, key=f"inp_job_name_{sel_code}")
         with col_f2:
-            inp_desc = st.text_input("Mô tả công việc thực tế:", value=selected_option["name"])
+            inp_desc = st.text_input("Mô tả công việc thực tế:", value=selected_sugg, key=f"inp_desc_{sel_code}")
         with col_f3:
-            inp_vol = st.number_input("Khối lượng:", min_value=0.01, value=1.0, step=1.0)
+            inp_vol = st.number_input("Khối lượng:", min_value=0.01, value=1.0, step=1.0, key=f"inp_vol_{sel_code}")
         with col_f4:
-            inp_unit = st.text_input("ĐVT:", value=selected_option["unit"])
+            inp_unit = st.text_input("ĐVT:", value=selected_option["unit"], key=f"inp_unit_{sel_code}")
 
         st.caption(f"📌 Căn cứ pháp lý gốc: *{selected_option['basis']}*")
 
-        if st.button("➕ Thêm công tác này vào Tiên lượng", type="primary"):
+        if st.button("➕ Thêm công tác này vào nhóm", type="primary"):
             new_stt = len(st.session_state.work_items) + 1
             st.session_state.work_items.append({
                 "stt": new_stt,
@@ -220,60 +304,84 @@ with tab1:
             st.success(f"Đã thêm công tác '{inp_job_name}' vào nhóm '{final_group}'!")
             st.rerun()
 
-    # 2. Quản lý theo Nhóm (Grouped View)
-    st.markdown("##### 🗂️ DANH SÁCH CÔNG TÁC PHÂN THEO NHÓM")
-    
-    # Group items by group
+    # 2. Quản lý theo từng Nhóm (Xem, Chỉnh sửa, Đổi tên & Xóa trực tiếp trong nhóm)
+    st.markdown("##### 🗂️ QUẢN LÝ CHI TIẾT THEO TỪNG NHÓM CÔNG VIỆC")
+    st.caption("Xem, sửa đơn giá khối lượng, đổi tên nhóm hoặc xóa công việc trực tiếp trong từng nhóm bên dưới.")
+
+    # Group items by group preserving order
     groups_dict = {}
     for it in st.session_state.work_items:
-        g = it.get("group", "Công việc chung").strip() or "Công việc chung"
+        g = (it.get("group") or "Công việc chung").strip() or "Công việc chung"
         if g not in groups_dict: groups_dict[g] = []
         groups_dict[g].append(it)
 
+    norm_codes_list = mgr.get_all_norm_codes()
+
     for g_idx, (g_name, items_in_g) in enumerate(groups_dict.items(), start=1):
         with st.expander(f"📁 **NHÓM {g_idx}: {g_name.upper()}** ({len(items_in_g)} công tác)", expanded=True):
-            df_g = pd.DataFrame(items_in_g)[["stt", "norm_code", "job_name", "volume", "unit", "description"]]
-            st.dataframe(
-                df_g.rename(columns={
-                    "stt": "STT", "norm_code": "Mã ĐM", "job_name": "Tên công tác",
-                    "volume": "Khối lượng", "unit": "ĐVT", "description": "Mô tả chi tiết"
-                }),
+            # Toolbar: Rename group and Delete group
+            col_ren_title, col_ren_btn, col_del_grp = st.columns([6, 3, 3])
+            with col_ren_title:
+                new_group_title = st.text_input(f"Tên nhóm {g_idx}:", value=g_name, key=f"edit_group_name_{g_idx}")
+            with col_ren_btn:
+                st.write("") # vertical spacing
+                if st.button("✏️ Đổi tên nhóm", key=f"btn_apply_rename_{g_idx}", use_container_width=True):
+                    if new_group_title.strip() and new_group_title.strip() != g_name:
+                        for it in st.session_state.work_items:
+                            if it.get("group", "").strip() == g_name:
+                                it["group"] = new_group_title.strip()
+                        st.success(f"Đã đổi tên nhóm thành: {new_group_title.strip()}")
+                        st.rerun()
+            with col_del_grp:
+                st.write("")
+                if st.button("🗑️ Xóa cả nhóm này", key=f"btn_del_entire_group_{g_idx}", use_container_width=True):
+                    st.session_state.work_items = [it for it in st.session_state.work_items if it.get("group", "").strip() != g_name]
+                    # Re-index STT
+                    for i, it in enumerate(st.session_state.work_items, start=1):
+                        it["stt"] = i
+                    st.success(f"Đã xóa toàn bộ công tác thuộc nhóm '{g_name}'!")
+                    st.rerun()
+
+            # In-group Data Editor
+            df_g = pd.DataFrame(items_in_g)
+            disp_cols = ["stt", "norm_code", "job_name", "description", "volume", "unit"]
+            edited_group_df = st.data_editor(
+                df_g[disp_cols],
+                column_config={
+                    "stt": st.column_config.NumberColumn("STT", width="small", disabled=True),
+                    "norm_code": st.column_config.SelectboxColumn("Mã Định Mức", options=norm_codes_list, width="medium", required=True),
+                    "job_name": st.column_config.TextColumn("Danh mục công việc (Theo PAKT)", width="large", required=True),
+                    "description": st.column_config.TextColumn("Mô tả công việc thực tế", width="large"),
+                    "volume": st.column_config.NumberColumn("Khối lượng", format="%.2f", min_value=0.0, step=1.0, required=True),
+                    "unit": st.column_config.TextColumn("Đơn vị tính", width="small", required=True),
+                },
+                num_rows="dynamic",
                 use_container_width=True,
-                hide_index=True
+                hide_index=True,
+                key=f"group_editor_{g_idx}"
             )
 
-    # 3. Trình chỉnh sửa dữ liệu toàn diện (Full Data Editor)
-    st.markdown("##### ✏️ BẢNG TIÊN LƯỢNG TỔNG HỢP (CHỈNH SỬA NHANH & XÓA)")
-    df_items = pd.DataFrame(st.session_state.work_items)
-    norm_codes_list = mgr.get_all_norm_codes()
-    
-    edited_df = st.data_editor(
-        df_items,
-        column_config={
-            "stt": st.column_config.NumberColumn("STT", width="small", disabled=True),
-            "group": st.column_config.TextColumn("Nhóm công việc", width="medium", required=True),
-            "norm_code": st.column_config.SelectboxColumn("Mã Định Mức", options=norm_codes_list, width="medium", required=True),
-            "job_name": st.column_config.TextColumn("Danh mục công việc (Theo PAKT)", width="large", required=True),
-            "description": st.column_config.TextColumn("Mô tả chi tiết", width="medium"),
-            "volume": st.column_config.NumberColumn("Khối lượng", format="%.2f", min_value=0.0, step=1.0, required=True),
-            "unit": st.column_config.TextColumn("Đơn vị tính", width="small", required=True),
-        },
-        num_rows="dynamic",
-        use_container_width=True,
-        hide_index=True,
-        key="full_work_items_editor"
-    )
-
-    col_save, col_reset = st.columns([3, 7])
-    with col_save:
-        if st.button("💾 Cập nhật Bảng Khối Lượng Tiên Lượng", type="primary"):
-            records = edited_df.to_dict("records")
-            # Re-index STT
-            for i, r in enumerate(records, start=1):
-                r["stt"] = i
-            st.session_state.work_items = records
-            st.success("Đã lưu bảng khối lượng công việc thành công!")
-            st.rerun()
+            if st.button(f"💾 Lưu cập nhật Nhóm {g_idx}", key=f"save_group_{g_idx}", type="primary"):
+                updated_g_records = edited_group_df.to_dict("records")
+                for r in updated_g_records:
+                    r["group"] = g_name
+                
+                # Replace items of this group in work_items
+                other_items = [it for it in st.session_state.work_items if it.get("group", "").strip() != g_name]
+                new_all_items = []
+                # Reconstruct full list preserving group position
+                for check_g in groups_dict.keys():
+                    if check_g == g_name:
+                        new_all_items.extend(updated_g_records)
+                    else:
+                        new_all_items.extend([it for it in other_items if it.get("group", "").strip() == check_g])
+                
+                # Re-index STT
+                for i, it in enumerate(new_all_items, start=1):
+                    it["stt"] = i
+                st.session_state.work_items = new_all_items
+                st.success(f"Đã lưu các thay đổi cho Nhóm {g_idx} thành công!")
+                st.rerun()
 
 # -----------------------------------------------------------------------------
 # TAB 2: QUẢN LÝ ĐƠN GIÁ (VẬT LIỆU, NHÂN CÔNG, MÁY THI CÔNG & PHÁP LÝ)
