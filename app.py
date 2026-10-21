@@ -6,6 +6,8 @@ Author: Tổ Thẩm Định EVN
 import streamlit as st
 import pandas as pd
 import json
+import io
+import openpyxl
 from pathlib import Path
 import sys
 
@@ -16,6 +18,21 @@ from config import DATA_DIR, OUTPUT_DIR, IMAGES_DIR, check_environment
 from core.norm_manager import NormManager
 from core.excel_generator import ExcelGenerator, DEFAULT_COEFFICIENTS
 from utils.num2words_vi import num2words_vi
+
+def create_single_summary_sheet_excel(sheet_type: str, p_name: str, c_name: str, items_data: list, n_mgr: NormManager) -> bytes:
+    wb = openpyxl.Workbook()
+    ws_dummy = wb.active
+    gen = ExcelGenerator(n_mgr)
+    if sheet_type == "material":
+        gen._build_sheet_th_vat_lieu(wb, p_name, c_name, items_data)
+    elif sheet_type == "labor":
+        gen._build_sheet_th_nhan_cong(wb, p_name, c_name, items_data)
+    elif sheet_type == "machine":
+        gen._build_sheet_th_may_thi_cong(wb, p_name, c_name, items_data)
+    wb.remove(ws_dummy)
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
 
 # Set Page Config
 st.set_page_config(
@@ -548,71 +565,305 @@ with tab2:
 
     with sub_t1:
         st.markdown("##### 1. BẢNG TỔNG HỢP VẬT LIỆU")
+        vl_mode = st.radio(
+            "Chế độ hiển thị Vật liệu:",
+            ["👁️ 1. Bảng giá hiện tại (Theo chuẩn PAKT & EVN)", "✏️ 2. Chỉnh sửa đơn giá & Căn cứ pháp lý"],
+            horizontal=True,
+            key="vl_view_mode_choice"
+        )
         df_vl = pd.DataFrame(prices.get("materials", []))
         if not df_vl.empty:
             df_vl["qty_calc"] = df_vl["code"].apply(lambda x: round(mat_qty.get(x, 0.0), 3))
             if "legal_basis" not in df_vl.columns: df_vl["legal_basis"] = df_vl.get("notes", "Công bố giá LS / Báo giá NSX")
-            edited_vl = st.data_editor(
-                df_vl[["code", "name", "unit", "qty_calc", "price_base", "price_notice", "legal_basis"]],
-                column_config={
-                    "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
-                    "name": st.column_config.TextColumn("Tên vật tư", disabled=True),
-                    "unit": st.column_config.TextColumn("ĐVT", disabled=True),
-                    "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
-                    "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
-                    "price_notice": st.column_config.NumberColumn("Giá thông báo (đ)", format="%d"),
-                    "legal_basis": st.column_config.TextColumn("Cơ sở đơn giá / Căn cứ pháp lý", width="large")
-                },
-                use_container_width=True,
-                hide_index=True,
-                key="editor_vl"
-            )
+            if "source" not in df_vl.columns: df_vl["source"] = ""
+
+            if "1. Bảng giá hiện tại" in vl_mode:
+                # View Mode matching user's image exactly:
+                # STT | Mã hiệu | Tên vật tư | Đơn vị | Nguồn mua | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+                rows_current = []
+                main_mat_total = 0.0
+                for idx, r in df_vl.iterrows():
+                    code = r["code"]
+                    is_other = (code == "V00750" or r["unit"] == "%")
+                    if not is_other:
+                        q = float(r["qty_calc"])
+                        p = float(r.get("price_notice", 0))
+                        main_mat_total += round(q * p)
+                
+                total_vl_all = 0.0
+                for idx, r in df_vl.iterrows():
+                    stt_idx = idx + 1
+                    code = r["code"]
+                    is_other = (code == "V00750" or r["unit"] == "%")
+                    if is_other:
+                        pct = float(r.get("rate", 2.0))
+                        tt = round(main_mat_total * (pct / 100.0))
+                        total_vl_all += tt
+                        rows_current.append({
+                            "STT": stt_idx,
+                            "Mã hiệu": code,
+                            "Tên vật tư": r["name"],
+                            "Đơn vị": r["unit"],
+                            "Nguồn mua": r.get("source", ""),
+                            "Khối lượng": None,
+                            "Giá hiện tại (đ)": None,
+                            "Thành tiền (đ)": tt,
+                            "Căn cứ tính giá": r.get("legal_basis", f"{pct}% vật liệu chính theo định mức")
+                        })
+                    else:
+                        q = float(r["qty_calc"])
+                        p = float(r.get("price_notice", 0))
+                        tt = round(q * p)
+                        total_vl_all += tt
+                        rows_current.append({
+                            "STT": stt_idx,
+                            "Mã hiệu": code,
+                            "Tên vật tư": r["name"],
+                            "Đơn vị": r["unit"],
+                            "Nguồn mua": r.get("source", ""),
+                            "Khối lượng": q,
+                            "Giá hiện tại (đ)": p,
+                            "Thành tiền (đ)": tt,
+                            "Căn cứ tính giá": r.get("legal_basis", "Công bố giá LS / Báo giá NSX")
+                        })
+                
+                df_vl_disp = pd.DataFrame(rows_current)
+                st.dataframe(
+                    df_vl_disp.style.format({
+                        "Khối lượng": lambda x: f"{x:,.2f}" if pd.notnull(x) else "",
+                        "Giá hiện tại (đ)": lambda x: f"{x:,.0f}" if pd.notnull(x) else "",
+                        "Thành tiền (đ)": "{:,.0f}"
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_sum, col_dl = st.columns([6, 4])
+                with col_sum:
+                    st.markdown(f"""
+                    <div class="metric-card" style="margin-top:5px;">
+                        <b>Tổng vật liệu:</b> 
+                        <span style="font-size:18px; color:#002060; font-weight:bold; margin-left:10px;">{total_vl_all:,.0f} đồng</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col_dl:
+                    materials_payload = []
+                    for idx, r in df_vl.iterrows():
+                        m_copy = r.to_dict()
+                        m_copy["total_qty"] = float(r["qty_calc"])
+                        materials_payload.append(m_copy)
+                    excel_bytes_vl = create_single_summary_sheet_excel("material", project_name, category_name, materials_payload, mgr)
+                    st.download_button(
+                        "📥 Tải Bảng Tổng Hợp Vật Liệu (.xlsx)",
+                        data=excel_bytes_vl,
+                        file_name="TH_VatLieu_GiaHienTai.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                edited_vl = df_vl
+            else:
+                edited_vl = st.data_editor(
+                    df_vl[["code", "name", "unit", "qty_calc", "source", "price_base", "price_notice", "legal_basis"]],
+                    column_config={
+                        "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
+                        "name": st.column_config.TextColumn("Tên vật tư", disabled=True),
+                        "unit": st.column_config.TextColumn("ĐVT", disabled=True),
+                        "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
+                        "source": st.column_config.TextColumn("Nguồn mua"),
+                        "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
+                        "price_notice": st.column_config.NumberColumn("Giá hiện tại / Thông báo (đ)", format="%d"),
+                        "legal_basis": st.column_config.TextColumn("Căn cứ tính giá / Pháp lý", width="large")
+                    },
+                    use_container_width=True,
+                    hide_index=True,
+                    key="editor_vl"
+                )
+                if st.button("💾 Lưu Cập Nhật Bảng Giá Vật Liệu", key="save_vl_btn", type="primary"):
+                    mgr.update_resource_prices({"materials": edited_vl.to_dict("records")})
+                    st.success("Đã cập nhật bảng giá vật liệu thành công!")
+                    st.rerun()
 
     with sub_t2:
         st.markdown("##### 2. BẢNG TỔNG HỢP NHÂN CÔNG")
+        nc_mode = st.radio(
+            "Chế độ hiển thị Nhân công:",
+            ["👁️ 1. Bảng giá hiện tại (Theo chuẩn PAKT & EVN)", "✏️ 2. Chỉnh sửa đơn giá & Căn cứ pháp lý"],
+            horizontal=True,
+            key="nc_view_mode_choice"
+        )
         df_nc = pd.DataFrame(prices.get("labor", []))
         if not df_nc.empty:
             df_nc["qty_calc"] = df_nc["code"].apply(lambda x: round(lab_qty.get(x, 0.0), 3))
             if "legal_basis" not in df_nc.columns: df_nc["legal_basis"] = "5898/SXD-QLXD ngày 02/7/2026 của SXD tỉnh Lâm Đồng"
-            edited_nc = st.data_editor(
-                df_nc[["code", "name", "unit", "qty_calc", "price_base", "price_current", "legal_basis"]],
-                column_config={
-                    "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
-                    "name": st.column_config.TextColumn("Tên nhân công", disabled=True),
-                    "unit": st.column_config.TextColumn("ĐVT", disabled=True),
-                    "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
-                    "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
-                    "price_current": st.column_config.NumberColumn("Giá hiện tại (đ)", format="%d"),
-                    "legal_basis": st.column_config.TextColumn("Cơ sở đơn giá / Căn cứ pháp lý", width="large")
-                },
-                use_container_width=True,
-                hide_index=True,
-                key="editor_nc"
-            )
+
+            if "1. Bảng giá hiện tại" in nc_mode:
+                # View Mode matching user's image exactly:
+                # STT | Mã hiệu | Tên vật tư (Tên nhân công) | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+                rows_nc_current = []
+                total_nc_all = 0.0
+                for idx, r in df_nc.iterrows():
+                    stt_idx = idx + 1
+                    q = float(r["qty_calc"])
+                    p = float(r.get("price_current", 0))
+                    tt = round(q * p)
+                    total_nc_all += tt
+                    rows_nc_current.append({
+                        "STT": stt_idx,
+                        "Mã hiệu": r["code"],
+                        "Tên nhân công": r["name"],
+                        "Đơn vị": r["unit"],
+                        "Khối lượng": q,
+                        "Giá hiện tại (đ)": p,
+                        "Thành tiền (đ)": tt,
+                        "Căn cứ tính giá": r.get("legal_basis", "5898/SXD-QLXD")
+                    })
+                
+                df_nc_disp = pd.DataFrame(rows_nc_current)
+                st.dataframe(
+                    df_nc_disp.style.format({
+                        "Khối lượng": "{:,.2f}",
+                        "Giá hiện tại (đ)": "{:,.0f}",
+                        "Thành tiền (đ)": "{:,.0f}"
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_sum_nc, col_dl_nc = st.columns([6, 4])
+                with col_sum_nc:
+                    st.markdown(f"""
+                    <div class="metric-card" style="margin-top:5px;">
+                        <b>Cộng nhân công:</b> 
+                        <span style="font-size:18px; color:#002060; font-weight:bold; margin-left:10px;">{total_nc_all:,.0f} đồng</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col_dl_nc:
+                    labor_payload = []
+                    for idx, r in df_nc.iterrows():
+                        l_copy = r.to_dict()
+                        l_copy["total_qty"] = float(r["qty_calc"])
+                        labor_payload.append(l_copy)
+                    excel_bytes_nc = create_single_summary_sheet_excel("labor", project_name, category_name, labor_payload, mgr)
+                    st.download_button(
+                        "📥 Tải Bảng Tổng Hợp Nhân Công (.xlsx)",
+                        data=excel_bytes_nc,
+                        file_name="TH_NhanCong_GiaHienTai.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                edited_nc = df_nc
+            else:
+                edited_nc = st.data_editor(
+                    df_nc[["code", "name", "unit", "qty_calc", "price_base", "price_current", "legal_basis"]],
+                    column_config={
+                        "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
+                        "name": st.column_config.TextColumn("Tên nhân công", disabled=True),
+                        "unit": st.column_config.TextColumn("ĐVT", disabled=True),
+                        "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
+                        "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
+                        "price_current": st.column_config.NumberColumn("Giá hiện tại (đ)", format="%d"),
+                        "legal_basis": st.column_config.TextColumn("Căn cứ tính giá / Pháp lý", width="large")
+                    },
+                    use_container_width=True,
+                    hide_index=True,
+                    key="editor_nc"
+                )
+                if st.button("💾 Lưu Cập Nhật Bảng Giá Nhân Công", key="save_nc_btn", type="primary"):
+                    mgr.update_resource_prices({"labor": edited_nc.to_dict("records")})
+                    st.success("Đã cập nhật bảng giá nhân công thành công!")
+                    st.rerun()
 
     with sub_t3:
         st.markdown("##### 3. BẢNG TỔNG HỢP MÁY THI CÔNG")
+        m_mode = st.radio(
+            "Chế độ hiển thị Máy thi công:",
+            ["👁️ 1. Bảng giá hiện tại (Theo chuẩn PAKT & EVN)", "✏️ 2. Chỉnh sửa đơn giá & Căn cứ pháp lý"],
+            horizontal=True,
+            key="m_view_mode_choice"
+        )
         df_m = pd.DataFrame(prices.get("machines", []))
         if not df_m.empty:
             df_m["qty_calc"] = df_m["code"].apply(lambda x: round(mac_qty.get(x, 0.0), 3))
             if "legal_basis" not in df_m.columns: df_m["legal_basis"] = "Thông tư 37/2026/TT-BXD của Bộ Xây dựng"
-            edited_m = st.data_editor(
-                df_m[["code", "name", "unit", "qty_calc", "price_base", "price_notice", "price_diff", "price_current", "legal_basis"]],
-                column_config={
-                    "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
-                    "name": st.column_config.TextColumn("Tên máy thi công", disabled=True),
-                    "unit": st.column_config.TextColumn("ĐVT", disabled=True),
-                    "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
-                    "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
-                    "price_notice": st.column_config.NumberColumn("Giá thông báo (đ)", format="%d"),
-                    "price_diff": st.column_config.NumberColumn("Bù giá (đ)", format="%d"),
-                    "price_current": st.column_config.NumberColumn("Giá hiện tại (đ)", format="%d"),
-                    "legal_basis": st.column_config.TextColumn("Cơ sở đơn giá / Căn cứ pháp lý", width="large")
-                },
-                use_container_width=True,
-                hide_index=True,
-                key="editor_m"
-            )
+
+            if "1. Bảng giá hiện tại" in m_mode:
+                # View Mode matching user's image exactly:
+                # STT | Mã hiệu | Tên vật tư (Tên máy) | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+                rows_m_current = []
+                total_m_all = 0.0
+                for idx, r in df_m.iterrows():
+                    stt_idx = idx + 1
+                    q = float(r["qty_calc"])
+                    p = float(r.get("price_current", r.get("price_notice", 0) + r.get("price_diff", 0)))
+                    tt = round(q * p)
+                    total_m_all += tt
+                    rows_m_current.append({
+                        "STT": stt_idx,
+                        "Mã hiệu": r["code"],
+                        "Tên máy thi công": r["name"],
+                        "Đơn vị": r["unit"],
+                        "Khối lượng": q,
+                        "Giá hiện tại (đ)": p,
+                        "Thành tiền (đ)": tt,
+                        "Căn cứ tính giá": r.get("legal_basis", "TT 37/2026/TT-BXD")
+                    })
+                
+                df_m_disp = pd.DataFrame(rows_m_current)
+                st.dataframe(
+                    df_m_disp.style.format({
+                        "Khối lượng": "{:,.2f}",
+                        "Giá hiện tại (đ)": "{:,.0f}",
+                        "Thành tiền (đ)": "{:,.0f}"
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                
+                col_sum_m, col_dl_m = st.columns([6, 4])
+                with col_sum_m:
+                    st.markdown(f"""
+                    <div class="metric-card" style="margin-top:5px;">
+                        <b>Cộng Máy:</b> 
+                        <span style="font-size:18px; color:#002060; font-weight:bold; margin-left:10px;">{total_m_all:,.0f} đồng</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col_dl_m:
+                    machines_payload = []
+                    for idx, r in df_m.iterrows():
+                        mac_copy = r.to_dict()
+                        mac_copy["total_qty"] = float(r["qty_calc"])
+                        machines_payload.append(mac_copy)
+                    excel_bytes_m = create_single_summary_sheet_excel("machine", project_name, category_name, machines_payload, mgr)
+                    st.download_button(
+                        "📥 Tải Bảng Tổng Hợp Máy Thi Công (.xlsx)",
+                        data=excel_bytes_m,
+                        file_name="TH_MayThiCong_GiaHienTai.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                edited_m = df_m
+            else:
+                edited_m = st.data_editor(
+                    df_m[["code", "name", "unit", "qty_calc", "price_base", "price_notice", "price_diff", "price_current", "legal_basis"]],
+                    column_config={
+                        "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
+                        "name": st.column_config.TextColumn("Tên máy thi công", disabled=True),
+                        "unit": st.column_config.TextColumn("ĐVT", disabled=True),
+                        "qty_calc": st.column_config.NumberColumn("Khối lượng (Tiên lượng)", format="%.3f", disabled=True),
+                        "price_base": st.column_config.NumberColumn("Giá gốc (đ)", format="%d"),
+                        "price_notice": st.column_config.NumberColumn("Giá thông báo (đ)", format="%d"),
+                        "price_diff": st.column_config.NumberColumn("Bù giá (đ)", format="%d"),
+                        "price_current": st.column_config.NumberColumn("Giá hiện tại (đ)", format="%d"),
+                        "legal_basis": st.column_config.TextColumn("Căn cứ tính giá / Pháp lý", width="large")
+                    },
+                    use_container_width=True,
+                    hide_index=True,
+                    key="editor_m"
+                )
+                if st.button("💾 Lưu Cập Nhật Bảng Giá Máy Thi Công", key="save_m_btn", type="primary"):
+                    mgr.update_resource_prices({"machines": edited_m.to_dict("records")})
+                    st.success("Đã cập nhật bảng giá máy thi công thành công!")
+                    st.rerun()
 
     with sub_t4:
         st.markdown("##### 4. QUẢN LÝ ĐƠN GIÁ THEO BẢN CHẤT KỸ THUẬT (CHUẨN HÓA ĐƠN GIÁ)")

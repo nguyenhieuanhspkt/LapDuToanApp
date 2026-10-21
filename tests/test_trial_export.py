@@ -127,14 +127,17 @@ def run_trial_export():
     print(f"       - Column J (Thành tiền) formulas    : {j_formulas}")
     assert g_links > 40 and h_links > 40 and j_formulas > 40
 
-    # 5. Check calculated total quantities in summary sheets
-    for th_name, sum_col in [("TH_VatLieu", 9), ("TH_NhanCong", 9), ("TH_MayThiCong", 11)]:
+    # 5. Check calculated total quantities in summary sheets (Current price format)
+    # TH_VatLieu: KL col 6, Thành tiền col 8
+    # TH_NhanCong: KL col 5, Thành tiền col 7
+    # TH_MayThiCong: KL col 5, Thành tiền col 7
+    for th_name, kl_col, sum_col in [("TH_VatLieu", 6, 8), ("TH_NhanCong", 5, 7), ("TH_MayThiCong", 5, 7)]:
         ws_th = wb[th_name]
         last_r = ws_th.max_row
         sum_cell = ws_th.cell(last_r, sum_col).value
         assert str(sum_cell).startswith("=SUM"), f"Sheet {th_name} total formula missing at col {sum_col}"
-        # Check non-zero volume in column 5
-        non_zero_kl = sum(1 for r in range(7, last_r) if float(ws_th.cell(r, 5).value or 0) > 0)
+        # Check non-zero volume in kl_col (excluding other materials with %)
+        non_zero_kl = sum(1 for r in range(7, last_r) if float(ws_th.cell(r, kl_col).value or 0) > 0)
         print(f"[PASS] Sheet {th_name:14s}: {non_zero_kl} items have computed project volumes > 0, total sum formula: {sum_cell}")
 
     print("\n==================================================")

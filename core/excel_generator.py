@@ -329,11 +329,11 @@ class ExcelGenerator:
 
             rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
             rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
-            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!H{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
             rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
-            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!G{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
             rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
-            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!G{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
             rows_spec.append(("4", "Chi phí công tác báo giá / tạm tính", "=D14", "=D14", "BG", f"{quote_count} công việc báo giá trọn gói", True, False))
             rows_spec.append(("", " - Chi phí báo giá trước thuế", "Theo báo giá cạnh tranh / PAKT", f"{quote_sum:.2f}", "BGHT", "Hồ sơ PAKT & Báo giá", False, False))
         else:
@@ -351,11 +351,11 @@ class ExcelGenerator:
 
             rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
             rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
-            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!H{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
             rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
-            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!G{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
             rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
-            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!G{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
 
         rows_spec.extend([
             ("II", "Chi phí gián tiếp", f"=D{r_C}+D{r_TT}", f"=D{r_C}+D{r_TT}", "GT", "GT = C + TT", True, True),
@@ -407,10 +407,11 @@ class ExcelGenerator:
 
             curr_r += 1
 
-        # Calculate estimated total for num2words_vi
-        sum_vl = sum(m.get("total_qty", 0.0) * (m.get("price_notice", 0) - m.get("price_base", 0)) for m in materials)
-        sum_nc = sum(l.get("total_qty", 0.0) * (l.get("price_current", 0) - l.get("price_base", 0)) for l in labor)
-        sum_mac = sum(mac.get("total_qty", 0.0) * (mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0)) - mac.get("price_base", 0)) for mac in machines)
+        # Calculate estimated total for num2words_vi (Current direct prices)
+        sum_vl_chinh = sum(m.get("total_qty", 0.0) * m.get("price_notice", 0) for m in materials if m.get("code") != "V00750" and m.get("unit") != "%")
+        sum_vl = sum_vl_chinh * 1.02
+        sum_nc = sum(l.get("total_qty", 0.0) * l.get("price_current", 0) for l in labor)
+        sum_mac = sum(mac.get("total_qty", 0.0) * mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0)) for mac in machines)
         t_est = sum_vl + sum_nc + sum_mac + quote_sum
         c_est = t_est * (c_rate / 100.0)
         tt_est = t_est * (tt_rate / 100.0)
@@ -978,7 +979,7 @@ class ExcelGenerator:
                     ws.cell(curr_r, 7).number_format = "#,##0.00"
 
                     r_th = lab_row_map.get(l_code)
-                    c_h = ws.cell(curr_r, 8, f"='TH_NhanCong'!$G${r_th}" if r_th else 0)
+                    c_h = ws.cell(curr_r, 8, f"='TH_NhanCong'!$F${r_th}" if r_th else 0)
                     c_h.fill = self.fill_yellow
                     c_h.alignment = self.align_right
                     c_h.number_format = "#,##0"
@@ -1013,7 +1014,7 @@ class ExcelGenerator:
                     ws.cell(curr_r, 7).number_format = "#,##0.00"
 
                     r_th = mac_row_map.get(m_code)
-                    c_h = ws.cell(curr_r, 8, f"='TH_MayThiCong'!$I${r_th}" if r_th else 0)
+                    c_h = ws.cell(curr_r, 8, f"='TH_MayThiCong'!$F${r_th}" if r_th else 0)
                     c_h.fill = self.fill_yellow
                     c_h.alignment = self.align_right
                     c_h.number_format = "#,##0"
@@ -1040,10 +1041,15 @@ class ExcelGenerator:
             ws.column_dimensions[get_column_letter(c)].width = w
 
     def _build_sheet_th_vat_lieu(self, wb: openpyxl.Workbook, project_name: str, category_name: str, materials: List[Dict[str, Any]]):
+        """
+        Builds the current price material summary sheet (Bảng tổng hợp vật liệu dạng giá hiện tại)
+        matching 100% the layout in user request:
+        STT | Mã hiệu | Tên vật tư | Đơn vị | Nguồn mua | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+        """
         ws = wb.create_sheet(title="TH_VatLieu")
         ws.views.sheetView[0].showGridLines = True
 
-        ws["A1"] = "BẢNG TỔNG HỢP VẬT LIỆU VÀ CHÊNH LỆCH GIÁ"
+        ws["A1"] = "BẢNG TỔNG HỢP VẬT LIỆU"
         ws["A1"].font = self.font_title
         ws["A2"] = "(Theo giá thông báo quý .. năm 20..)"
         ws["A2"].font = self.font_subtitle
@@ -1055,242 +1061,258 @@ class ExcelGenerator:
         ws["I5"].font = self.font_unit
         ws["I5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Nguồn mua", "Khối lượng", "Giá hiện tại", "Thành tiền", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
             cell.font = self.font_header
             cell.alignment = self.align_center
             cell.border = self.border_cell
+            cell.fill = self.fill_ev_header
             if c_idx == 2: cell.fill = self.fill_code
 
         r_start = 7
+        curr_r = r_start
         for idx, m in enumerate(materials, start=1):
-            r = r_start + idx - 1
-            ws.row_dimensions[r].height = 20
-            ws.cell(r, 1, idx).alignment = self.align_center
+            ws.row_dimensions[curr_r].height = 20
+            ws.cell(curr_r, 1, idx).alignment = self.align_center
             
-            c_code = ws.cell(r, 2, m["code"])
+            c_code = ws.cell(curr_r, 2, m["code"])
             c_code.font = self.font_code
             c_code.alignment = self.align_center
             c_code.fill = self.fill_code
             
-            ws.cell(r, 3, m["name"]).alignment = self.align_left
-            ws.cell(r, 4, m["unit"]).alignment = self.align_center
+            ws.cell(curr_r, 3, m["name"]).alignment = self.align_left
+            ws.cell(curr_r, 4, m["unit"]).alignment = self.align_center
             
-            c_kl = ws.cell(r, 5, m.get("total_qty", 0.0))
-            c_kl.alignment = self.align_right
-            c_kl.number_format = "#,##0.00"
+            # Nguồn mua
+            ws.cell(curr_r, 5, m.get("source", "")).alignment = self.align_left
             
-            c_goc = ws.cell(r, 6, m.get("price_base", 0))
-            c_goc.alignment = self.align_right
-            c_goc.number_format = "#,##0"
-            
-            c_tb = ws.cell(r, 7, m.get("price_notice", 0))
-            c_tb.alignment = self.align_right
-            c_tb.number_format = "#,##0"
-            
-            c_cl = ws.cell(r, 8, f"=G{r}-F{r}")
-            c_cl.alignment = self.align_right
-            c_cl.number_format = "#,##0"
-            
-            c_tc = ws.cell(r, 9, f"=E{r}*H{r}")
-            c_tc.alignment = self.align_right
-            c_tc.number_format = "#,##0"
+            is_other = (m.get("code") == "V00750" or m.get("unit") == "%")
+            if is_other:
+                # Vật liệu khác: không có khối lượng và đơn giá, tính theo % tổng vật liệu chính
+                ws.cell(curr_r, 6, "")
+                ws.cell(curr_r, 7, "")
+                pct = float(m.get("rate", 2.0))
+                c_tt = ws.cell(curr_r, 8, f"=ROUND(SUM(H{r_start}:H{curr_r-1})*{pct}%, 0)")
+                c_tt.alignment = self.align_right
+                c_tt.number_format = "#,##0"
+                
+                c_basis = ws.cell(curr_r, 9, m.get("legal_basis", f"{pct}% vật liệu chính theo định mức"))
+                c_basis.alignment = self.align_left
+            else:
+                c_kl = ws.cell(curr_r, 6, m.get("total_qty", 0.0))
+                c_kl.alignment = self.align_right
+                c_kl.number_format = "#,##0.00"
+                
+                c_ht = ws.cell(curr_r, 7, m.get("price_notice", 0))
+                c_ht.alignment = self.align_right
+                c_ht.number_format = "#,##0"
+                
+                c_tt = ws.cell(curr_r, 8, f"=ROUND(F{curr_r}*G{curr_r}, 0)")
+                c_tt.alignment = self.align_right
+                c_tt.number_format = "#,##0"
+                
+                basis_val = m.get("legal_basis", m.get("notes", "Công bố giá LS / Báo giá NSX"))
+                c_basis = ws.cell(curr_r, 9, basis_val)
+                c_basis.alignment = self.align_left
 
-            # Basis column
-            basis_val = m.get("legal_basis", m.get("notes", "Công bố giá LS / Báo giá NSX"))
-            c_basis = ws.cell(r, 10, basis_val)
-            c_basis.alignment = self.align_left
-            
-            for c in range(1, 11):
-                ws.cell(r, c).border = self.border_cell
-                if c not in [2]: ws.cell(r, c).font = self.font_regular
+            for c in range(1, 10):
+                ws.cell(curr_r, c).border = self.border_cell
+                if c not in [1, 2, 8]: ws.cell(curr_r, c).font = self.font_regular
+                elif c == 8: ws.cell(curr_r, c).font = self.font_bold
 
-        r_total = r_start + len(materials)
-        ws.row_dimensions[r_total].height = 22
-        for c in range(1, 11): ws.cell(r_total, c).border = self.border_total
-        ws.cell(r_total, 3, "Tổng vật liệu:").font = self.font_total
-        ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
-        c_tot = ws.cell(r_total, 9, f"=SUM(I{r_start}:I{r_total-1})")
-        c_tot.font = self.font_total
+            curr_r += 1
+
+        r_total = curr_r
+        ws.row_dimensions[r_total].height = 24
+        for c in range(1, 10): ws.cell(r_total, c).border = self.border_total
+        
+        font_blue_bold = Font(name="Times New Roman", size=11, bold=True, color="002060")
+        c_lbl = ws.cell(r_total, 3, "Tổng vật liệu:")
+        c_lbl.font = font_blue_bold
+        c_lbl.alignment = Alignment(horizontal="left", vertical="center")
+        
+        c_tot = ws.cell(r_total, 8, f"=SUM(H{r_start}:H{r_total-1})")
+        c_tot.font = font_blue_bold
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18, 10: 30}
+        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 20, 6: 15, 7: 16, 8: 18, 9: 35}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
 
     def _build_sheet_th_nhan_cong(self, wb: openpyxl.Workbook, project_name: str, category_name: str, labor: List[Dict[str, Any]]):
+        """
+        Builds the current price labor summary sheet (Bảng tổng hợp nhân công dạng giá hiện tại)
+        matching 100% the layout in user request:
+        STT | Mã hiệu | Tên vật tư | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+        """
         ws = wb.create_sheet(title="TH_NhanCong")
         ws.views.sheetView[0].showGridLines = True
 
-        ws["A1"] = "BẢNG TỔNG HỢP NHÂN CÔNG VÀ CHÊNH LỆCH GIÁ"
+        ws["A1"] = "BẢNG TỔNG HỢP NHÂN CÔNG"
         ws["A1"].font = self.font_title
-        ws["A2"] = "(Căn cứ theo 5898/SXD-QLXD ngày 02/7/2026 của SXD tỉnh Lâm Đồng)"
+        ws["A2"] = "(Theo giá thông báo quý .. năm 20..)"
         ws["A2"].font = self.font_subtitle
         ws["A3"] = f"CÔNG TRÌNH: {project_name}"
         ws["A3"].font = self.font_project
         ws["A4"] = f"HẠNG MỤC: {category_name}"
         ws["A4"].font = self.font_project
-        ws["I5"] = "Đơn vị: đồng"
-        ws["I5"].font = self.font_unit
-        ws["I5"].alignment = self.align_right
+        ws["H5"] = "Đơn vị: đồng"
+        ws["H5"].font = self.font_unit
+        ws["H5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá hiện tại", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá hiện tại", "Thành tiền", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
             cell.font = self.font_header
             cell.alignment = self.align_center
             cell.border = self.border_cell
+            cell.fill = self.fill_ev_header
             if c_idx == 2: cell.fill = self.fill_code
 
         r_start = 7
+        curr_r = r_start
         for idx, l in enumerate(labor, start=1):
-            r = r_start + idx - 1
-            ws.row_dimensions[r].height = 20
-            ws.cell(r, 1, idx).alignment = self.align_center
+            ws.row_dimensions[curr_r].height = 20
+            ws.cell(curr_r, 1, idx).alignment = self.align_center
             
-            c_code = ws.cell(r, 2, l["code"])
+            c_code = ws.cell(curr_r, 2, l["code"])
             c_code.font = self.font_code
             c_code.alignment = self.align_center
             c_code.fill = self.fill_code
             
-            ws.cell(r, 3, l["name"]).alignment = self.align_left
-            ws.cell(r, 4, l["unit"]).alignment = self.align_center
+            ws.cell(curr_r, 3, l["name"]).alignment = self.align_left
+            ws.cell(curr_r, 4, l.get("unit", "công")).alignment = self.align_center
             
-            c_kl = ws.cell(r, 5, l.get("total_qty", 0.0))
+            c_kl = ws.cell(curr_r, 5, l.get("total_qty", 0.0))
             c_kl.alignment = self.align_right
             c_kl.number_format = "#,##0.00"
             
-            c_goc = ws.cell(r, 6, l.get("price_base", 0))
-            c_goc.alignment = self.align_right
-            c_goc.number_format = "#,##0"
-            
-            c_ht = ws.cell(r, 7, l.get("price_current", 0))
+            c_ht = ws.cell(curr_r, 6, l.get("price_current", 0))
             c_ht.alignment = self.align_right
-            c_ht.font = self.font_blue
             c_ht.number_format = "#,##0"
             
-            c_cl = ws.cell(r, 8, f"=G{r}-F{r}")
-            c_cl.alignment = self.align_right
-            c_cl.number_format = "#,##0"
-            
-            c_tc = ws.cell(r, 9, f"=E{r}*H{r}")
-            c_tc.alignment = self.align_right
-            c_tc.number_format = "#,##0"
+            c_tt = ws.cell(curr_r, 7, f"=ROUND(E{curr_r}*F{curr_r}, 0)")
+            c_tt.alignment = self.align_right
+            c_tt.number_format = "#,##0"
 
             # Basis column
             basis_val = l.get("legal_basis", "5898/SXD-QLXD ngày 02/7/2026 của SXD tỉnh Lâm Đồng")
-            c_basis = ws.cell(r, 10, basis_val)
+            c_basis = ws.cell(curr_r, 8, basis_val)
             c_basis.alignment = self.align_left
             
-            for c in range(1, 11):
-                ws.cell(r, c).border = self.border_cell
-                if c not in [2, 7]: ws.cell(r, c).font = self.font_regular
+            for c in range(1, 9):
+                ws.cell(curr_r, c).border = self.border_cell
+                if c not in [1, 2, 7]: ws.cell(curr_r, c).font = self.font_regular
+                elif c == 7: ws.cell(curr_r, c).font = self.font_bold
 
-        r_total = r_start + len(labor)
-        ws.row_dimensions[r_total].height = 22
-        for c in range(1, 11): ws.cell(r_total, c).border = self.border_total
-        ws.cell(r_total, 3, "Cộng nhân công:").font = self.font_total
-        ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
-        c_tot = ws.cell(r_total, 9, f"=SUM(I{r_start}:I{r_total-1})")
-        c_tot.font = self.font_total
+            curr_r += 1
+
+        r_total = curr_r
+        ws.row_dimensions[r_total].height = 24
+        for c in range(1, 9): ws.cell(r_total, c).border = self.border_total
+        
+        font_blue_bold = Font(name="Times New Roman", size=11, bold=True, color="002060")
+        c_lbl = ws.cell(r_total, 3, "Cộng nhân công:")
+        c_lbl.font = font_blue_bold
+        c_lbl.alignment = Alignment(horizontal="left", vertical="center")
+        
+        c_tot = ws.cell(r_total, 7, f"=SUM(G{r_start}:G{r_total-1})")
+        c_tot.font = font_blue_bold
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18, 10: 35}
+        col_w = {1: 6, 2: 14, 3: 45, 4: 12, 5: 15, 6: 16, 7: 18, 8: 38}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
 
     def _build_sheet_th_may_thi_cong(self, wb: openpyxl.Workbook, project_name: str, category_name: str, machines: List[Dict[str, Any]]):
+        """
+        Builds the current price machine summary sheet (Bảng tổng hợp máy thi công dạng giá hiện tại)
+        matching 100% the layout in user request:
+        STT | Mã hiệu | Tên vật tư | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
+        """
         ws = wb.create_sheet(title="TH_MayThiCong")
         ws.views.sheetView[0].showGridLines = True
 
-        ws["A1"] = "BẢNG TỔNG HỢP MÁY THI CÔNG VÀ CHÊNH LỆCH GIÁ"
+        ws["A1"] = "BẢNG TỔNG HỢP MÁY THI CÔNG"
         ws["A1"].font = self.font_title
-        ws["A2"] = "(Căn cứ theo TT 37/2026/TT-BXD ngày 26/06/2026 của Bộ Xây dựng)"
+        ws["A2"] = "(Theo giá thông báo quý .. năm 20..)"
         ws["A2"].font = self.font_subtitle
         ws["A3"] = f"CÔNG TRÌNH: {project_name}"
         ws["A3"].font = self.font_project
         ws["A4"] = f"HẠNG MỤC: {category_name}"
         ws["A4"].font = self.font_project
-        ws["K5"] = "Đơn vị: đồng"
-        ws["K5"].font = self.font_unit
-        ws["K5"].alignment = self.align_right
+        ws["H5"] = "Đơn vị: đồng"
+        ws["H5"].font = self.font_unit
+        ws["H5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Bù giá", "Giá hiện tại", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá hiện tại", "Thành tiền", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
             cell.font = self.font_header
             cell.alignment = self.align_center
             cell.border = self.border_cell
+            cell.fill = self.fill_ev_header
             if c_idx == 2: cell.fill = self.fill_code
 
         r_start = 7
+        curr_r = r_start
         for idx, mac in enumerate(machines, start=1):
-            r = r_start + idx - 1
-            ws.row_dimensions[r].height = 20
-            ws.cell(r, 1, idx).alignment = self.align_center
+            ws.row_dimensions[curr_r].height = 20
+            ws.cell(curr_r, 1, idx).alignment = self.align_center
             
-            c_code = ws.cell(r, 2, mac["code"])
+            c_code = ws.cell(curr_r, 2, mac["code"])
             c_code.font = self.font_code
             c_code.alignment = self.align_center
             c_code.fill = self.fill_code
             
-            ws.cell(r, 3, mac["name"]).alignment = self.align_left
-            ws.cell(r, 4, mac["unit"]).alignment = self.align_center
+            ws.cell(curr_r, 3, mac["name"]).alignment = self.align_left
+            ws.cell(curr_r, 4, mac.get("unit", "ca")).alignment = self.align_center
             
-            c_kl = ws.cell(r, 5, mac.get("total_qty", 0.0))
+            c_kl = ws.cell(curr_r, 5, mac.get("total_qty", 0.0))
             c_kl.alignment = self.align_right
             c_kl.number_format = "#,##0.00"
             
-            c_goc = ws.cell(r, 6, mac.get("price_base", 0))
-            c_goc.alignment = self.align_right
-            c_goc.number_format = "#,##0"
-            
-            c_tb = ws.cell(r, 7, mac.get("price_notice", 0))
-            c_tb.alignment = self.align_right
-            c_tb.number_format = "#,##0"
-            
-            c_bu = ws.cell(r, 8, mac.get("price_diff", 0))
-            c_bu.alignment = self.align_right
-            c_bu.number_format = "#,##0"
-            
-            c_ht = ws.cell(r, 9, f"=G{r}+H{r}")
+            c_ht_val = mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0))
+            c_ht = ws.cell(curr_r, 6, c_ht_val)
             c_ht.alignment = self.align_right
-            c_ht.font = self.font_blue
             c_ht.number_format = "#,##0"
             
-            c_cl = ws.cell(r, 10, f"=I{r}-F{r}")
-            c_cl.alignment = self.align_right
-            c_cl.number_format = "#,##0"
-            
-            c_tc = ws.cell(r, 11, f"=E{r}*J{r}")
-            c_tc.alignment = self.align_right
-            c_tc.number_format = "#,##0"
+            c_tt = ws.cell(curr_r, 7, f"=ROUND(E{curr_r}*F{curr_r}, 0)")
+            c_tt.alignment = self.align_right
+            c_tt.number_format = "#,##0"
 
             # Basis column
             basis_val = mac.get("legal_basis", "Thông tư 37/2026/TT-BXD của Bộ Xây dựng")
-            c_basis = ws.cell(r, 12, basis_val)
+            c_basis = ws.cell(curr_r, 8, basis_val)
             c_basis.alignment = self.align_left
             
-            for c in range(1, 13):
-                ws.cell(r, c).border = self.border_cell
-                if c not in [2, 9]: ws.cell(r, c).font = self.font_regular
+            for c in range(1, 9):
+                ws.cell(curr_r, c).border = self.border_cell
+                if c not in [1, 2, 7]: ws.cell(curr_r, c).font = self.font_regular
+                elif c == 7: ws.cell(curr_r, c).font = self.font_bold
 
-        r_total = r_start + len(machines)
-        ws.row_dimensions[r_total].height = 22
-        for c in range(1, 13): ws.cell(r_total, c).border = self.border_total
-        ws.cell(r_total, 3, "Cộng Máy:").font = self.font_total
-        ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
-        c_tot = ws.cell(r_total, 11, f"=SUM(K{r_start}:K{r_total-1})")
-        c_tot.font = self.font_total
+            curr_r += 1
+
+        r_total = curr_r
+        ws.row_dimensions[r_total].height = 24
+        for c in range(1, 9): ws.cell(r_total, c).border = self.border_total
+        
+        font_blue_bold = Font(name="Times New Roman", size=11, bold=True, color="002060")
+        c_lbl = ws.cell(r_total, 3, "Cộng Máy:")
+        c_lbl.font = font_blue_bold
+        c_lbl.alignment = Alignment(horizontal="left", vertical="center")
+        
+        c_tot = ws.cell(r_total, 7, f"=SUM(G{r_start}:G{r_total-1})")
+        c_tot.font = font_blue_bold
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 48, 4: 10, 5: 14, 6: 15, 7: 15, 8: 12, 9: 15, 10: 15, 11: 18, 12: 35}
+        col_w = {1: 6, 2: 14, 3: 48, 4: 12, 5: 15, 6: 16, 7: 18, 8: 38}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
