@@ -403,6 +403,20 @@ class ExcelGenerator:
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
 
+    def _determine_group(self, item: Dict[str, Any]) -> str:
+        """Determines the standard work group for an item."""
+        grp = (item.get("group") or "").strip()
+        if grp:
+            return grp
+        code = (item.get("norm_code") or "").strip()
+        if code.startswith("BD.41") or code.startswith("BD.42"):
+            return "Hệ thống báo cháy tự động và thiết bị ngoại vi (Lắp đặt - Thay mới)"
+        elif code.startswith("E6C.3.01") or code.startswith("E6C.3.02") or code.startswith("E6C.3.03") or code.startswith("E6C.3.04") or code.startswith("E6C.3.05"):
+            return "Bảo dưỡng, sửa chữa và hiệu chuẩn thiết bị báo cháy"
+        elif code.startswith("E6C.3.06") or code.startswith("E6B.") or code.startswith("E6C.1."):
+            return "Bảo dưỡng van tràn Deluge, hệ thống ắc quy và thiết bị đo khí"
+        return "Các công tác lắp đặt và bảo dưỡng khác"
+
     def _build_sheet_khoi_luong(
         self,
         wb: openpyxl.Workbook,
@@ -410,7 +424,7 @@ class ExcelGenerator:
         category_name: str,
         work_items: List[Dict[str, Any]]
     ):
-        """Builds the primary work volume sheet (Bảng tiên lượng khối lượng công việc), with optional grouping."""
+        """Builds the primary work volume sheet (Bảng tiên lượng khối lượng công việc), with clean standard grouping."""
         ws = wb.create_sheet(title="Khối lượng-Định mức-ĐVT")
         ws.views.sheetView[0].showGridLines = True
 
@@ -431,62 +445,71 @@ class ExcelGenerator:
             if c_idx == 2:
                 cell.fill = self.fill_code
 
+        # Organize items by group while preserving order of first appearance
+        grouped_items = []
+        groups_order = []
+        groups_map = {}
+        for item in work_items:
+            g_name = self._determine_group(item)
+            if g_name not in groups_map:
+                groups_map[g_name] = []
+                groups_order.append(g_name)
+            groups_map[g_name].append(item)
+
         r = 6
-        current_group = None
-        group_idx = 0
         roman_nums = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
+        stt_counter = 1
 
-        for idx, item in enumerate(work_items, start=1):
-            item_group = item.get("group", "").strip()
-            
-            # Insert Group Header row if group changed and item_group is present
-            if item_group and item_group != current_group:
-                current_group = item_group
-                group_roman = roman_nums[group_idx % len(roman_nums)]
-                group_idx += 1
-                
-                ws.row_dimensions[r].height = 24
-                ws.cell(r, 1, group_roman).alignment = self.align_center
-                ws.cell(r, 1).font = self.font_bold
-                
-                ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=8)
-                c_grp = ws.cell(r, 2, f"NHÓM {group_roman}: {current_group.upper()}")
-                c_grp.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
-                c_grp.alignment = self.align_left
-                
-                for c in range(1, 9):
-                    ws.cell(r, c).border = self.border_cell
-                    ws.cell(r, c).fill = self.fill_yellow
-                r += 1
+        for g_idx, g_name in enumerate(groups_order):
+            group_roman = roman_nums[g_idx % len(roman_nums)]
+            items_in_g = groups_map[g_name]
 
-            ws.row_dimensions[r].height = 22
-            ws.cell(r, 1, item.get("stt", idx)).alignment = self.align_center
+            # 1. Group Header Row
+            ws.row_dimensions[r].height = 24
+            ws.cell(r, 1, group_roman).alignment = self.align_center
+            ws.cell(r, 1).font = self.font_bold
             
-            c_code = ws.cell(r, 2, item.get("norm_code", ""))
-            c_code.font = self.font_code
-            c_code.alignment = self.align_center
-            c_code.fill = self.fill_code
+            ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=8)
+            c_grp = ws.cell(r, 2, f"NHÓM {group_roman}: {g_name.upper()}")
+            c_grp.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
+            c_grp.alignment = self.align_left
             
-            ws.cell(r, 3, item.get("job_name", "")).alignment = self.align_left
-            ws.cell(r, 4, item.get("description", item.get("job_name", ""))).alignment = self.align_left
-            
-            c_kl = ws.cell(r, 5, item.get("volume", 0))
-            c_kl.alignment = self.align_right
-            c_kl.font = self.font_bold
-            c_kl.number_format = "#,##0.00"
-            
-            ws.cell(r, 6, item.get("unit", "")).alignment = self.align_center
-            
-            norm = self.norm_manager.get_norm(item.get("norm_code", ""))
-            basis_str = norm.get("legal_basis", "") if norm else ""
-            ws.cell(r, 7, basis_str).alignment = self.align_left
-            ws.cell(r, 8, item.get("notes", "")).alignment = self.align_left
-
             for c in range(1, 9):
                 ws.cell(r, c).border = self.border_cell
-                if c not in [1, 2, 5]:
-                    ws.cell(r, c).font = self.font_regular
+                ws.cell(r, c).fill = self.fill_ev_header
             r += 1
+
+            # 2. Work Items in this Group
+            for item in items_in_g:
+                ws.row_dimensions[r].height = 22
+                ws.cell(r, 1, stt_counter).alignment = self.align_center
+                
+                c_code = ws.cell(r, 2, item.get("norm_code", ""))
+                c_code.font = self.font_code
+                c_code.alignment = self.align_center
+                c_code.fill = self.fill_code
+                
+                ws.cell(r, 3, item.get("job_name", "")).alignment = self.align_left
+                ws.cell(r, 4, item.get("description", item.get("job_name", ""))).alignment = self.align_left
+                
+                c_kl = ws.cell(r, 5, item.get("volume", 0))
+                c_kl.alignment = self.align_right
+                c_kl.font = self.font_bold
+                c_kl.number_format = "#,##0.00"
+                
+                ws.cell(r, 6, item.get("unit", "")).alignment = self.align_center
+                
+                norm = self.norm_manager.get_norm(item.get("norm_code", ""))
+                basis_str = norm.get("legal_basis", "") if norm else ""
+                ws.cell(r, 7, basis_str).alignment = self.align_left
+                ws.cell(r, 8, item.get("notes", "")).alignment = self.align_left
+
+                for c in range(1, 9):
+                    ws.cell(r, c).border = self.border_cell
+                    if c not in [1, 2, 5]:
+                        ws.cell(r, c).font = self.font_regular
+                r += 1
+                stt_counter += 1
 
         col_w = {1: 6, 2: 15, 3: 45, 4: 45, 5: 14, 6: 12, 7: 35, 8: 20}
         for c, w in col_w.items():
@@ -566,46 +589,157 @@ class ExcelGenerator:
         ws["P2"].font = self.font_subtitle
 
         # 3. Work Steps Table (Rows 3 to N)
-        ws["P3"] = "Thành phần công việc"
-        ws["Q3"] = "ĐVT / Tỷ lệ"
-        ws["R3"] = "Định mức gốc"
-        ws["S3"] = "Áp dụng (1=Có, 0=Không)"
-        ws["T3"] = "Hao phí tính toán"
-        for col_idx, col_let in enumerate(["P", "Q", "R", "S", "T"], start=16):
-            cell = ws[f"{col_let}3"]
-            cell.font = self.font_ev_header
-            cell.fill = self.fill_ev_header
-            cell.border = self.border_cell
-            cell.alignment = self.align_center
-
         steps = norm.get("work_steps", [])
-        r_step = 4
-        for s in steps:
-            ws.cell(r_step, 16, s["name"]).font = self.font_ev_reg
-            ws.cell(r_step, 17, s.get("dvt_step", "")).alignment = self.align_center
-            c_r = ws.cell(r_step, 18, s.get("rate_base", 0.0))
-            c_r.alignment = self.align_right
-            c_r.font = self.font_ev_reg
-            c_s = ws.cell(r_step, 19, s.get("apply_flag", 1))
-            c_s.alignment = self.align_center
-            c_s.font = self.font_ev_bold
-            c_t = ws.cell(r_step, 20, f"=R{r_step}*S{r_step}")
-            c_t.alignment = self.align_right
-            c_t.font = self.font_ev_reg
-            for c in range(16, 21):
-                ws.cell(r_step, c).border = self.border_cell
-            r_step += 1
+        labor_split = norm.get("labor_split")
+        is_split = labor_split is not None
 
-        r_tot_step = r_step
-        ws.cell(r_tot_step, 16, "Tổng cộng hao phí các bước:").font = self.font_ev_bold
-        ws.cell(r_tot_step, 16).alignment = self.align_right
-        ws.cell(r_tot_step, 18, f"=SUM(R4:R{r_tot_step-1})").font = self.font_ev_bold
-        ws.cell(r_tot_step, 20, f"=SUM(T4:T{r_tot_step-1})").font = self.font_ev_bold
-        for c in range(16, 21):
-            ws.cell(r_tot_step, c).border = self.border_cell
+        if is_split:
+            # Multi-labor columns (e.g. BD norms: NC nhóm 3 + Kỹ sư)
+            step_cols = [
+                ("P", "Thành phần công việc"),
+                ("Q", "ĐVT / Tỷ lệ"),
+                ("R", "NC nhóm 3 (công)"),
+                ("S", "Kỹ sư (công)"),
+                ("T", "Tổng ĐM gốc (công)"),
+                ("U", "Áp dụng (1/0)"),
+                ("V", "Hao phí tính toán")
+            ]
+            for col_idx, (col_let, col_title) in enumerate(step_cols, start=16):
+                cell = ws[f"{col_let}3"]
+                cell.value = col_title
+                cell.font = self.font_ev_header
+                cell.fill = self.fill_ev_header
+                cell.border = self.border_cell
+                cell.alignment = self.align_center
+
+            r_step = 4
+            for s in steps:
+                ws.cell(r_step, 16, s["name"]).font = self.font_ev_reg
+                dvt_label = f"{s.get('dvt_step', '')} ({s.get('pct', '')})" if s.get('pct') else s.get('dvt_step', '')
+                ws.cell(r_step, 17, dvt_label).alignment = self.align_center
+                
+                c_nc = ws.cell(r_step, 18, s.get("rate_nc", 0.0))
+                c_nc.alignment = self.align_right
+                c_nc.font = self.font_ev_reg
+                c_nc.number_format = "0.0000"
+
+                c_ks = ws.cell(r_step, 19, s.get("rate_ks", 0.0))
+                c_ks.alignment = self.align_right
+                c_ks.font = self.font_ev_reg
+                c_ks.number_format = "0.0000"
+
+                c_tot_goc = ws.cell(r_step, 20, f"=R{r_step}+S{r_step}")
+                c_tot_goc.alignment = self.align_right
+                c_tot_goc.font = self.font_ev_reg
+                c_tot_goc.number_format = "0.0000"
+
+                c_u = ws.cell(r_step, 21, s.get("apply_flag", 1))
+                c_u.alignment = self.align_center
+                c_u.font = self.font_ev_bold
+
+                c_v = ws.cell(r_step, 22, f"=T{r_step}*U{r_step}")
+                c_v.alignment = self.align_right
+                c_v.font = self.font_ev_reg
+                c_v.number_format = "0.0000"
+
+                for c in range(16, 23):
+                    ws.cell(r_step, c).border = self.border_cell
+                r_step += 1
+
+            r_tot_step = r_step
+            ws.cell(r_tot_step, 16, "Tổng cộng hao phí các bước:").font = self.font_ev_bold
+            ws.cell(r_tot_step, 16).alignment = self.align_right
+
+            c_tot_nc = ws.cell(r_tot_step, 18, f"=SUM(R4:R{r_tot_step-1})")
+            c_tot_nc.font = self.font_ev_bold
+            c_tot_nc.alignment = self.align_right
+            c_tot_nc.number_format = "0.000"
+
+            c_tot_ks = ws.cell(r_tot_step, 19, f"=SUM(S4:S{r_tot_step-1})")
+            c_tot_ks.font = self.font_ev_bold
+            c_tot_ks.alignment = self.align_right
+            c_tot_ks.number_format = "0.000"
+
+            c_tot_goc = ws.cell(r_tot_step, 20, f"=SUM(T4:T{r_tot_step-1})")
+            c_tot_goc.font = self.font_ev_bold
+            c_tot_goc.alignment = self.align_right
+            c_tot_goc.number_format = "0.000"
+
+            c_tot_calc = ws.cell(r_tot_step, 22, f"=SUM(V4:V{r_tot_step-1})")
+            c_tot_calc.font = self.font_ev_bold
+            c_tot_calc.alignment = self.align_right
+            c_tot_calc.number_format = "0.000"
+
+            for c in range(16, 23):
+                ws.cell(r_tot_step, c).border = self.border_cell
+
+            # Clarification note row
+            r_note = r_tot_step + 1
+            ws.merge_cells(start_row=r_note, start_column=16, end_row=r_note, end_column=22)
+            lbl_nc = labor_split.get("nc_total_per_unit", 0.087)
+            lbl_ks = labor_split.get("ks_total_per_unit", 0.087)
+            lbl_tot = labor_split.get("total_per_unit", 0.174)
+            c_expl = ws.cell(r_note, 16, f"*(Ghi chú: {lbl_tot} công = {lbl_nc} công NC nhóm 3 + {lbl_ks} công Kỹ sư bậc 5,0/8 theo Thông tư 38/2026/TT-BXD)*")
+            c_expl.font = Font(name="Times New Roman", size=10, bold=True, italic=True, color="002060")
+            c_expl.alignment = self.align_left
+
+            col_w = {"P": 38, "Q": 14, "R": 15, "S": 15, "T": 15, "U": 12, "V": 16}
+            for col_l, w in col_w.items():
+                ws.column_dimensions[col_l].width = w
+
+            r_res_title = r_tot_step + 3
+            table_end_col = 22
+
+        else:
+            # Single-labor standard columns (e.g. E6 norms)
+            step_cols = [
+                ("P", "Thành phần công việc"),
+                ("Q", "ĐVT / Tỷ lệ"),
+                ("R", "Định mức gốc"),
+                ("S", "Áp dụng (1=Có, 0=Không)"),
+                ("T", "Hao phí tính toán")
+            ]
+            for col_idx, (col_let, col_title) in enumerate(step_cols, start=16):
+                cell = ws[f"{col_let}3"]
+                cell.value = col_title
+                cell.font = self.font_ev_header
+                cell.fill = self.fill_ev_header
+                cell.border = self.border_cell
+                cell.alignment = self.align_center
+
+            r_step = 4
+            for s in steps:
+                ws.cell(r_step, 16, s["name"]).font = self.font_ev_reg
+                ws.cell(r_step, 17, s.get("dvt_step", "")).alignment = self.align_center
+                c_r = ws.cell(r_step, 18, s.get("rate_base", 0.0))
+                c_r.alignment = self.align_right
+                c_r.font = self.font_ev_reg
+                c_s = ws.cell(r_step, 19, s.get("apply_flag", 1))
+                c_s.alignment = self.align_center
+                c_s.font = self.font_ev_bold
+                c_t = ws.cell(r_step, 20, f"=R{r_step}*S{r_step}")
+                c_t.alignment = self.align_right
+                c_t.font = self.font_ev_reg
+                for c in range(16, 21):
+                    ws.cell(r_step, c).border = self.border_cell
+                r_step += 1
+
+            r_tot_step = r_step
+            ws.cell(r_tot_step, 16, "Tổng cộng hao phí các bước:").font = self.font_ev_bold
+            ws.cell(r_tot_step, 16).alignment = self.align_right
+            ws.cell(r_tot_step, 18, f"=SUM(R4:R{r_tot_step-1})").font = self.font_ev_bold
+            ws.cell(r_tot_step, 20, f"=SUM(T4:T{r_tot_step-1})").font = self.font_ev_bold
+            for c in range(16, 21):
+                ws.cell(r_tot_step, c).border = self.border_cell
+
+            col_w = {"P": 45, "Q": 12, "R": 18, "S": 22, "T": 25}
+            for col_l, w in col_w.items():
+                ws.column_dimensions[col_l].width = w
+
+            r_res_title = r_tot_step + 2
+            table_end_col = 20
 
         # 4. Resource Table (Vật liệu, Nhân công, Máy thi công)
-        r_res_title = r_tot_step + 2
         ws.cell(r_res_title, 16, f"BẢNG THÀNH PHẦN HAO PHÍ ĐỊNH MỨC (MÃ HIỆU: {code})").font = self.font_ev_title
         
         r_res_hdr = r_res_title + 1
@@ -679,10 +813,6 @@ class ExcelGenerator:
                 for c in range(16, 21): ws.cell(curr_r, c).border = self.border_cell
                 cell_coords["machines"][mac["code"]] = curr_r
                 curr_r += 1
-
-        col_w = {"P": 45, "Q": 12, "R": 18, "S": 22, "T": 25}
-        for col_l, w in col_w.items():
-            ws.column_dimensions[col_l].width = w
 
         return cell_coords
 

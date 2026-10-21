@@ -555,18 +555,33 @@ with tab4:
                 st.markdown("**Bảng phân tích tỷ lệ các bước thực hiện:**")
                 st.caption(f"Đơn vị tính gốc: {n_detail.get('unit', '')} | Căn cứ: {n_detail.get('legal_basis', '')}")
                 steps = n_detail.get("work_steps", [])
+                labor_split = n_detail.get("labor_split")
                 if steps:
                     df_steps = pd.DataFrame(steps)
-                    st.dataframe(
-                        df_steps[["step", "name", "dvt_step", "rate_base", "apply_flag", "rate_calculated"]].rename(columns={
+                    if labor_split:
+                        # Display split labor columns for BD norms
+                        disp_cols = ["step", "name", "dvt_step", "rate_nc", "rate_ks", "rate_base", "apply_flag", "rate_calculated"]
+                        disp_df = df_steps[[c for c in disp_cols if c in df_steps.columns]].rename(columns={
                             "step": "Bước", "name": "Nội dung công việc", "dvt_step": "ĐVT",
-                            "rate_base": "Hao phí gốc", "apply_flag": "Áp dụng (1/0)", "rate_calculated": "Tính toán"
-                        }),
-                        use_container_width=True,
-                        hide_index=True
-                    )
-                    tot_s = sum(s.get("rate_calculated", 0) for s in steps)
-                    st.info(f"Tổng hao phí nhân công các bước: **{tot_s:.4f} công**")
+                            "rate_nc": "NC nhóm 3 (công)", "rate_ks": "Kỹ sư (công)",
+                            "rate_base": "Tổng ĐM gốc", "apply_flag": "Áp dụng (1/0)", "rate_calculated": "Tính toán"
+                        })
+                        st.dataframe(disp_df, use_container_width=True, hide_index=True)
+                        lbl_nc = labor_split.get("nc_total_per_unit", 0.087)
+                        lbl_ks = labor_split.get("ks_total_per_unit", 0.087)
+                        lbl_tot = labor_split.get("total_per_unit", 0.174)
+                        st.info(f"💡 **Tách rõ thành phần:** Tổng cộng **{lbl_tot} công** = **{lbl_nc} công NC nhóm 3** (Bậc 3,5/7) + **{lbl_ks} công Kỹ sư** (Bậc 5,0/8) theo TT 38/2026/TT-BXD.")
+                    else:
+                        st.dataframe(
+                            df_steps[["step", "name", "dvt_step", "rate_base", "apply_flag", "rate_calculated"]].rename(columns={
+                                "step": "Bước", "name": "Nội dung công việc", "dvt_step": "ĐVT",
+                                "rate_base": "Hao phí gốc", "apply_flag": "Áp dụng (1/0)", "rate_calculated": "Tính toán"
+                            }),
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                        tot_s = sum(s.get("rate_calculated", 0) for s in steps)
+                        st.info(f"Tổng hao phí nhân công các bước: **{tot_s:.4f} công**")
 
 # -----------------------------------------------------------------------------
 # TAB 5: XUẤT BẢN FILE EXCEL DỰ TOÁN

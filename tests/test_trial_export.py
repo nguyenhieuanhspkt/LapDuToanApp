@@ -70,8 +70,9 @@ def run_trial_export():
     # 2. Verify Sheet Khối lượng is the SECOND sheet!
     assert sheet_names[1] == "Khối lượng-Định mức-ĐVT", f"Second sheet is not Khối lượng: {sheet_names[1]}"
     ws_kl = wb["Khối lượng-Định mức-ĐVT"]
-    assert ws_kl.max_row >= 18, f"Too few rows in Khối lượng sheet: {ws_kl.max_row}"
-    print(f"[PASS] Sheet 'Khối lượng-Định mức-ĐVT' is in 2nd position with {ws_kl.max_row} rows!")
+    assert ws_kl["A6"].value == "I", f"Row 6 STT is not Group I: {ws_kl['A6'].value}"
+    assert "NHÓM I:" in str(ws_kl["B6"].value), f"Row 6 is not Group I header: {ws_kl['B6'].value}"
+    print(f"[PASS] Sheet 'Khối lượng-Định mức-ĐVT' has standard Group I header at Row 6: {ws_kl['B6'].value}")
 
     # 3. Verify all other sheets exist
     expected_sheets = [
@@ -87,10 +88,20 @@ def run_trial_export():
         assert s in sheet_names, f"Missing sheet: {s}"
     print(f"[PASS] All {len(expected_sheets)} expected sheets exist!")
 
-    # 4. Check embedded images
+    # 4. Check embedded images & Labor split in BD.41111
     evidence_sheets = expected_sheets[7:]
     images_count = sum(1 for s in evidence_sheets if getattr(wb[s], "_images", []))
     print(f"[PASS] Evidence images check: {images_count}/13 sheets contain embedded scan images!")
+
+    # Verify Labor Split in BD.41111 (Separating 0.174 into NC & Kỹ sư)
+    ws_bd = wb["BD.41111"]
+    assert ws_bd["R3"].value == "NC nhóm 3 (công)", f"R3 mismatch: {ws_bd['R3'].value}"
+    assert ws_bd["S3"].value == "Kỹ sư (công)", f"S3 mismatch: {ws_bd['S3'].value}"
+    assert ws_bd["T3"].value == "Tổng ĐM gốc (công)", f"T3 mismatch: {ws_bd['T3'].value}"
+    assert ws_bd["R9"].value == "=SUM(R4:R8)", f"R9 formula mismatch: {ws_bd['R9'].value}"
+    assert ws_bd["S9"].value == "=SUM(S4:S8)", f"S9 formula mismatch: {ws_bd['S9'].value}"
+    assert "0.174" in str(ws_bd["P10"].value) and "0.087" in str(ws_bd["P10"].value), f"Row 10 note mismatch: {ws_bd['P10'].value}"
+    print(f"[PASS] Sheet BD.41111 labor split verified: NC=0.087 công, Kỹ sư=0.087 công, Tổng=0.174 công (Note: {ws_bd['P10'].value})")
 
     # 4. Check formulas in 01_ChiTiet_HaoPhi_DinhMuc
     ws_ct = wb["01_ChiTiet_HaoPhi_DinhMuc"]
