@@ -23,6 +23,15 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import IMAGES_DIR, OUTPUT_DIR
 from core.norm_manager import NormManager
+from utils.num2words_vi import num2words_vi
+
+DEFAULT_COEFFICIENTS = {
+    "c": {"rate": 7.3, "basis": "Thông tư số 11/2021/TT-BXD (Định mức chi phí chung công trình công nghiệp)"},
+    "tt": {"rate": 2.5, "basis": "Thông tư số 11/2021/TT-BXD (Công việc không xác định được KL từ TK)"},
+    "tl": {"rate": 5.5, "basis": "Thông tư số 11/2021/TT-BXD (Thu nhập chịu thuế tính trước)"},
+    "vat": {"rate": 8.0, "basis": "Nghị định 72/2024/NĐ-CP của Chính phủ"},
+    "lt": {"rate": 1.1, "basis": "Thông tư số 11/2021/TT-BXD (Chi phí nhà tạm để ở và ĐHTC công trình ngoài đô thị)"}
+}
 
 class ExcelGenerator:
     def __init__(self, norm_manager: Optional[NormManager] = None):
@@ -67,13 +76,24 @@ class ExcelGenerator:
         project_name: str,
         category_name: str,
         work_items: List[Dict[str, Any]],
-        output_path: Path
+        output_path: Path,
+        coefficients: Optional[Dict[str, Any]] = None,
+        custom_prices: Optional[Dict[str, Any]] = None
     ) -> Path:
         """
         Main generator method: builds the complete workbook and writes to output_path.
+        Includes TH_KinhPhi, KhoiLuong, ThongKe, DonGiaChiTiet, TH_VL, TH_NC, TH_M, and Norm sheets.
         """
         wb = openpyxl.Workbook()
         wb.remove(wb.active)
+
+        coeffs = DEFAULT_COEFFICIENTS.copy()
+        if coefficients:
+            for k, v in coefficients.items():
+                if k in coeffs:
+                    coeffs[k].update(v)
+                else:
+                    coeffs[k] = v
 
         # 1. Determine all unique norm codes used in the work items
         unique_norm_codes = []
@@ -84,6 +104,24 @@ class ExcelGenerator:
 
         # 2. Build 3 Resource Lookup Tables (for TH_VatLieu, TH_NhanCong, TH_MayThiCong)
         res_data = self.norm_manager.aggregate_resources_from_norms()
+        
+        # Override with custom prices if provided
+        if custom_prices:
+            # Map custom prices if available
+            p_mat = {m["code"]: m for m in custom_prices.get("materials", [])}
+            p_lab = {l["code"]: l for l in custom_prices.get("labor", [])}
+            p_mac = {mac["code"]: mac for mac in custom_prices.get("machines", [])}
+            
+            for m in res_data.get("materials", []):
+                if m["code"] in p_mat:
+                    m.update(p_mat[m["code"]])
+            for l in res_data.get("labor", []):
+                if l["code"] in p_lab:
+                    l.update(p_lab[l["code"]])
+            for mac in res_data.get("machines", []):
+                if mac["code"] in p_mac:
+                    mac.update(p_mac[mac["code"]])
+
         used_mat_codes = set()
         used_lab_codes = set()
         used_mac_codes = set()
@@ -99,7 +137,6 @@ class ExcelGenerator:
             norm = self.norm_manager.get_norm(code)
             if not norm: continue
             
-            # Unit norm divisor (e.g. 10 đầu -> norm is for 10 units, so per unit is rate / 10)
             norm_unit_str = norm.get("unit", "")
             divisor = 1.0
             if "10" in norm_unit_str: divisor = 10.0
@@ -137,41 +174,61 @@ class ExcelGenerator:
         lab_row_map = {l["code"]: 7 + idx for idx, l in enumerate(labor_list)}
         mac_row_map = {mac["code"]: 7 + idx for idx, mac in enumerate(machines_list)}
 
-        # 3. Create Sheet: Khối lượng-Định mức-ĐVT (Bảng tiên lượng công việc)
+        r_total_vl = 7 + len(materials_list)
+        r_total_nc = 7 + len(labor_list)
+        r_total_mac = 7 + len(machines_list)
+
+        # 3. Create Sheet: TH_KinhPhi (BẢNG TỔNG HỢP KINH PHÍ DỰ TOÁN - SHEET ĐẦU TIÊN)
+        self._build_sheet_th_kinh_phi(
+            wb=wb,
+            project_name=project_name,
+            category_name=category_name,
+            coefficients=coeffs,
+            r_total_vl=r_total_vl,
+            r_total_nc=r_total_nc,
+            r_total_mac=r_total_mac,
+            materials=materials_list,
+            labor=labor_list,
+            machines=machines_list
+        )
+
+        # 4. Create Sheet: Khối lượng-Định mức-ĐVT (Bảng tiên lượng công việc)
         self._build_sheet_khoi_luong(wb, project_name, category_name, work_items)
 
-        # 4. Create Sheet: 00_ThongKe_DinhMuc
+        # 5. Create Sheet: 00_ThongKe_DinhMuc
         self._build_sheet_thong_ke(wb, unique_norm_codes)
 
-        # 5. Create Evidence Sheets for each unique norm code
+        # 6. Create Evidence Sheets for each unique norm code
         norm_cell_map = {}
         for code in unique_norm_codes:
             norm_cell_map[code] = self._build_evidence_sheet(wb, code)
 
-        # 6. Create Sheet: 01_ChiTiet_HaoPhi_DinhMuc
+        # 7. Create Sheet: 01_ChiTiet_HaoPhi_DinhMuc
         self._build_sheet_don_gia_chi_tiet(
             wb, project_name, category_name, work_items,
             norm_cell_map, mat_row_map, lab_row_map, mac_row_map
         )
 
-        # 7. Create Sheet: TH_VatLieu
+        # 8. Create Sheet: TH_VatLieu
         self._build_sheet_th_vat_lieu(wb, project_name, category_name, materials_list)
 
-        # 8. Create Sheet: TH_NhanCong
+        # 9. Create Sheet: TH_NhanCong
         self._build_sheet_th_nhan_cong(wb, project_name, category_name, labor_list)
 
-        # 9. Create Sheet: TH_MayThiCong
+        # 10. Create Sheet: TH_MayThiCong
         self._build_sheet_th_may_thi_cong(wb, project_name, category_name, machines_list)
 
         # Reorder sheets cleanly:
-        # 1. Khối lượng-Định mức-ĐVT
-        # 2. 00_ThongKe_DinhMuc
-        # 3. 01_ChiTiet_HaoPhi_DinhMuc
-        # 4. TH_VatLieu
-        # 5. TH_NhanCong
-        # 6. TH_MayThiCong
-        # 7. [Evidence Sheets]
+        # 1. TH_KinhPhi
+        # 2. Khối lượng-Định mức-ĐVT
+        # 3. 00_ThongKe_DinhMuc
+        # 4. 01_ChiTiet_HaoPhi_DinhMuc
+        # 5. TH_VatLieu
+        # 6. TH_NhanCong
+        # 7. TH_MayThiCong
+        # 8. [Evidence Sheets]
         ordered_names = [
+            "TH_KinhPhi",
             "Khối lượng-Định mức-ĐVT",
             "00_ThongKe_DinhMuc",
             "01_ChiTiet_HaoPhi_DinhMuc",
@@ -193,6 +250,159 @@ class ExcelGenerator:
     # INTERNAL BUILDERS
     # =========================================================================
 
+    def _build_sheet_th_kinh_phi(
+        self,
+        wb: openpyxl.Workbook,
+        project_name: str,
+        category_name: str,
+        coefficients: Dict[str, Any],
+        r_total_vl: int,
+        r_total_nc: int,
+        r_total_mac: int,
+        materials: List[Dict[str, Any]],
+        labor: List[Dict[str, Any]],
+        machines: List[Dict[str, Any]]
+    ):
+        """
+        Builds the summary cost estimation sheet (Bảng tổng hợp dự toán chi phí xây dựng)
+        matching 100% the layout and formulas of EVN standard format.
+        """
+        ws = wb.create_sheet(title="TH_KinhPhi")
+        ws.views.sheetView[0].showGridLines = True
+
+        # Titles
+        ws["A1"] = "BẢNG TỔNG HỢP DỰ TOÁN CHI PHÍ XÂY DỰNG"
+        ws["A1"].font = self.font_title
+        ws["A2"] = f"CÔNG TRÌNH: {project_name}"
+        ws["A2"].font = self.font_project
+        ws["A3"] = f"HẠNG MỤC: {category_name}"
+        ws["A3"].font = self.font_project
+        ws["F4"] = "Đơn vị: đồng"
+        ws["F4"].font = self.font_unit
+        ws["F4"].alignment = self.align_right
+
+        # Table Headers
+        headers = ["STT", "NỘI DUNG CHI PHÍ", "CÁCH TÍNH", "GIÁ TRỊ", "KÝ HIỆU", "CƠ SỞ HỆ SỐ / GHI CHÚ"]
+        ws.row_dimensions[5].height = 28
+        for c_idx, h in enumerate(headers, start=1):
+            cell = ws.cell(5, c_idx, h)
+            cell.font = self.font_header
+            cell.alignment = self.align_center
+            cell.border = self.border_cell
+            cell.fill = self.fill_ev_header
+
+        # Coefficients
+        c_rate = float(coefficients.get("c", {}).get("rate", 7.3))
+        c_basis = coefficients.get("c", {}).get("basis", "Thông tư 11/2021/TT-BXD")
+        tt_rate = float(coefficients.get("tt", {}).get("rate", 2.5))
+        tt_basis = coefficients.get("tt", {}).get("basis", "Thông tư 11/2021/TT-BXD")
+        tl_rate = float(coefficients.get("tl", {}).get("rate", 5.5))
+        tl_basis = coefficients.get("tl", {}).get("basis", "Thông tư 11/2021/TT-BXD")
+        vat_rate = float(coefficients.get("vat", {}).get("rate", 8.0))
+        vat_basis = coefficients.get("vat", {}).get("basis", "Nghị định 72/2024/NĐ-CP")
+        lt_rate = float(coefficients.get("lt", {}).get("rate", 1.1))
+        lt_basis = coefficients.get("lt", {}).get("basis", "Thông tư 11/2021/TT-BXD")
+
+        # Row Data Definitions: (STT, Content, Calculation_Text, Formula_Value, Symbol, Note, is_bold, is_highlight)
+        rows_spec = [
+            ("I", "Chi phí trực tiếp", "=D7+D9+D11", "=D7+D9+D11", "T", "T = VL + NC + M", True, True),
+            ("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False),
+            ("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!I{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False),
+            ("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False),
+            ("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!I{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False),
+            ("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False),
+            ("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!K{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False),
+            ("II", "Chi phí gián tiếp", "=D14+D15", "=D14+D15", "GT", "GT = C + TT", True, True),
+            ("1", "Chi phí chung", f"=D6*{c_rate}%", f"=D6*{c_rate/100:.6f}", "C", c_basis, False, False),
+            ("2", "Chi phí một số công việc không xác định được KL từ thiết kế", f"=D6*{tt_rate}%", f"=D6*{tt_rate/100:.6f}", "TT", tt_basis, False, False),
+            ("III", "Thu nhập chịu thuế tính trước", f"=(D6+D13)*{tl_rate}%", f"=(D6+D13)*{tl_rate/100:.6f}", "TL", tl_basis, True, True),
+            ("", "Chi phí xây dựng trước thuế", "=D6+D13+D16", "=D6+D13+D16", "G", "G = T + GT + TL", True, False),
+            ("IV", "Thuế giá trị gia tăng", f"=D17*{vat_rate}%", f"=D17*{vat_rate/100:.6f}", "GTGT", vat_basis, True, True),
+            ("", "CHI PHÍ XÂY DỰNG SAU THUẾ", "=D17+D18", "=D17+D18", "Gxd", "Gxd = G + GTGT", True, True),
+            ("V", "Chi phí nhà tạm để ở và điều hành thi công", f"=D17*{lt_rate}%*(1+{vat_rate}%)", f"=D17*{lt_rate/100:.6f}*(1+{vat_rate/100:.6f})", "LT", lt_basis, True, False),
+            ("", "Tổng cộng", "=D19+D20", "=D19+D20", "", "", True, True),
+            ("", "Làm tròn", "=ROUND(D21,-3)", "=ROUND(D21,-3)", "", "", True, True)
+        ]
+
+        curr_r = 6
+        for stt, name, calc, formula, sym, note, is_b, is_hl in rows_spec:
+            ws.row_dimensions[curr_r].height = 22
+            c_stt = ws.cell(curr_r, 1, stt)
+            c_stt.alignment = self.align_center
+            if is_b: c_stt.font = self.font_bold
+
+            c_name = ws.cell(curr_r, 2, name)
+            c_name.alignment = self.align_left
+            c_name.font = self.font_bold if is_b else self.font_regular
+
+            c_calc = ws.cell(curr_r, 3, calc)
+            c_calc.alignment = self.align_left
+            c_calc.font = self.font_regular
+
+            c_val = ws.cell(curr_r, 4, formula)
+            c_val.alignment = self.align_right
+            c_val.font = self.font_bold if is_b else self.font_regular
+            c_val.number_format = "#,##0"
+
+            c_sym = ws.cell(curr_r, 5, sym)
+            c_sym.alignment = self.align_center
+            c_sym.font = self.font_bold if sym else self.font_regular
+
+            c_note = ws.cell(curr_r, 6, note)
+            c_note.alignment = self.align_left
+            c_note.font = self.font_regular
+
+            for c in range(1, 7):
+                ws.cell(curr_r, c).border = self.border_cell
+                if is_hl and stt in ["I", "II", "III", "IV", "V"]:
+                    ws.cell(curr_r, c).fill = self.fill_yellow
+                elif name in ["Tổng cộng", "Làm tròn", "CHI PHÍ XÂY DỰNG SAU THUẾ"]:
+                    ws.cell(curr_r, c).fill = self.fill_code
+
+            curr_r += 1
+
+        # Calculate estimated total for num2words_vi
+        sum_vl = sum(m.get("total_qty", 0.0) * (m.get("price_notice", 0) - m.get("price_base", 0)) for m in materials)
+        sum_nc = sum(l.get("total_qty", 0.0) * (l.get("price_current", 0) - l.get("price_base", 0)) for l in labor)
+        sum_mac = sum(mac.get("total_qty", 0.0) * (mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0)) - mac.get("price_base", 0)) for mac in machines)
+        t_est = sum_vl + sum_nc + sum_mac
+        c_est = t_est * (c_rate / 100.0)
+        tt_est = t_est * (tt_rate / 100.0)
+        gt_est = c_est + tt_est
+        tl_est = (t_est + gt_est) * (tl_rate / 100.0)
+        g_est = t_est + gt_est + tl_est
+        vat_est = g_est * (vat_rate / 100.0)
+        gxd_est = g_est + vat_est
+        lt_est = g_est * (lt_rate / 100.0) * (1.0 + vat_rate / 100.0)
+        tot_est = gxd_est + lt_est
+        round_est = round(tot_est, -3)
+        words_vi = num2words_vi(round_est)
+
+        # Row 23: In words
+        ws.row_dimensions[curr_r].height = 24
+        ws.merge_cells(start_row=curr_r, start_column=2, end_row=curr_r, end_column=6)
+        c_words = ws.cell(curr_r, 2, f"Bằng chữ: {words_vi}")
+        c_words.font = Font(name="Times New Roman", size=11, bold=True, italic=True, color="002060")
+        c_words.alignment = self.align_left
+
+        # Signatures block
+        r_sig_title = curr_r + 2
+        ws.row_dimensions[r_sig_title].height = 22
+        
+        ws.cell(r_sig_title, 2, "NGƯỜI LẬP").font = self.font_bold
+        ws.cell(r_sig_title, 2).alignment = self.align_center
+
+        ws.cell(r_sig_title, 5, "NGƯỜI CHỦ TRÌ").font = self.font_bold
+        ws.cell(r_sig_title, 5).alignment = self.align_center
+
+        r_sig_sub = r_sig_title + 1
+        ws.cell(r_sig_sub, 5, "(Chứng chỉ kỹ sư định giá XD)").font = self.font_subtitle
+        ws.cell(r_sig_sub, 5).alignment = self.align_center
+
+        col_w = {1: 8, 2: 45, 3: 28, 4: 18, 5: 12, 6: 42}
+        for c, w in col_w.items():
+            ws.column_dimensions[get_column_letter(c)].width = w
+
     def _build_sheet_khoi_luong(
         self,
         wb: openpyxl.Workbook,
@@ -200,7 +410,7 @@ class ExcelGenerator:
         category_name: str,
         work_items: List[Dict[str, Any]]
     ):
-        """Builds the primary work volume sheet (Bảng tiên lượng khối lượng công việc)."""
+        """Builds the primary work volume sheet (Bảng tiên lượng khối lượng công việc), with optional grouping."""
         ws = wb.create_sheet(title="Khối lượng-Định mức-ĐVT")
         ws.views.sheetView[0].showGridLines = True
 
@@ -221,9 +431,34 @@ class ExcelGenerator:
             if c_idx == 2:
                 cell.fill = self.fill_code
 
-        r_start = 6
+        r = 6
+        current_group = None
+        group_idx = 0
+        roman_nums = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
+
         for idx, item in enumerate(work_items, start=1):
-            r = r_start + idx - 1
+            item_group = item.get("group", "").strip()
+            
+            # Insert Group Header row if group changed and item_group is present
+            if item_group and item_group != current_group:
+                current_group = item_group
+                group_roman = roman_nums[group_idx % len(roman_nums)]
+                group_idx += 1
+                
+                ws.row_dimensions[r].height = 24
+                ws.cell(r, 1, group_roman).alignment = self.align_center
+                ws.cell(r, 1).font = self.font_bold
+                
+                ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=8)
+                c_grp = ws.cell(r, 2, f"NHÓM {group_roman}: {current_group.upper()}")
+                c_grp.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
+                c_grp.alignment = self.align_left
+                
+                for c in range(1, 9):
+                    ws.cell(r, c).border = self.border_cell
+                    ws.cell(r, c).fill = self.fill_yellow
+                r += 1
+
             ws.row_dimensions[r].height = 22
             ws.cell(r, 1, item.get("stt", idx)).alignment = self.align_center
             
@@ -251,6 +486,7 @@ class ExcelGenerator:
                 ws.cell(r, c).border = self.border_cell
                 if c not in [1, 2, 5]:
                     ws.cell(r, c).font = self.font_regular
+            r += 1
 
         col_w = {1: 6, 2: 15, 3: 45, 4: 45, 5: 14, 6: 12, 7: 35, 8: 20}
         for c, w in col_w.items():
@@ -640,7 +876,7 @@ class ExcelGenerator:
         ws["I5"].font = self.font_unit
         ws["I5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Chênh lệch", "Tổng chênh"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
@@ -682,14 +918,19 @@ class ExcelGenerator:
             c_tc = ws.cell(r, 9, f"=E{r}*H{r}")
             c_tc.alignment = self.align_right
             c_tc.number_format = "#,##0"
+
+            # Basis column
+            basis_val = m.get("legal_basis", m.get("notes", "Công bố giá LS / Báo giá NSX"))
+            c_basis = ws.cell(r, 10, basis_val)
+            c_basis.alignment = self.align_left
             
-            for c in range(1, 10):
+            for c in range(1, 11):
                 ws.cell(r, c).border = self.border_cell
                 if c not in [2]: ws.cell(r, c).font = self.font_regular
 
         r_total = r_start + len(materials)
         ws.row_dimensions[r_total].height = 22
-        for c in range(1, 10): ws.cell(r_total, c).border = self.border_total
+        for c in range(1, 11): ws.cell(r_total, c).border = self.border_total
         ws.cell(r_total, 3, "Tổng vật liệu:").font = self.font_total
         ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
         c_tot = ws.cell(r_total, 9, f"=SUM(I{r_start}:I{r_total-1})")
@@ -697,7 +938,7 @@ class ExcelGenerator:
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18}
+        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18, 10: 30}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
 
@@ -717,7 +958,7 @@ class ExcelGenerator:
         ws["I5"].font = self.font_unit
         ws["I5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá hiện tại", "Chênh lệch", "Tổng chênh"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá hiện tại", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
@@ -760,14 +1001,19 @@ class ExcelGenerator:
             c_tc = ws.cell(r, 9, f"=E{r}*H{r}")
             c_tc.alignment = self.align_right
             c_tc.number_format = "#,##0"
+
+            # Basis column
+            basis_val = l.get("legal_basis", "5898/SXD-QLXD ngày 02/7/2026 của SXD tỉnh Lâm Đồng")
+            c_basis = ws.cell(r, 10, basis_val)
+            c_basis.alignment = self.align_left
             
-            for c in range(1, 10):
+            for c in range(1, 11):
                 ws.cell(r, c).border = self.border_cell
                 if c not in [2, 7]: ws.cell(r, c).font = self.font_regular
 
         r_total = r_start + len(labor)
         ws.row_dimensions[r_total].height = 22
-        for c in range(1, 10): ws.cell(r_total, c).border = self.border_total
+        for c in range(1, 11): ws.cell(r_total, c).border = self.border_total
         ws.cell(r_total, 3, "Cộng nhân công:").font = self.font_total
         ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
         c_tot = ws.cell(r_total, 9, f"=SUM(I{r_start}:I{r_total-1})")
@@ -775,7 +1021,7 @@ class ExcelGenerator:
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18}
+        col_w = {1: 6, 2: 14, 3: 45, 4: 10, 5: 14, 6: 15, 7: 15, 8: 15, 9: 18, 10: 35}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
 
@@ -795,7 +1041,7 @@ class ExcelGenerator:
         ws["K5"].font = self.font_unit
         ws["K5"].alignment = self.align_right
 
-        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Bù giá", "Giá hiện tại", "Chênh lệch", "Tổng chênh"]
+        headers = ["STT", "Mã hiệu", "Tên vật tư", "Đơn vị", "Khối lượng", "Giá gốc", "Giá thông báo", "Bù giá", "Giá hiện tại", "Chênh lệch", "Tổng chênh", "Căn cứ tính giá"]
         ws.row_dimensions[6].height = 28
         for c_idx, h in enumerate(headers, start=1):
             cell = ws.cell(6, c_idx, h)
@@ -846,14 +1092,19 @@ class ExcelGenerator:
             c_tc = ws.cell(r, 11, f"=E{r}*J{r}")
             c_tc.alignment = self.align_right
             c_tc.number_format = "#,##0"
+
+            # Basis column
+            basis_val = mac.get("legal_basis", "Thông tư 37/2026/TT-BXD của Bộ Xây dựng")
+            c_basis = ws.cell(r, 12, basis_val)
+            c_basis.alignment = self.align_left
             
-            for c in range(1, 12):
+            for c in range(1, 13):
                 ws.cell(r, c).border = self.border_cell
                 if c not in [2, 9]: ws.cell(r, c).font = self.font_regular
 
         r_total = r_start + len(machines)
         ws.row_dimensions[r_total].height = 22
-        for c in range(1, 12): ws.cell(r_total, c).border = self.border_total
+        for c in range(1, 13): ws.cell(r_total, c).border = self.border_total
         ws.cell(r_total, 3, "Cộng Máy:").font = self.font_total
         ws.cell(r_total, 3).alignment = Alignment(horizontal="right", vertical="center")
         c_tot = ws.cell(r_total, 11, f"=SUM(K{r_start}:K{r_total-1})")
@@ -861,6 +1112,6 @@ class ExcelGenerator:
         c_tot.alignment = self.align_right
         c_tot.number_format = "#,##0"
 
-        col_w = {1: 6, 2: 14, 3: 48, 4: 10, 5: 14, 6: 15, 7: 15, 8: 12, 9: 15, 10: 15, 11: 18}
+        col_w = {1: 6, 2: 14, 3: 48, 4: 10, 5: 14, 6: 15, 7: 15, 8: 12, 9: 15, 10: 15, 11: 18, 12: 35}
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w

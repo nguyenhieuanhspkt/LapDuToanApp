@@ -58,14 +58,24 @@ def run_trial_export():
     sheet_names = wb.sheetnames
     print(f"[PASS] Total sheets generated: {len(sheet_names)}")
 
-    # 1. Verify Sheet Khối lượng is the FIRST sheet!
-    assert sheet_names[0] == "Khối lượng-Định mức-ĐVT", f"First sheet is not Khối lượng: {sheet_names[0]}"
+    # 1. Verify Sheet TH_KinhPhi is the FIRST sheet!
+    assert sheet_names[0] == "TH_KinhPhi", f"First sheet is not TH_KinhPhi: {sheet_names[0]}"
+    ws_kp = wb["TH_KinhPhi"]
+    assert ws_kp["B6"].value == "Chi phí trực tiếp", "Row 6 of TH_KinhPhi is not Chi phí trực tiếp"
+    assert ws_kp["D6"].value == "=D7+D9+D11", "Formula D6 mismatch"
+    assert ws_kp["D22"].value == "=ROUND(D21,-3)", "Formula D22 mismatch"
+    assert str(ws_kp["B23"].value).startswith("Bằng chữ:"), "Row 23 text mismatch"
+    print(f"[PASS] Sheet 'TH_KinhPhi' is in 1st position with dynamic formulas and text: {ws_kp['B23'].value}")
+
+    # 2. Verify Sheet Khối lượng is the SECOND sheet!
+    assert sheet_names[1] == "Khối lượng-Định mức-ĐVT", f"Second sheet is not Khối lượng: {sheet_names[1]}"
     ws_kl = wb["Khối lượng-Định mức-ĐVT"]
     assert ws_kl.max_row >= 18, f"Too few rows in Khối lượng sheet: {ws_kl.max_row}"
-    print(f"[PASS] Sheet 'Khối lượng-Định mức-ĐVT' is in 1st position with {ws_kl.max_row} rows!")
+    print(f"[PASS] Sheet 'Khối lượng-Định mức-ĐVT' is in 2nd position with {ws_kl.max_row} rows!")
 
-    # 2. Verify all other sheets exist
+    # 3. Verify all other sheets exist
     expected_sheets = [
+        "TH_KinhPhi",
         "Khối lượng-Định mức-ĐVT",
         "00_ThongKe_DinhMuc", "01_ChiTiet_HaoPhi_DinhMuc",
         "TH_VatLieu", "TH_NhanCong", "TH_MayThiCong",
@@ -77,8 +87,8 @@ def run_trial_export():
         assert s in sheet_names, f"Missing sheet: {s}"
     print(f"[PASS] All {len(expected_sheets)} expected sheets exist!")
 
-    # 3. Check embedded images
-    evidence_sheets = expected_sheets[6:]
+    # 4. Check embedded images
+    evidence_sheets = expected_sheets[7:]
     images_count = sum(1 for s in evidence_sheets if getattr(wb[s], "_images", []))
     print(f"[PASS] Evidence images check: {images_count}/13 sheets contain embedded scan images!")
 
@@ -94,14 +104,14 @@ def run_trial_export():
     assert g_links > 40 and h_links > 40 and j_formulas > 40
 
     # 5. Check calculated total quantities in summary sheets
-    for th_name, col_ht in [("TH_VatLieu", 7), ("TH_NhanCong", 7), ("TH_MayThiCong", 9)]:
+    for th_name, sum_col in [("TH_VatLieu", 9), ("TH_NhanCong", 9), ("TH_MayThiCong", 11)]:
         ws_th = wb[th_name]
         last_r = ws_th.max_row
-        sum_cell = ws_th.cell(last_r, ws_th.max_column).value
-        assert str(sum_cell).startswith("=SUM"), f"Sheet {th_name} total formula missing"
+        sum_cell = ws_th.cell(last_r, sum_col).value
+        assert str(sum_cell).startswith("=SUM"), f"Sheet {th_name} total formula missing at col {sum_col}"
         # Check non-zero volume in column 5
         non_zero_kl = sum(1 for r in range(7, last_r) if float(ws_th.cell(r, 5).value or 0) > 0)
-        print(f"[PASS] Sheet {th_name:14s}: {non_zero_kl} items have computed project volumes > 0!")
+        print(f"[PASS] Sheet {th_name:14s}: {non_zero_kl} items have computed project volumes > 0, total sum formula: {sum_cell}")
 
     print("\n==================================================")
     print("ALL TESTS PASSED WITH 100% QUALITY AND ACCURACY!")
