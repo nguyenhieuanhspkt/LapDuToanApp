@@ -22,7 +22,7 @@ import sys
 # Ensure project root is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import IMAGES_DIR, OUTPUT_DIR
-from core.norm_manager import NormManager
+from core.norm_manager import NormManager, REPLACEMENT_MATERIAL_CODES, get_unit_divisor
 from utils.num2words_vi import num2words_vi
 
 DEFAULT_COEFFICIENTS = {
@@ -178,16 +178,55 @@ class ExcelGenerator:
         r_total_nc = 7 + len(labor_list)
         r_total_mac = 7 + len(machines_list)
 
+        # Filter out 0 quantity resources so TH sheets only have active resources
+        materials_list = [m for m in materials_list if m.get("total_qty", 0.0) > 0 or m.get("code") == "V00750" or m.get("unit") == "%"]
+        labor_list = [l for l in labor_list if l.get("total_qty", 0.0) > 0]
+        machines_list = [mac for mac in machines_list if mac.get("total_qty", 0.0) > 0]
+
+        # Row mappings in TH sheets (headers start at row 6, data rows start at row 7)
+        mat_row_map = {m["code"]: 7 + idx for idx, m in enumerate(materials_list)}
+        lab_row_map = {l["code"]: 7 + idx for idx, l in enumerate(labor_list)}
+        mac_row_map = {mac["code"]: 7 + idx for idx, mac in enumerate(machines_list)}
+
+        r_total_vl = 7 + len(materials_list)
+        r_total_nc = 7 + len(labor_list)
+        r_total_mac = 7 + len(machines_list)
+
         # Compute quote items sum (including hybrid quote prices)
         quote_sum = sum(float(it.get("unit_price_quote", 0.0)) * float(it.get("volume", 0.0)) for it in work_items if float(it.get("unit_price_quote", 0.0)) > 0)
         quote_count = sum(1 for it in work_items if float(it.get("unit_price_quote", 0.0)) > 0)
 
-        # 3. Create Sheet: TH_KinhPhi (BẢNG TỔNG HỢP KINH PHÍ DỰ TOÁN - SHEET ĐẦU TIÊN)
+        # 1. Create Sheet: 00_ThongKe_DinhMuc
+        self._build_sheet_thong_ke(wb, unique_norm_codes)
+
+        # 2. Create Evidence Sheets for each unique norm code
+        norm_cell_map = {}
+        for code in unique_norm_codes:
+            norm_cell_map[code] = self._build_evidence_sheet(wb, code)
+
+        # 3. Create Sheet: 01_ChiTiet_HaoPhi_DinhMuc (returns item_subtotal_map for linking)
+        item_subtotal_map = self._build_sheet_don_gia_chi_tiet(
+            wb, project_name, category_name, work_items,
+            norm_cell_map, mat_row_map, lab_row_map, mac_row_map
+        )
+
+        # 4. Create Sheet: 02_GiaiTrinh_HeSo_DieuChinh (thống kê biến thể A0, A1, A2 và so sánh 2 cột)
+        self._build_sheet_giai_trinh_he_so(wb, project_name, category_name, work_items)
+
+        # 5. Create Sheet: Khối lượng-Định mức-ĐVT (Bảng 19 cột đầy đủ công thức link Bảng 01)
+        r_grand_total_kl = self._build_sheet_khoi_luong(
+            wb, project_name, category_name, work_items,
+            item_subtotal_map=item_subtotal_map,
+            coefficients=coeffs
+        )
+
+        # 6. Create Sheet: TH_KinhPhi (BẢNG TỔNG HỢP KINH PHÍ DỰ TOÁN - link trực tiếp vào bảng Khối lượng)
         self._build_sheet_th_kinh_phi(
             wb=wb,
             project_name=project_name,
             category_name=category_name,
             coefficients=coeffs,
+            r_grand_total_kl=r_grand_total_kl,
             r_total_vl=r_total_vl,
             r_total_nc=r_total_nc,
             r_total_mac=r_total_mac,
@@ -198,34 +237,13 @@ class ExcelGenerator:
             quote_count=quote_count
         )
 
-        # 4. Create Sheet: 00_ThongKe_DinhMuc
-        self._build_sheet_thong_ke(wb, unique_norm_codes)
-
-        # 5. Create Evidence Sheets for each unique norm code
-        norm_cell_map = {}
-        for code in unique_norm_codes:
-            norm_cell_map[code] = self._build_evidence_sheet(wb, code)
-
-        # 6. Create Sheet: 01_ChiTiet_HaoPhi_DinhMuc (returns item_subtotal_map for linking)
-        item_subtotal_map = self._build_sheet_don_gia_chi_tiet(
-            wb, project_name, category_name, work_items,
-            norm_cell_map, mat_row_map, lab_row_map, mac_row_map
-        )
-
-        # 7. Create Sheet: Khối lượng-Định mức-ĐVT (Bảng 16 cột đầy đủ công thức link Bảng 01)
-        self._build_sheet_khoi_luong(
-            wb, project_name, category_name, work_items,
-            item_subtotal_map=item_subtotal_map,
-            coefficients=coeffs
-        )
-
-        # 8. Create Sheet: TH_VatLieu
+        # 7. Create Sheet: TH_VatLieu
         self._build_sheet_th_vat_lieu(wb, project_name, category_name, materials_list)
 
-        # 9. Create Sheet: TH_NhanCong
+        # 8. Create Sheet: TH_NhanCong
         self._build_sheet_th_nhan_cong(wb, project_name, category_name, labor_list)
 
-        # 10. Create Sheet: TH_MayThiCong
+        # 9. Create Sheet: TH_MayThiCong
         self._build_sheet_th_may_thi_cong(wb, project_name, category_name, machines_list)
 
         # Reorder sheets cleanly:
@@ -233,15 +251,17 @@ class ExcelGenerator:
         # 2. Khối lượng-Định mức-ĐVT
         # 3. 00_ThongKe_DinhMuc
         # 4. 01_ChiTiet_HaoPhi_DinhMuc
-        # 5. TH_VatLieu
-        # 6. TH_NhanCong
-        # 7. TH_MayThiCong
-        # 8. [Evidence Sheets]
+        # 5. 02_GiaiTrinh_HeSo_DieuChinh
+        # 6. TH_VatLieu
+        # 7. TH_NhanCong
+        # 8. TH_MayThiCong
+        # 9. [Evidence Sheets]
         ordered_names = [
             "TH_KinhPhi",
             "Khối lượng-Định mức-ĐVT",
             "00_ThongKe_DinhMuc",
             "01_ChiTiet_HaoPhi_DinhMuc",
+            "02_GiaiTrinh_HeSo_DieuChinh",
             "TH_VatLieu",
             "TH_NhanCong",
             "TH_MayThiCong"
@@ -266,18 +286,19 @@ class ExcelGenerator:
         project_name: str,
         category_name: str,
         coefficients: Dict[str, Any],
-        r_total_vl: int,
-        r_total_nc: int,
-        r_total_mac: int,
-        materials: List[Dict[str, Any]],
-        labor: List[Dict[str, Any]],
-        machines: List[Dict[str, Any]],
+        r_grand_total_kl: Optional[int] = None,
+        r_total_vl: int = 7,
+        r_total_nc: int = 7,
+        r_total_mac: int = 7,
+        materials: Optional[List[Dict[str, Any]]] = None,
+        labor: Optional[List[Dict[str, Any]]] = None,
+        machines: Optional[List[Dict[str, Any]]] = None,
         quote_sum: float = 0.0,
         quote_count: int = 0
     ):
         """
-        Builds the summary cost estimation sheet (Bảng tổng hợp dự toán chi phí xây dựng)
-        matching 100% the layout and formulas of EVN standard format.
+        Builds the summary cost estimation sheet (Bảng tổng hợp dự toán chi phí xây dựng).
+        Directly links Material, Labor, and Machine totals to Sheet 'Khối lượng-Định mức-ĐVT'.
         """
         ws = wb.create_sheet(title="TH_KinhPhi")
         ws.views.sheetView[0].showGridLines = True
@@ -315,6 +336,20 @@ class ExcelGenerator:
         lt_rate = float(coefficients.get("lt", {}).get("rate", 1.1))
         lt_basis = coefficients.get("lt", {}).get("basis", "Thông tư 11/2021/TT-BXD")
 
+        # Link formulas to Khối lượng sheet if r_grand_total_kl provided
+        if r_grand_total_kl:
+            ref_vl = f"='Khối lượng-Định mức-ĐVT'!$K${r_grand_total_kl}"
+            ref_nc = f"='Khối lượng-Định mức-ĐVT'!$L${r_grand_total_kl}"
+            ref_mac = f"='Khối lượng-Định mức-ĐVT'!$M${r_grand_total_kl}"
+            ref_bg = f"='Khối lượng-Định mức-ĐVT'!$P${r_grand_total_kl}"
+            note_src = "Bảng tiên lượng khối lượng"
+        else:
+            ref_vl = f"='TH_VatLieu'!H{r_total_vl}"
+            ref_nc = f"='TH_NhanCong'!G{r_total_nc}"
+            ref_mac = f"='TH_MayThiCong'!G{r_total_mac}"
+            ref_bg = f"{quote_sum:.2f}"
+            note_src = "Bảng tổng hợp tài nguyên"
+
         # Row Data Definitions: (STT, Content, Calculation_Text, Formula_Value, Symbol, Note, is_bold, is_highlight)
         rows_spec = []
         r_T = 6
@@ -333,13 +368,13 @@ class ExcelGenerator:
 
             rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
             rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
-            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!H{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", f"Theo {note_src}", ref_vl, "VLHT", note_src, False, False))
             rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
-            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!G{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("", " - Đơn giá nhân công", f"Theo {note_src}", ref_nc, "NCHT", note_src, False, False))
             rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
-            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!G{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", f"Theo {note_src}", ref_mac, "MHT", note_src, False, False))
             rows_spec.append(("4", "Chi phí công tác báo giá / tạm tính", "=D14", "=D14", "BG", f"{quote_count} công việc báo giá trọn gói", True, False))
-            rows_spec.append(("", " - Chi phí báo giá trước thuế", "Theo báo giá cạnh tranh / PAKT", f"{quote_sum:.2f}", "BGHT", "Hồ sơ PAKT & Báo giá", False, False))
+            rows_spec.append(("", " - Chi phí báo giá trước thuế", "Theo báo giá cạnh tranh / PAKT", ref_bg, "BGHT", "Hồ sơ PAKT & Báo giá", False, False))
         else:
             formula_T = "=D7+D9+D11"
             calc_T = "T = VL + NC + M"
@@ -355,11 +390,11 @@ class ExcelGenerator:
 
             rows_spec.append(("I", "Chi phí trực tiếp", formula_T, formula_T, "T", calc_T, True, True))
             rows_spec.append(("1", "Chi phí vật liệu", "=D8", "=D8", "VL", "VL = VLHT", True, False))
-            rows_spec.append(("", " - Đơn giá vật liệu", "Theo bảng tổng hợp vật liệu", f"='TH_VatLieu'!H{r_total_vl}", "VLHT", "Bảng tổng hợp vật liệu", False, False))
+            rows_spec.append(("", " - Đơn giá vật liệu", f"Theo {note_src}", ref_vl, "VLHT", note_src, False, False))
             rows_spec.append(("2", "Chi phí nhân công", "=D10", "=D10", "NC", "NC = NCHT", True, False))
-            rows_spec.append(("", " - Đơn giá nhân công", "Theo bảng tổng hợp nhân công", f"='TH_NhanCong'!G{r_total_nc}", "NCHT", "Bảng tổng hợp nhân công", False, False))
+            rows_spec.append(("", " - Đơn giá nhân công", f"Theo {note_src}", ref_nc, "NCHT", note_src, False, False))
             rows_spec.append(("3", "Chi phí máy và thiết bị thi công", "=D12", "=D12", "M", "M = MHT", True, False))
-            rows_spec.append(("", " - Đơn giá máy thi công", "Theo bảng tổng hợp máy thi công", f"='TH_MayThiCong'!G{r_total_mac}", "MHT", "Bảng tổng hợp máy thi công", False, False))
+            rows_spec.append(("", " - Đơn giá máy thi công", f"Theo {note_src}", ref_mac, "MHT", note_src, False, False))
 
         rows_spec.extend([
             ("II", "Chi phí gián tiếp", f"=D{r_C}+D{r_TT}", f"=D{r_C}+D{r_TT}", "GT", "GT = C + TT", True, True),
@@ -373,6 +408,7 @@ class ExcelGenerator:
             ("", "Tổng cộng", f"=D{r_GXD}+D{r_LT}", f"=D{r_GXD}+D{r_LT}", "", "", True, True),
             ("", "Làm tròn", f"=ROUND(D{r_TOT},-3)", f"=ROUND(D{r_TOT},-3)", "", "", True, True)
         ])
+
 
         curr_r = 6
         for stt, name, calc, formula, sym, note, is_b, is_hl in rows_spec:
@@ -468,6 +504,163 @@ class ExcelGenerator:
             return "Bảo dưỡng van tràn Deluge, hệ thống ắc quy và thiết bị đo khí"
         return "Các công tác lắp đặt và bảo dưỡng khác"
 
+    def _build_sheet_giai_trinh_he_so(
+        self,
+        wb: openpyxl.Workbook,
+        project_name: str,
+        category_name: str,
+        work_items: List[Dict[str, Any]]
+    ):
+        """
+        Builds Sheet 02_GiaiTrinh_HeSo_DieuChinh:
+        Transparently explains original norm work steps vs applied work steps for each variant profile (A0, A1, A2...)
+        with dynamic Excel formulas for k factor and lists target work items in project.
+        """
+        ws = wb.create_sheet(title="02_GiaiTrinh_HeSo_DieuChinh")
+        ws.views.sheetView[0].showGridLines = True
+
+        ws["A1"] = "BẢNG GIẢI TRÌNH THÀNH PHẦN CÔNG VIỆC VÀ HỆ SỐ ĐIỀU CHỈNH ĐỊNH MỨC"
+        ws["A1"].font = self.font_title
+        ws["A2"] = f"CÔNG TRÌNH: {project_name}"
+        ws["A2"].font = self.font_project
+        ws["A3"] = f"HẠNG MỤC: {category_name} (Giải trình chi tiết các biến thể A0, A1, A2... phục vụ thẩm định)"
+        ws["A3"].font = self.font_subtitle
+
+        # Identify all unique variants used in work items
+        norm_variants_map = {}
+        for it in work_items:
+            code = it.get("norm_code", "").strip()
+            norm = self.norm_manager.get_norm(code)
+            if not norm:
+                continue
+            eff = self.norm_manager.get_effective_item_resources(it)
+            var_id = eff.get("variant_id") or "A0"
+            key = (code, var_id)
+            if key not in norm_variants_map:
+                norm_variants_map[key] = {
+                    "code": code,
+                    "norm_name": norm.get("name", ""),
+                    "norm_unit": norm.get("unit", ""),
+                    "legal_basis": norm.get("legal_basis", ""),
+                    "variant_id": var_id,
+                    "variant_name": eff.get("variant_name") or f"Biến thể {var_id}",
+                    "exclude_replacement": eff.get("exclude_replacement", False),
+                    "raw_steps": eff.get("raw_steps", []),
+                    "k_step": eff.get("k_step", 1.0),
+                    "applied_items": []
+                }
+            norm_variants_map[key]["applied_items"].append(it.get("stt"))
+
+        curr_r = 5
+        var_idx = 1
+        for (code, var_id), vdata in norm_variants_map.items():
+            # Variant Block Title
+            ws.row_dimensions[curr_r].height = 24
+            ws.merge_cells(start_row=curr_r, start_column=1, end_row=curr_r, end_column=7)
+            t_cell = ws.cell(curr_r, 1, f"MỤC {var_idx}: ĐỊNH MỨC {code} - BIẾN THỂ [{var_id}] ({vdata['variant_name']})")
+            t_cell.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
+            t_cell.fill = self.fill_ev_header
+            t_cell.alignment = self.align_left
+            for c in range(1, 8):
+                ws.cell(curr_r, c).border = self.border_cell
+            curr_r += 1
+
+            # Subtitle: Target items and replacement material status
+            ws.row_dimensions[curr_r].height = 20
+            ws.merge_cells(start_row=curr_r, start_column=1, end_row=curr_r, end_column=7)
+            items_str = ", ".join(f"STT {s}" for s in vdata["applied_items"] if s)
+            vt_status = "ĐÃ LOẠI TRỪ VẬT TƯ THAY THẾ (Đơn giá = 0 đ theo PAKT)" if vdata["exclude_replacement"] else "Có bao gồm vật tư thay thế thiết bị chính"
+            sub_cell = ws.cell(curr_r, 1, f"Áp dụng cho các công tác: {items_str} | Trạng thái vật tư thay thế: {vt_status}")
+            sub_cell.font = Font(name="Times New Roman", size=10, italic=True)
+            sub_cell.alignment = self.align_left
+            for c in range(1, 8):
+                ws.cell(curr_r, c).border = self.border_cell
+            curr_r += 1
+
+            # Table Header (2 side-by-side columns: Original vs Applied)
+            headers = [
+                "Bước", "Nội dung thành phần công việc gốc", "ĐVT",
+                "Hao phí gốc (công)", "Áp dụng (1=Có, 0=Không)", "Hao phí áp dụng (công)", "Tỷ lệ áp dụng k"
+            ]
+            ws.row_dimensions[curr_r].height = 26
+            for c_idx, h in enumerate(headers, start=1):
+                c_h = ws.cell(curr_r, c_idx, h)
+                c_h.font = self.font_header
+                c_h.alignment = self.align_center
+                c_h.border = self.border_cell
+                c_h.fill = self.fill_code if c_idx in [4, 6, 7] else self.fill_ev_header
+            curr_r += 1
+
+            start_steps_r = curr_r
+            steps = vdata["raw_steps"]
+            for s in steps:
+                ws.row_dimensions[curr_r].height = 20
+                ws.cell(curr_r, 1, s.get("step_no", 1)).alignment = self.align_center
+                ws.cell(curr_r, 2, s.get("step_name", "")).alignment = self.align_left
+                ws.cell(curr_r, 3, s.get("dvt_step", "")).alignment = self.align_center
+                
+                c_base = ws.cell(curr_r, 4, float(s.get("rate_base", 0.0)))
+                c_base.alignment = self.align_right
+                c_base.number_format = "0.0000"
+                
+                c_flag = ws.cell(curr_r, 5, int(s.get("apply_flag", 1)))
+                c_flag.alignment = self.align_center
+                c_flag.font = self.font_bold
+                
+                c_calc = ws.cell(curr_r, 6, f"=D{curr_r}*E{curr_r}")
+                c_calc.alignment = self.align_right
+                c_calc.number_format = "0.0000"
+                
+                ws.cell(curr_r, 7, "").alignment = self.align_center
+                for c in range(1, 8):
+                    ws.cell(curr_r, c).border = self.border_cell
+                curr_r += 1
+
+            end_steps_r = curr_r - 1
+
+            # Summary Row for this Variant
+            ws.row_dimensions[curr_r].height = 22
+            ws.merge_cells(start_row=curr_r, start_column=1, end_row=curr_r, end_column=3)
+            ws.cell(curr_r, 1, "TỔNG CỘNG HAO PHÍ & HỆ SỐ ĐIỀU CHỈNH:").font = self.font_bold
+            ws.cell(curr_r, 1).alignment = self.align_right
+            
+            c_tot_base = ws.cell(curr_r, 4, f"=SUM(D{start_steps_r}:D{end_steps_r})")
+            c_tot_base.font = self.font_bold
+            c_tot_base.alignment = self.align_right
+            c_tot_base.number_format = "0.0000"
+            
+            ws.cell(curr_r, 5, "").alignment = self.align_center
+            
+            c_tot_app = ws.cell(curr_r, 6, f"=SUM(F{start_steps_r}:F{end_steps_r})")
+            c_tot_app.font = self.font_bold
+            c_tot_app.alignment = self.align_right
+            c_tot_app.number_format = "0.0000"
+            
+            c_k_ratio = ws.cell(curr_r, 7, f"=F{curr_r}/D{curr_r}")
+            c_k_ratio.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
+            c_k_ratio.fill = self.fill_yellow
+            c_k_ratio.alignment = self.align_right
+            c_k_ratio.number_format = "0.00%"
+            
+            for c in range(1, 8):
+                ws.cell(curr_r, c).border = self.border_total
+            curr_r += 1
+
+            # Policy note row
+            ws.row_dimensions[curr_r].height = 20
+            ws.merge_cells(start_row=curr_r, start_column=1, end_row=curr_r, end_column=7)
+            c_note = ws.cell(curr_r, 1, "*(Nguyên tắc thẩm định: Tỷ lệ k áp dụng giảm trừ tương ứng cho Vật liệu phụ và Máy thi công; Nhân công tính theo hao phí thực hiện; Vật tư thay thế áp đơn giá = 0 đ theo PAKT)*")
+            c_note.font = Font(name="Times New Roman", size=10, italic=True, color="555555")
+            c_note.alignment = self.align_left
+            for c in range(1, 8):
+                ws.cell(curr_r, c).border = self.border_cell
+            curr_r += 2
+            var_idx += 1
+
+        col_w = {1: 8, 2: 45, 3: 12, 4: 18, 5: 22, 6: 22, 7: 18}
+        for c, w in col_w.items():
+            ws.column_dimensions[get_column_letter(c)].width = w
+
     def _build_sheet_khoi_luong(
         self,
         wb: openpyxl.Workbook,
@@ -476,8 +669,11 @@ class ExcelGenerator:
         work_items: List[Dict[str, Any]],
         item_subtotal_map: Optional[Dict[Any, Dict[str, Any]]] = None,
         coefficients: Optional[Dict[str, Any]] = None
-    ):
-        """Builds the comprehensive 16-column work volume & unit rate sheet linking 100% dynamically to Sheet 01."""
+    ) -> int:
+        """
+        Builds the comprehensive 19-column work volume & unit rate sheet linking 100% dynamically to Sheet 01.
+        Returns the grand total row index for direct formula linking from TH_KinhPhi.
+        """
         ws = wb.create_sheet(title="Khối lượng-Định mức-ĐVT")
         ws.views.sheetView[0].showGridLines = True
 
@@ -491,9 +687,10 @@ class ExcelGenerator:
         headers = [
             "STT", "Mã hiệu\nđịnh mức", "Danh mục hàng hóa/dịch vụ (THEO PAKT)",
             "Mô tả công việc thực tế", "Khối lượng", "Đơn vị\ntính",
-            "Đơn giá\nVật liệu (đ)", "Đơn giá\nNhân công (đ)", "Đơn giá\nCa máy (đ)",
-            "Đơn giá\nTrực tiếp T (đ)", "ĐG Định mức\ntrước thuế (đ)", "Đơn giá\nBáo giá (đ)",
-            "ĐG Đầy đủ\ntrước thuế (đ)", "Thành tiền\ntrước thuế (đ)", "Căn cứ pháp lý áp dụng", "Ghi chú"
+            "Đơn giá\nVật liệu (đ)", "Đơn giá\nNhân công (đ)", "Đơn giá\nCa máy (đ)", "Đơn giá\nTrực tiếp T (đ)",
+            "Thành tiền\nVật liệu (đ)", "Thành tiền\nNhân công (đ)", "Thành tiền\nCa máy (đ)", "Thành tiền\nTrực tiếp T (đ)",
+            "ĐG Định mức\ntrước thuế (đ)", "Đơn giá\nBáo giá (đ)", "ĐG Đầy đủ\ntrước thuế (đ)",
+            "Thành tiền\ntrước thuế (đ)", "Ghi chú biến thể / Căn cứ"
         ]
         ws.row_dimensions[5].height = 32
         for c_idx, h in enumerate(headers, start=1):
@@ -503,7 +700,7 @@ class ExcelGenerator:
             cell.border = self.border_cell
             if c_idx == 2:
                 cell.fill = self.fill_code
-            elif c_idx in [7, 8, 9, 10, 11, 13, 14]:
+            elif c_idx in [7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18]:
                 cell.fill = self.fill_ev_header
 
         coeffs = coefficients or DEFAULT_COEFFICIENTS
@@ -537,12 +734,12 @@ class ExcelGenerator:
             ws.cell(r, 1, group_roman).alignment = self.align_center
             ws.cell(r, 1).font = self.font_bold
             
-            ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=16)
+            ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=19)
             c_grp = ws.cell(r, 2, f"NHÓM {group_roman}: {g_name.upper()}")
             c_grp.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
             c_grp.alignment = self.align_left
             
-            for c in range(1, 17):
+            for c in range(1, 20):
                 ws.cell(r, c).border = self.border_cell
                 ws.cell(r, c).fill = self.fill_ev_header
             r += 1
@@ -552,10 +749,14 @@ class ExcelGenerator:
             # 2. Work Items in this Group
             for item in items_in_g:
                 stt_val = item.get("stt")
+                eff = self.norm_manager.get_effective_item_resources(item)
+                var_id = eff.get("variant_id") or "A0"
+                var_label = f" [{var_id}]" if var_id and var_id != "A0" else ""
+
                 ws.row_dimensions[r].height = 22
                 ws.cell(r, 1, stt_val).alignment = self.align_center
                 
-                c_code = ws.cell(r, 2, item.get("norm_code", ""))
+                c_code = ws.cell(r, 2, f"{item.get('norm_code', '')}{var_label}")
                 c_code.font = self.font_code
                 c_code.alignment = self.align_center
                 c_code.fill = self.fill_code
@@ -597,45 +798,65 @@ class ExcelGenerator:
                 c_j.font = self.font_bold
                 c_j.number_format = "#,##0"
 
-                # Col K: ĐG Định mức trước thuế = J * (1 + C + TT) * (1 + TL)
-                c_k = ws.cell(r, 11, f"=ROUND(J{r}*{k_mult:.6f}, 0)")
+                # Col K: Thành tiền Vật liệu = Khối lượng * ĐG Vật liệu
+                c_k = ws.cell(r, 11, f"=ROUND(E{r}*G{r}, 0)")
                 c_k.alignment = self.align_right
                 c_k.number_format = "#,##0"
 
-                # Col L: ĐG Báo giá trước thuế
-                quote_val = float(item.get("unit_price_quote", 0.0))
-                c_l = ws.cell(r, 12, quote_val if quote_val > 0 else 0)
+                # Col L: Thành tiền Nhân công = Khối lượng * ĐG Nhân công
+                c_l = ws.cell(r, 12, f"=ROUND(E{r}*H{r}, 0)")
                 c_l.alignment = self.align_right
                 c_l.number_format = "#,##0"
 
-                # Col M: ĐG Đầy đủ trước thuế = K + L
-                c_m = ws.cell(r, 13, f"=K{r}+L{r}")
+                # Col M: Thành tiền Ca máy = Khối lượng * ĐG Ca máy
+                c_m = ws.cell(r, 13, f"=ROUND(E{r}*I{r}, 0)")
                 c_m.alignment = self.align_right
-                c_m.font = self.font_bold
                 c_m.number_format = "#,##0"
 
-                # Col N: Thành tiền trước thuế = Khối lượng * ĐG Đầy đủ
-                c_n = ws.cell(r, 14, f"=ROUND(E{r}*M{r}, 0)")
+                # Col N: Thành tiền Trực tiếp T = K + L + M
+                c_n = ws.cell(r, 14, f"=K{r}+L{r}+M{r}")
                 c_n.alignment = self.align_right
                 c_n.font = self.font_bold
                 c_n.number_format = "#,##0"
 
-                # Col O: Căn cứ pháp lý
+                # Col O: ĐG Định mức trước thuế = J * (1 + C + TT) * (1 + TL)
+                c_o = ws.cell(r, 15, f"=ROUND(J{r}*{k_mult:.6f}, 0)")
+                c_o.alignment = self.align_right
+                c_o.number_format = "#,##0"
+
+                # Col P: ĐG Báo giá trước thuế
+                quote_val = float(item.get("unit_price_quote", 0.0))
+                c_p = ws.cell(r, 16, quote_val if quote_val > 0 else 0)
+                c_p.alignment = self.align_right
+                c_p.number_format = "#,##0"
+
+                # Col Q: ĐG Đầy đủ trước thuế = O + P
+                c_q = ws.cell(r, 17, f"=O{r}+P{r}")
+                c_q.alignment = self.align_right
+                c_q.font = self.font_bold
+                c_q.number_format = "#,##0"
+
+                # Col R: Thành tiền trước thuế = Khối lượng * ĐG Đầy đủ
+                c_r = ws.cell(r, 18, f"=ROUND(E{r}*Q{r}, 0)")
+                c_r.alignment = self.align_right
+                c_r.font = self.font_bold
+                c_r.number_format = "#,##0"
+
+                # Col S: Ghi chú biến thể & Căn cứ
                 norm = self.norm_manager.get_norm(item.get("norm_code", ""))
                 basis_str = (norm.get("legal_basis", "") if norm else "") or item.get("quote_basis", "") or item.get("basis", "")
-                ws.cell(r, 15, basis_str).alignment = self.align_left
+                note_parts = []
+                if var_id and var_id != "A0":
+                    note_parts.append(f"Biến thể [{var_id}] ({round(eff['k_step']*100)}% bước)")
+                if eff.get("exclude_replacement"):
+                    note_parts.append("Không tính vật tư thay thế (ĐG=0)")
+                if basis_str:
+                    note_parts.append(basis_str)
+                ws.cell(r, 19, "; ".join(note_parts)).alignment = self.align_left
 
-                # Col P: Ghi chú
-                eff = self.norm_manager.get_effective_item_resources(item)
-                note_str = item.get("notes", "")
-                if eff["k_step"] < 1.0:
-                    prefix = f"Áp dụng {round(eff['k_step']*100)}% thành phần ĐM ({len(eff['active_steps'])}/{eff['total_steps']} bước)"
-                    note_str = f"{prefix}; {note_str}".strip("; ")
-                ws.cell(r, 16, note_str).alignment = self.align_left
-
-                for c in range(1, 17):
+                for c in range(1, 20):
                     ws.cell(r, c).border = self.border_cell
-                    if c not in [1, 2, 5, 10, 13, 14]:
+                    if c not in [1, 2, 5, 10, 14, 17, 18]:
                         ws.cell(r, c).font = self.font_regular
                 r += 1
 
@@ -643,17 +864,19 @@ class ExcelGenerator:
 
             # 3. Group Subtotal Row
             ws.row_dimensions[r].height = 24
-            ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=13)
+            ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=10)
             c_sub_lbl = ws.cell(r, 1, f"TỔNG CỘNG NHÓM {group_roman}:")
             c_sub_lbl.font = Font(name="Times New Roman", size=11, bold=True, italic=True, color="002060")
             c_sub_lbl.alignment = self.align_right
 
-            c_sub_val = ws.cell(r, 14, f"=SUM(N{start_group_r}:N{end_group_r})")
-            c_sub_val.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
-            c_sub_val.alignment = self.align_right
-            c_sub_val.number_format = "#,##0"
+            # Subtotal for K (TT VL), L (TT NC), M (TT Máy), N (TT Trực tiếp T), R (TT Trước thuế)
+            for c_idx, col_letter in [(11, "K"), (12, "L"), (13, "M"), (14, "N"), (16, "P"), (18, "R")]:
+                c_val = ws.cell(r, c_idx, f"=SUM({col_letter}{start_group_r}:{col_letter}{end_group_r})")
+                c_val.font = Font(name="Times New Roman", size=11, bold=True, color="002060")
+                c_val.alignment = self.align_right
+                c_val.number_format = "#,##0"
 
-            for c in range(1, 17):
+            for c in range(1, 20):
                 ws.cell(r, c).border = self.border_cell
                 ws.cell(r, c).fill = self.fill_yellow
 
@@ -662,32 +885,38 @@ class ExcelGenerator:
 
         # 4. Grand Total Row
         ws.row_dimensions[r].height = 28
-        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=13)
-        c_gt_lbl = ws.cell(r, 1, "TỔNG CỘNG CHI PHÍ XÂY DỰNG TRƯỚC THUẾ (G):")
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=10)
+        c_gt_lbl = ws.cell(r, 1, "TỔNG CỘNG TOÀN BỘ CÔNG TRÌNH:")
         c_gt_lbl.font = Font(name="Times New Roman", size=12, bold=True, color="002060")
         c_gt_lbl.alignment = self.align_right
 
-        if group_total_rows:
-            formula_gt = "=" + "+".join(f"N{grp_r}" for grp_r in group_total_rows)
-        else:
-            formula_gt = "0"
+        for c_idx, col_letter in [(11, "K"), (12, "L"), (13, "M"), (14, "N"), (16, "P"), (18, "R")]:
+            if group_total_rows:
+                f_gt = "=" + "+".join(f"{col_letter}{grp_r}" for grp_r in group_total_rows)
+            else:
+                f_gt = "0"
+            c_val = ws.cell(r, c_idx, f_gt)
+            c_val.font = Font(name="Times New Roman", size=12, bold=True, color="002060")
+            c_val.alignment = self.align_right
+            c_val.number_format = "#,##0"
 
-        c_gt_val = ws.cell(r, 14, formula_gt)
-        c_gt_val.font = Font(name="Times New Roman", size=12, bold=True, color="002060")
-        c_gt_val.alignment = self.align_right
-        c_gt_val.number_format = "#,##0"
-
-        for c in range(1, 17):
+        for c in range(1, 20):
             ws.cell(r, c).border = self.border_total
             ws.cell(r, c).fill = self.fill_yellow
 
+        grand_total_r = r
+
         col_w = {
-            1: 6, 2: 14, 3: 40, 4: 35, 5: 12, 6: 10,
-            7: 15, 8: 15, 9: 15, 10: 16, 11: 18, 12: 16,
-            13: 18, 14: 20, 15: 35, 16: 25
+            1: 6, 2: 16, 3: 38, 4: 28, 5: 12, 6: 10,
+            7: 15, 8: 15, 9: 15, 10: 16,
+            11: 18, 12: 18, 13: 18, 14: 20,
+            15: 18, 16: 16, 17: 18, 18: 22, 19: 30
         }
         for c, w in col_w.items():
             ws.column_dimensions[get_column_letter(c)].width = w
+
+        return grand_total_r
+
 
     def _build_sheet_thong_ke(self, wb: openpyxl.Workbook, norm_codes: List[str]):
         ws = wb.create_sheet(title="00_ThongKe_DinhMuc")
@@ -1030,19 +1259,26 @@ class ExcelGenerator:
                 continue
             coords = norm_cell_map.get(code, {"materials": {}, "labor": {}, "machines": {}})
             eff = self.norm_manager.get_effective_item_resources(item)
+            norm_unit = norm.get("unit", "")
+            item_unit = item.get("unit", norm_unit)
+            divisor = get_unit_divisor(norm_unit, item_unit)
+            var_id = eff.get("variant_id") or "A0"
+            var_label = f" [{var_id}]" if var_id and var_id != "A0" else ""
 
             # Job Header Row
             ws.row_dimensions[curr_r].height = 22
             ws.cell(curr_r, 1, stt).alignment = self.align_center
             ws.cell(curr_r, 1).font = self.font_bold
             
-            c_code = ws.cell(curr_r, 2, code)
+            c_code = ws.cell(curr_r, 2, f"{code}{var_label}")
             c_code.font = self.font_code
             c_code.alignment = self.align_center
             
             job_name_txt = item.get("job_name", norm.get("name", ""))
             if eff["k_step"] < 1.0:
-                job_name_txt += f" [Áp dụng {round(eff['k_step']*100)}% thành phần ĐM ({len(eff['active_steps'])}/{eff['total_steps']} bước)]"
+                job_name_txt += f" [Biến thể {var_id}: {round(eff['k_step']*100)}% thành phần ĐM]"
+            if eff.get("exclude_replacement"):
+                job_name_txt += " (Không tính vật tư thay thế)"
 
             ws.cell(curr_r, 5, job_name_txt).font = self.font_bold
             ws.cell(curr_r, 6, item.get("unit", norm.get("unit", ""))).alignment = self.align_center
@@ -1066,15 +1302,26 @@ class ExcelGenerator:
                     m_code = m["code"]
                     ws.cell(curr_r, 2, m_code).font = self.font_regular
                     ws.cell(curr_r, 2).alignment = self.align_center
-                    ws.cell(curr_r, 5, f" - {m['name']}").font = self.font_regular
+                    
+                    is_excl_rep = (m_code in REPLACEMENT_MATERIAL_CODES and eff.get("exclude_replacement"))
+                    mat_name_disp = f" - {m['name']} (Không tính vật tư thay thế - ĐG = 0)" if is_excl_rep else f" - {m['name']}"
+                    ws.cell(curr_r, 5, mat_name_disp).font = self.font_regular
                     ws.cell(curr_r, 6, m.get("unit", "")).alignment = self.align_center
                     
-                    # Rate value: use effective rate
-                    ws.cell(curr_r, 7, m.get("rate", 0.0)).alignment = self.align_right
+                    # Rate value: scaled by divisor
+                    eff_m_rate = float(m.get("rate", 0.0)) / divisor
+                    ws.cell(curr_r, 7, eff_m_rate).alignment = self.align_right
                     ws.cell(curr_r, 7).number_format = "#,##0.000"
 
-                    if m_code == "V00750" or m.get("unit") == "%":
+                    if is_excl_rep:
+                        c_h = ws.cell(curr_r, 8, 0)
+                        c_h.alignment = self.align_right
+                        c_h.number_format = "#,##0"
+                        ws.cell(curr_r, 10, 0).alignment = self.align_right
+                        ws.cell(curr_r, 10).number_format = "#,##0"
+                    elif m_code == "V00750" or m.get("unit") == "%":
                         ws.cell(curr_r, 10, f"=SUM(J{mat_start_r}:J{curr_r-1})*G{curr_r}/100").alignment = self.align_right
+                        ws.cell(curr_r, 10).number_format = "#,##0"
                     else:
                         r_th = mat_row_map.get(m_code)
                         c_h = ws.cell(curr_r, 8, f"='TH_VatLieu'!$G${r_th}" if r_th else 0)
@@ -1082,8 +1329,7 @@ class ExcelGenerator:
                         c_h.alignment = self.align_right
                         c_h.number_format = "#,##0"
                         ws.cell(curr_r, 10, f"=G{curr_r}*H{curr_r}").alignment = self.align_right
-
-                    ws.cell(curr_r, 10).number_format = "#,##0"
+                        ws.cell(curr_r, 10).number_format = "#,##0"
                     curr_r += 1
 
                 mat_end_r = curr_r - 1
@@ -1105,7 +1351,8 @@ class ExcelGenerator:
                     ws.cell(curr_r, 5, f" - {l['name']}").font = self.font_regular
                     ws.cell(curr_r, 6, l.get("unit", "công")).alignment = self.align_center
                     
-                    ws.cell(curr_r, 7, l.get("rate", 0.0)).alignment = self.align_right
+                    eff_l_rate = float(l.get("rate", 0.0)) / divisor
+                    ws.cell(curr_r, 7, eff_l_rate).alignment = self.align_right
                     ws.cell(curr_r, 7).number_format = "#,##0.000"
 
                     r_th = lab_row_map.get(l_code)
@@ -1137,7 +1384,8 @@ class ExcelGenerator:
                     ws.cell(curr_r, 5, f" - {mac['name']}").font = self.font_regular
                     ws.cell(curr_r, 6, mac.get("unit", "ca")).alignment = self.align_center
                     
-                    ws.cell(curr_r, 7, mac.get("rate", 0.0)).alignment = self.align_right
+                    eff_mac_rate = float(mac.get("rate", 0.0)) / divisor
+                    ws.cell(curr_r, 7, eff_mac_rate).alignment = self.align_right
                     ws.cell(curr_r, 7).number_format = "#,##0.000"
 
                     r_th = mac_row_map.get(m_code)
@@ -1154,6 +1402,7 @@ class ExcelGenerator:
                 ws.cell(row_mac, 10, f"=SUM(J{mac_start_r}:J{mac_end_r})").font = self.font_cat
                 ws.cell(row_mac, 10).number_format = "#,##0"
                 subtotal_rows.append(row_mac)
+
 
             if subtotal_rows:
                 ws.cell(job_hdr_r, 10, "=" + "+".join(f"J{r_sub}" for r_sub in subtotal_rows)).font = self.font_bold

@@ -29,6 +29,8 @@ TEMPLATE_XLSX = TEMPLATES_DIR / "DU_TOAN_PCCC_2026_LATEST.xlsx"
 LAM_DONG_MACHINES_FILE = LAM_DONG_DIR / "machines_2026.json"
 PROJECT_ITEMS_FILE = DATABASE_DIR / "current_project_items.json"
 LOCAL_PROJECT_ITEMS_FILE = SOURCE_DIR / "database" / "current_project_items.json"
+PROJECT_VARIANTS_FILE = DATABASE_DIR / "project_variants.json"
+LOCAL_PROJECT_VARIANTS_FILE = SOURCE_DIR / "database" / "project_variants.json"
 
 def check_environment():
     """Verify that all required data directories and files exist."""

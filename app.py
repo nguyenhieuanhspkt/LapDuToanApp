@@ -427,7 +427,154 @@ with tab1:
                 st.success(f"Đã thêm công tác báo giá '{inp_q_job}' ({inp_q_price:,.0f} đ/{inp_q_unit}) vào nhóm '{final_group}'!")
                 st.rerun()
 
-    # 2. Quản lý theo từng Nhóm (Xem Bảng Hàng Ngang & Chỉnh Sửa Trong Nhóm)
+    # 2. Quản lý Thư viện Biến thể Định mức & Lọc gán hàng loạt (A0, A1, A2...)
+    with st.expander("⚙️ **QUẢN LÝ BIẾN THỂ ĐỊNH MỨC (A1, A2, A3...) & ÁP DỤNG HÀNG LOẠT THEO TỪ KHÓA**", expanded=False):
+        st.markdown("""
+        > **Ý nghĩa:**
+        > - Cùng 1 mã định mức gốc (ví dụ `BD.41111`), dự án có thể có nhiều biến thể như **A0** (Gốc 100%), **A1** (chỉ bảo dưỡng, không thay đế), **A2** (chỉ kiểm tra đo thông mạch)...
+        > - **Vật tư thay thế (Đế đầu báo, Đèn, Nút ấn, Chuông)**: Tùy chọn *Không bao gồm vật tư thay thế* sẽ tự động đưa đơn giá các vật tư này về **0 đồng** và không bị suy giảm theo hệ số $k$.
+        > - **Lọc theo từ khóa & Gán hàng loạt**: Giúp dự toán 800+ dòng được phân bổ biến thể trong vài giây mà không cần dò thủ công từng hàng.
+        """)
+        
+        tab_var1, tab_var2 = st.tabs(["🧩 1. Thiết lập & Quản lý Biến thể (A1, A2...)", "⚡ 2. Lọc từ khóa & Áp dụng hàng loạt"])
+        
+        with tab_var1:
+            all_norm_codes_v = mgr.get_all_norm_codes()
+            col_sel_n, col_sel_v = st.columns([6, 6])
+            with col_sel_n:
+                var_norm_code = st.selectbox("Chọn mã định mức quản lý biến thể:", options=all_norm_codes_v, key="var_mgmt_norm_code")
+            
+            norm_data = mgr.get_norm(var_norm_code)
+            all_vars_for_norm = mgr.get_variants_for_norm(var_norm_code)
+            var_keys = list(all_vars_for_norm.keys())
+            
+            with col_sel_v:
+                var_choice = st.selectbox(
+                    "Chọn biến thể hiện có hoặc tạo mới:",
+                    options=var_keys + ["➕ [Tạo biến thể mới...]"],
+                    format_func=lambda x: f"Biến thể {x}: {all_vars_for_norm.get(x, {}).get('variant_name', 'Mặc định')}" if x in all_vars_for_norm else x,
+                    key="var_mgmt_choice"
+                )
+            
+            if var_choice == "➕ [Tạo biến thể mới...]":
+                existing_nums = [int(k[1:]) for k in var_keys if k.startswith("A") and k[1:].isdigit()]
+                next_num = max(existing_nums, default=0) + 1
+                default_new_id = f"A{next_num}"
+                cur_var_id = st.text_input("Nhập mã biến thể mới (ví dụ A1, A2...):", value=default_new_id, key="var_new_id_input")
+                cur_var_name = st.text_input("Tên mô tả biến thể:", value=f"Biến thể điều chỉnh {cur_var_id} cho {var_norm_code}", key="var_new_name_input")
+                cur_exclude_rep = st.checkbox("❌ Không bao gồm vật tư thay thế (Đơn giá các vật tư thay thế TT38 = 0 đ)", value=False, key="var_new_rep_input")
+                base_steps = norm_data.get("work_steps", [])
+            else:
+                cur_var_id = var_choice
+                v_obj = all_vars_for_norm[var_choice]
+                cur_var_name = st.text_input("Tên mô tả biến thể:", value=v_obj.get("variant_name", ""), key=f"var_name_{var_choice}")
+                cur_exclude_rep = st.checkbox("❌ Không bao gồm vật tư thay thế (Đơn giá các vật tư thay thế TT38 = 0 đ)", value=bool(v_obj.get("exclude_replacement", False)), key=f"var_rep_{var_choice}")
+                base_steps = v_obj.get("work_steps", norm_data.get("work_steps", []))
+            
+            st.markdown("##### 📝 Chọn các bước thành phần công việc áp dụng cho Biến thể này:")
+            s_edit_data = []
+            for s in base_steps:
+                s_edit_data.append({
+                    "step_no": s.get("step_no", 1),
+                    "step_name": s.get("step_name", ""),
+                    "rate_base": float(s.get("rate_base", 0.0)),
+                    "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
+                })
+            df_v_steps = pd.DataFrame(s_edit_data)
+            
+            edited_v_steps = st.data_editor(
+                df_v_steps,
+                column_config={
+                    "step_no": st.column_config.NumberColumn("Bước", width="small", disabled=True),
+                    "step_name": st.column_config.TextColumn("Nội dung thành phần công việc", width="large", disabled=True),
+                    "rate_base": st.column_config.NumberColumn("Hao phí chuẩn (công)", format="%.4f", width="small", disabled=True),
+                    "apply_flag": st.column_config.CheckboxColumn("Thực hiện", width="small")
+                },
+                use_container_width=True,
+                hide_index=True,
+                key=f"var_steps_editor_{var_norm_code}_{cur_var_id}"
+            )
+            
+            if st.button(f"💾 Lưu hồ sơ biến thể '{cur_var_id}' vào Dự án", type="primary", key=f"btn_save_variant_{var_norm_code}_{cur_var_id}"):
+                final_steps = []
+                for idx_s, row_s in edited_v_steps.iterrows():
+                    orig_s = dict(base_steps[idx_s])
+                    orig_s["apply_flag"] = 1 if row_s["apply_flag"] else 0
+                    final_steps.append(orig_s)
+                mgr.create_or_update_variant(
+                    norm_code=var_norm_code,
+                    variant_id=cur_var_id.strip(),
+                    variant_name=cur_var_name.strip(),
+                    work_steps=final_steps,
+                    exclude_replacement=cur_exclude_rep
+                )
+                st.success(f"✅ Đã lưu biến thể '{cur_var_id}' cho định mức {var_norm_code} thành công!")
+                st.rerun()
+
+        with tab_var2:
+            st.markdown("##### ⚡ Lọc công tác theo từ khóa & Gán hàng loạt Biến thể")
+            f_col1, f_col2, f_col3 = st.columns([4, 4, 4])
+            with f_col1:
+                batch_norm_code = st.selectbox("Chọn mã định mức cần lọc:", options=all_norm_codes_v, key="batch_norm_code")
+            with f_col2:
+                batch_keyword = st.text_input("Lọc từ khóa theo tên công tác (để trống nếu chọn hết):", value="", placeholder="Ví dụ: thay thế, kiểm tra...", key="batch_keyword")
+            
+            avail_variants = mgr.get_variants_for_norm(batch_norm_code)
+            avail_var_keys = list(avail_variants.keys())
+            with f_col3:
+                chosen_var_to_assign = st.selectbox(
+                    "Chọn biến thể áp dụng hàng loạt:",
+                    options=avail_var_keys,
+                    format_func=lambda x: f"[{x}] {avail_variants[x].get('variant_name', '')}",
+                    key="batch_chosen_var"
+                )
+            
+            matching_items = []
+            for it in st.session_state.work_items:
+                if it.get("norm_code") == batch_norm_code:
+                    j_name = str(it.get("job_name", "")).lower()
+                    kw = batch_keyword.strip().lower()
+                    if not kw or kw in j_name:
+                        matching_items.append(it)
+            
+            st.caption(f"Tìm thấy **{len(matching_items)}** công tác khớp với định mức `{batch_norm_code}`" + (f" và từ khóa '{batch_keyword}'" if batch_keyword.strip() else "") + ".")
+            
+            if matching_items:
+                preview_rows = []
+                for it in matching_items:
+                    preview_rows.append({
+                        "STT": it.get("stt"),
+                        "Nhóm": it.get("group"),
+                        "Tên công tác": it.get("job_name"),
+                        "Khối lượng": it.get("volume"),
+                        "ĐVT": it.get("unit"),
+                        "Biến thể hiện tại": it.get("variant_id", "A0")
+                    })
+                st.dataframe(pd.DataFrame(preview_rows), use_container_width=True, hide_index=True)
+                
+                col_btn_apply, col_btn_revert = st.columns([6, 6])
+                with col_btn_apply:
+                    if st.button(f"🚀 Áp dụng Biến thể [{chosen_var_to_assign}] cho TẤT CẢ {len(matching_items)} công tác trên", type="primary", key="btn_batch_apply_var"):
+                        for it in matching_items:
+                            it["variant_id"] = chosen_var_to_assign
+                            it["exclude_replacement"] = avail_variants[chosen_var_to_assign].get("exclude_replacement", False)
+                            if "work_steps" in it:
+                                del it["work_steps"]
+                        mgr.save_work_items(st.session_state.work_items)
+                        st.success(f"✅ Đã gán biến thể [{chosen_var_to_assign}] cho {len(matching_items)} công việc!")
+                        st.rerun()
+                with col_btn_revert:
+                    if st.button(f"🔄 Khôi phục Biến thể [A0 - Gốc 100%] cho các công tác trên", key="btn_batch_revert_var"):
+                        for it in matching_items:
+                            it["variant_id"] = "A0"
+                            it["exclude_replacement"] = False
+                            if "work_steps" in it:
+                                del it["work_steps"]
+                        mgr.save_work_items(st.session_state.work_items)
+                        st.success(f"✅ Đã khôi phục biến thể gốc A0 cho {len(matching_items)} công việc!")
+                        st.rerun()
+
+    # 3. Quản lý theo từng Nhóm (Xem Bảng Hàng Ngang & Chỉnh Sửa Trong Nhóm)
     st.markdown("##### 🗂️ QUẢN LÝ THEO TỪNG NHÓM CÔNG VIỆC")
     st.caption("Xem đơn giá chi tiết theo hàng ngang (Vật liệu, Nhân công, Máy, Trực tiếp, Trước thuế) hoặc chuyển sang chế độ chỉnh sửa.")
 
@@ -486,18 +633,28 @@ with tab1:
                     total_group_amount = 0.0
                     for item in items_in_g:
                         rates = mgr.calculate_item_unit_rate(item, st.session_state.coefficients)
+                        vol = float(item.get("volume", 0.0))
+                        var_id = rates.get("variant_id", "")
+                        var_label = f"[{var_id}]" if var_id and var_id != "A0" else ("Gốc [A0]" if not rates.get("is_quote") else "-")
+                        tt_vl = round(vol * rates["dg_vl"])
+                        tt_nc = round(vol * rates["dg_nc"])
+                        tt_m = round(vol * rates["dg_m"])
                         h_rows.append({
                             "STT": item.get("stt"),
                             "Mã hiệu": item.get("norm_code"),
+                            "Biến thể": var_label,
                             "Bản chất kỹ thuật": item.get("tech_profile") or mgr.get_default_tech_profile(item.get("norm_code", "")),
                             "Tên công tác (PAKT)": item.get("job_name"),
                             "ĐVT": item.get("unit"),
-                            "Khối lượng": item.get("volume", 0.0),
+                            "Khối lượng": vol,
                             "Thành phần ĐM": f"{rates['k_pct_str']} ({rates['active_steps_count']}/{rates['total_steps_count']})" if rates.get("total_steps_count", 0) > 0 else "100%",
                             "ĐG Vật liệu (đ)": rates["dg_vl"],
                             "ĐG Nhân công (đ)": rates["dg_nc"],
                             "ĐG Ca máy (đ)": rates["dg_m"],
                             "ĐG Trực tiếp T (đ)": rates["dg_tt"],
+                            "Thành tiền VL (đ)": tt_vl,
+                            "Thành tiền NC (đ)": tt_nc,
+                            "Thành tiền Máy (đ)": tt_m,
                             "ĐG ĐM trước thuế (đ)": rates["dg_dm_truoc_thue"],
                             "ĐG Báo giá (đ)": rates["unit_price_quote"],
                             "ĐG Đầy đủ trước thuế (đ)": rates["dg_truoc_thue"],
@@ -513,6 +670,9 @@ with tab1:
                             "ĐG Nhân công (đ)": "{:,.0f}",
                             "ĐG Ca máy (đ)": "{:,.0f}",
                             "ĐG Trực tiếp T (đ)": "{:,.0f}",
+                            "Thành tiền VL (đ)": "{:,.0f}",
+                            "Thành tiền NC (đ)": "{:,.0f}",
+                            "Thành tiền Máy (đ)": "{:,.0f}",
                             "ĐG ĐM trước thuế (đ)": "{:,.0f}",
                             "ĐG Báo giá (đ)": "{:,.0f}",
                             "ĐG Đầy đủ trước thuế (đ)": "{:,.0f}",
@@ -549,6 +709,30 @@ with tab1:
                                 key=f"sel_adj_item_{g_idx}"
                             )
                             target_it = next(it for it in items_in_g if it["stt"] == sel_adj_stt)
+                            t_code = target_it.get("norm_code", "")
+                            avail_vars_for_t = mgr.get_variants_for_norm(t_code)
+                            curr_v_id = target_it.get("variant_id", "A0")
+                            
+                            c_var_pick, c_var_btn = st.columns([8, 4])
+                            with c_var_pick:
+                                sel_profile_var = st.selectbox(
+                                    f"Chọn Biến thể hồ sơ dự án cho mã {t_code}:",
+                                    options=list(avail_vars_for_t.keys()),
+                                    index=list(avail_vars_for_t.keys()).index(curr_v_id) if curr_v_id in avail_vars_for_t else 0,
+                                    format_func=lambda x: f"[{x}] {avail_vars_for_t[x].get('variant_name', '')}",
+                                    key=f"pick_var_in_grp_{g_idx}_{sel_adj_stt}"
+                                )
+                            with c_var_btn:
+                                st.write("")
+                                if st.button("Áp dụng biến thể này", key=f"btn_apply_var_grp_{g_idx}_{sel_adj_stt}", use_container_width=True):
+                                    target_it["variant_id"] = sel_profile_var
+                                    target_it["exclude_replacement"] = avail_vars_for_t[sel_profile_var].get("exclude_replacement", False)
+                                    if "work_steps" in target_it:
+                                        del target_it["work_steps"]
+                                    mgr.save_work_items(st.session_state.work_items)
+                                    st.success(f"Đã gán biến thể [{sel_profile_var}] cho công tác STT {sel_adj_stt}!")
+                                    st.rerun()
+
                             eff_info = mgr.get_effective_item_resources(target_it)
                             curr_steps = eff_info["raw_steps"]
 
@@ -697,7 +881,7 @@ with tab2:
         norm = mgr.get_norm(c)
         if not norm: continue
         u_str = norm.get("unit", "")
-        div = 10.0 if "10" in u_str else (5.0 if "5" in u_str else 1.0)
+        div = mgr.get_unit_divisor(u_str, item.get("unit", ""))
         eff = mgr.get_effective_item_resources(item)
         for m in eff.get("materials", []):
             if m.get("code"): mat_qty[m["code"]] = mat_qty.get(m["code"], 0.0) + (v * float(m.get("rate", 0.0)) / div)
@@ -729,7 +913,7 @@ with tab2:
             if "source" not in df_vl.columns: df_vl["source"] = ""
 
             if "1. Bảng giá hiện tại" in vl_mode:
-                # View Mode matching user's image exactly:
+                # View Mode matching user's image:
                 # STT | Mã hiệu | Tên vật tư | Đơn vị | Nguồn mua | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
                 rows_current = []
                 main_mat_total = 0.0
@@ -738,45 +922,50 @@ with tab2:
                     is_other = (code == "V00750" or r["unit"] == "%")
                     if not is_other:
                         q = float(r["qty_calc"])
-                        p = float(r.get("price_notice", 0))
-                        main_mat_total += round(q * p)
+                        if q > 0:
+                            p = float(r.get("price_notice", 0))
+                            main_mat_total += round(q * p)
                 
                 total_vl_all = 0.0
+                stt_counter = 1
                 for idx, r in df_vl.iterrows():
-                    stt_idx = idx + 1
                     code = r["code"]
                     is_other = (code == "V00750" or r["unit"] == "%")
                     if is_other:
-                        pct = float(r.get("rate", 2.0))
-                        tt = round(main_mat_total * (pct / 100.0))
-                        total_vl_all += tt
-                        rows_current.append({
-                            "STT": stt_idx,
-                            "Mã hiệu": code,
-                            "Tên vật tư": r["name"],
-                            "Đơn vị": r["unit"],
-                            "Nguồn mua": r.get("source", ""),
-                            "Khối lượng": None,
-                            "Giá hiện tại (đ)": None,
-                            "Thành tiền (đ)": tt,
-                            "Căn cứ tính giá": r.get("legal_basis", f"{pct}% vật liệu chính theo định mức")
-                        })
+                        if main_mat_total > 0:
+                            pct = float(r.get("rate", 2.0))
+                            tt = round(main_mat_total * (pct / 100.0))
+                            total_vl_all += tt
+                            rows_current.append({
+                                "STT": stt_counter,
+                                "Mã hiệu": code,
+                                "Tên vật tư": r["name"],
+                                "Đơn vị": r["unit"],
+                                "Nguồn mua": r.get("source", ""),
+                                "Khối lượng": None,
+                                "Giá hiện tại (đ)": None,
+                                "Thành tiền (đ)": tt,
+                                "Căn cứ tính giá": r.get("legal_basis", f"{pct}% vật liệu chính theo định mức")
+                            })
+                            stt_counter += 1
                     else:
                         q = float(r["qty_calc"])
-                        p = float(r.get("price_notice", 0))
-                        tt = round(q * p)
-                        total_vl_all += tt
-                        rows_current.append({
-                            "STT": stt_idx,
-                            "Mã hiệu": code,
-                            "Tên vật tư": r["name"],
-                            "Đơn vị": r["unit"],
-                            "Nguồn mua": r.get("source", ""),
-                            "Khối lượng": q,
-                            "Giá hiện tại (đ)": p,
-                            "Thành tiền (đ)": tt,
-                            "Căn cứ tính giá": r.get("legal_basis", "Công bố giá LS / Báo giá NSX")
-                        })
+                        if q > 0:
+                            p = float(r.get("price_notice", 0))
+                            tt = round(q * p)
+                            total_vl_all += tt
+                            rows_current.append({
+                                "STT": stt_counter,
+                                "Mã hiệu": code,
+                                "Tên vật tư": r["name"],
+                                "Đơn vị": r["unit"],
+                                "Nguồn mua": r.get("source", ""),
+                                "Khối lượng": q,
+                                "Giá hiện tại (đ)": p,
+                                "Thành tiền (đ)": tt,
+                                "Căn cứ tính giá": r.get("legal_basis", "Công bố giá LS / Báo giá NSX")
+                            })
+                            stt_counter += 1
                 
                 df_vl_disp = pd.DataFrame(rows_current)
                 st.dataframe(
@@ -800,9 +989,12 @@ with tab2:
                 with col_dl:
                     materials_payload = []
                     for idx, r in df_vl.iterrows():
-                        m_copy = r.to_dict()
-                        m_copy["total_qty"] = float(r["qty_calc"])
-                        materials_payload.append(m_copy)
+                        q_val = float(r["qty_calc"])
+                        is_other = (r["code"] == "V00750" or r["unit"] == "%")
+                        if q_val > 0 or (is_other and main_mat_total > 0):
+                            m_copy = r.to_dict()
+                            m_copy["total_qty"] = q_val
+                            materials_payload.append(m_copy)
                     excel_bytes_vl = create_single_summary_sheet_excel("material", project_name, category_name, materials_payload, mgr)
                     st.download_button(
                         "📥 Tải Bảng Tổng Hợp Vật Liệu (.xlsx)",
@@ -813,8 +1005,9 @@ with tab2:
                     )
                 edited_vl = df_vl
             else:
+                df_vl_edit_source = df_vl[df_vl["qty_calc"] > 0] if not df_vl.empty else df_vl
                 edited_vl = st.data_editor(
-                    df_vl[["code", "name", "unit", "qty_calc", "source", "price_base", "price_notice", "legal_basis"]],
+                    df_vl_edit_source[["code", "name", "unit", "qty_calc", "source", "price_base", "price_notice", "legal_basis"]],
                     column_config={
                         "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
                         "name": st.column_config.TextColumn("Tên vật tư", disabled=True),
@@ -848,18 +1041,20 @@ with tab2:
             if "legal_basis" not in df_nc.columns: df_nc["legal_basis"] = "5898/SXD-QLXD ngày 02/7/2026 của SXD tỉnh Lâm Đồng"
 
             if "1. Bảng giá hiện tại" in nc_mode:
-                # View Mode matching user's image exactly:
+                # View Mode matching user's image:
                 # STT | Mã hiệu | Tên vật tư (Tên nhân công) | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
                 rows_nc_current = []
                 total_nc_all = 0.0
+                stt_nc_counter = 1
                 for idx, r in df_nc.iterrows():
-                    stt_idx = idx + 1
                     q = float(r["qty_calc"])
+                    if q <= 0:
+                        continue
                     p = float(r.get("price_current", 0))
                     tt = round(q * p)
                     total_nc_all += tt
                     rows_nc_current.append({
-                        "STT": stt_idx,
+                        "STT": stt_nc_counter,
                         "Mã hiệu": r["code"],
                         "Tên nhân công": r["name"],
                         "Đơn vị": r["unit"],
@@ -868,6 +1063,7 @@ with tab2:
                         "Thành tiền (đ)": tt,
                         "Căn cứ tính giá": r.get("legal_basis", "5898/SXD-QLXD")
                     })
+                    stt_nc_counter += 1
                 
                 df_nc_disp = pd.DataFrame(rows_nc_current)
                 st.dataframe(
@@ -891,9 +1087,11 @@ with tab2:
                 with col_dl_nc:
                     labor_payload = []
                     for idx, r in df_nc.iterrows():
-                        l_copy = r.to_dict()
-                        l_copy["total_qty"] = float(r["qty_calc"])
-                        labor_payload.append(l_copy)
+                        q_val = float(r["qty_calc"])
+                        if q_val > 0:
+                            l_copy = r.to_dict()
+                            l_copy["total_qty"] = q_val
+                            labor_payload.append(l_copy)
                     excel_bytes_nc = create_single_summary_sheet_excel("labor", project_name, category_name, labor_payload, mgr)
                     st.download_button(
                         "📥 Tải Bảng Tổng Hợp Nhân Công (.xlsx)",
@@ -904,8 +1102,9 @@ with tab2:
                     )
                 edited_nc = df_nc
             else:
+                df_nc_edit_source = df_nc[df_nc["qty_calc"] > 0] if not df_nc.empty else df_nc
                 edited_nc = st.data_editor(
-                    df_nc[["code", "name", "unit", "qty_calc", "price_base", "price_current", "legal_basis"]],
+                    df_nc_edit_source[["code", "name", "unit", "qty_calc", "price_base", "price_current", "legal_basis"]],
                     column_config={
                         "code": st.column_config.TextColumn("Mã hiệu", disabled=True),
                         "name": st.column_config.TextColumn("Tên nhân công", disabled=True),
@@ -938,18 +1137,20 @@ with tab2:
             if "legal_basis" not in df_m.columns: df_m["legal_basis"] = "Thông tư 37/2026/TT-BXD của Bộ Xây dựng"
 
             if "1. Bảng giá hiện tại" in m_mode:
-                # View Mode matching user's image exactly:
+                # View Mode matching user's image:
                 # STT | Mã hiệu | Tên vật tư (Tên máy) | Đơn vị | Khối lượng | Giá hiện tại | Thành tiền | Căn cứ tính giá
                 rows_m_current = []
                 total_m_all = 0.0
+                stt_m_counter = 1
                 for idx, r in df_m.iterrows():
-                    stt_idx = idx + 1
                     q = float(r["qty_calc"])
+                    if q <= 0:
+                        continue
                     p = float(r.get("price_current", r.get("price_notice", 0) + r.get("price_diff", 0)))
                     tt = round(q * p)
                     total_m_all += tt
                     rows_m_current.append({
-                        "STT": stt_idx,
+                        "STT": stt_m_counter,
                         "Mã hiệu": r["code"],
                         "Tên máy thi công": r["name"],
                         "Đơn vị": r["unit"],
@@ -958,6 +1159,7 @@ with tab2:
                         "Thành tiền (đ)": tt,
                         "Căn cứ tính giá": r.get("legal_basis", "TT 37/2026/TT-BXD")
                     })
+                    stt_m_counter += 1
                 
                 df_m_disp = pd.DataFrame(rows_m_current)
                 st.dataframe(
@@ -981,9 +1183,11 @@ with tab2:
                 with col_dl_m:
                     machines_payload = []
                     for idx, r in df_m.iterrows():
-                        mac_copy = r.to_dict()
-                        mac_copy["total_qty"] = float(r["qty_calc"])
-                        machines_payload.append(mac_copy)
+                        q_val = float(r["qty_calc"])
+                        if q_val > 0:
+                            mac_copy = r.to_dict()
+                            mac_copy["total_qty"] = q_val
+                            machines_payload.append(mac_copy)
                     excel_bytes_m = create_single_summary_sheet_excel("machine", project_name, category_name, machines_payload, mgr)
                     st.download_button(
                         "📥 Tải Bảng Tổng Hợp Máy Thi Công (.xlsx)",

@@ -1,0 +1,66 @@
+{
+  "A1": {
+    "variant_id": "A1",
+    "variant_name": "Bảo dưỡng đo kiểm không thay đế",
+    "norm_code": "BD.41111",
+    "exclude_replacement": true,
+    "k_step": 0.6,
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0261,
+        "apply_flag": 1,
+        "rate_calculated": 0.0261,
+        "pct": "15%",
+        "rate_nc": 0.01305,
+        "rate_ks": 0.01305
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0783,
+        "apply_flag": 1,
+        "rate_calculated": 0.0783,
+        "pct": "45%",
+        "rate_nc": 0.03915,
+        "rate_ks": 0.03915
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0435,
+        "apply_flag": 0,
+        "rate_calculated": 0.0435,
+        "pct": "25%",
+        "rate_nc": 0.02175,
+        "rate_ks": 0.02175
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0174,
+        "apply_flag": 0,
+        "rate_calculated": 0.0174,
+        "pct": "10%",
+        "rate_nc": 0.0087,
+        "rate_ks": 0.0087
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0087,
+        "apply_flag": 0,
+        "rate_calculated": 0.0087,
+        "pct": "5%",
+        "rate_nc": 0.00435,
+        "rate_ks": 0.00435
+      }
+    ]
+  }
+}

@@ -10,9 +10,37 @@ import sys
 
 # Ensure parent directory is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import NORMS_DB_FILE, PRICES_DB_FILE, IMAGES_DIR, PROJECT_ITEMS_FILE, LOCAL_PROJECT_ITEMS_FILE, DATABASE_DIR
+from config import (
+    NORMS_DB_FILE, PRICES_DB_FILE, IMAGES_DIR,
+    PROJECT_ITEMS_FILE, LOCAL_PROJECT_ITEMS_FILE, DATABASE_DIR,
+    PROJECT_VARIANTS_FILE, LOCAL_PROJECT_VARIANTS_FILE
+)
+
+REPLACEMENT_MATERIAL_CODES = {"V82782", "V82780", "V82781", "V82783"}
+
+def get_unit_divisor(norm_unit: str, item_unit: str) -> float:
+    """
+    Scale factor between norm basis unit (e.g. 10 đầu, 5 bộ) and project work item unit.
+    - If norm is for 10 units and item is also 10 units (e.g. '10 đầu'): divisor = 1.0 (no division)
+    - If norm is for 10 units and item is 1 unit (e.g. 'đầu', 'bộ', 'cái'): divisor = 10.0
+    - If norm is for 5 units and item is 1 unit: divisor = 5.0
+    - If norm is for 100 units and item is 1 unit: divisor = 100.0
+    """
+    nu = (norm_unit or "").strip().lower()
+    iu = (item_unit or "").strip().lower()
+    if "10" in nu:
+        return 1.0 if "10" in iu else 10.0
+    if "5" in nu:
+        return 1.0 if "5" in iu else 5.0
+    if "100" in nu:
+        return 1.0 if "100" in iu else 100.0
+    return 1.0
 
 class NormManager:
+    @staticmethod
+    def get_unit_divisor(norm_unit: str, item_unit: str) -> float:
+        return get_unit_divisor(norm_unit, item_unit)
+
     def __init__(self, norms_file: Path = NORMS_DB_FILE, prices_file: Path = PRICES_DB_FILE):
         self.norms_file = norms_file
         self.prices_file = prices_file
@@ -167,22 +195,137 @@ class NormManager:
         tl_rate = float(coeffs.get("tl", {}).get("rate", 5.5)) / 100.0
         k_full = (1.0 + c_rate + tt_rate) * (1.0 + tl_rate)
 
+    def get_project_variants_file(self) -> Path:
+        """Return the target path for project variants JSON database file."""
+        if PROJECT_VARIANTS_FILE.parent.exists():
+            return PROJECT_VARIANTS_FILE
+        return LOCAL_PROJECT_VARIANTS_FILE
+
+    def load_project_variants(self) -> Dict[str, Any]:
+        """Load project variants profile dictionary from database."""
+        target = self.get_project_variants_file()
+        if target.exists():
+            try:
+                with open(target, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+            except Exception as e:
+                print(f"Error loading project variants from {target}: {e}")
+        elif LOCAL_PROJECT_VARIANTS_FILE.exists():
+            try:
+                with open(LOCAL_PROJECT_VARIANTS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+            except Exception:
+                pass
+        return {}
+
+    def save_project_variants(self, variants: Dict[str, Any]) -> bool:
+        """Persist project variants to JSON database file."""
+        target = self.get_project_variants_file()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with open(target, "w", encoding="utf-8") as f:
+                json.dump(variants, f, ensure_ascii=False, indent=2)
+            if target != LOCAL_PROJECT_VARIANTS_FILE:
+                try:
+                    LOCAL_PROJECT_VARIANTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+                    with open(LOCAL_PROJECT_VARIANTS_FILE, "w", encoding="utf-8") as f2:
+                        json.dump(variants, f2, ensure_ascii=False, indent=2)
+                except Exception:
+                    pass
+            return True
+        except Exception as e:
+            print(f"Error saving project variants: {e}")
+            return False
+
+    def get_variant(self, variant_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve a specific project variant profile by its ID."""
+        variants = self.load_project_variants()
+        return variants.get(variant_id)
+
+    def get_variants_for_norm(self, norm_code: str) -> List[Dict[str, Any]]:
+        """Retrieve all active variant profiles belonging to a given base norm code."""
+        code = (norm_code or "").strip()
+        variants = self.load_project_variants()
+        results = [v for v in variants.values() if v.get("norm_code", "").strip() == code]
+        # Always ensure base variant A0 exists in memory if none defined
+        has_base = any(v.get("variant_id", "").endswith("A0") or v.get("variant_id") == "A0" for v in results)
+        if not has_base:
+            norm = self.get_norm(code)
+            if norm:
+                base_steps = norm.get("work_steps", [])
+                results.insert(0, {
+                    "variant_id": "A0",
+                    "variant_name": "Định mức gốc chuẩn 100% (Bao gồm vật tư thay thế)",
+                    "norm_code": code,
+                    "exclude_replacement": False,
+                    "k_step": 1.0,
+                    "work_steps": base_steps
+                })
+        return results
+
+    def create_or_update_variant(
+        self,
+        variant_id: str,
+        variant_name: str,
+        norm_code: str,
+        work_steps: List[Dict[str, Any]],
+        exclude_replacement: bool = False
+    ) -> Dict[str, Any]:
+        """Create or update a centralized variant profile and save to DB."""
+        variants = self.load_project_variants()
+        total_base = sum(float(s.get("rate_base", 0.0)) for s in work_steps)
+        active_base = sum(float(s.get("rate_base", 0.0)) for s in work_steps if int(s.get("apply_flag", 1)) == 1)
+        k_step = (active_base / total_base) if total_base > 0 else 1.0
+
+        var_obj = {
+            "variant_id": variant_id.strip(),
+            "variant_name": variant_name.strip(),
+            "norm_code": norm_code.strip(),
+            "exclude_replacement": bool(exclude_replacement),
+            "k_step": round(k_step, 4),
+            "work_steps": work_steps
+        }
+        variants[variant_id.strip()] = var_obj
+        self.save_project_variants(variants)
+        return var_obj
+
     def get_effective_item_resources(self, item: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Calculates effective resource rates for a specific work item taking into account
-        item-level work_steps adjustment (k_step factor and active labor).
+        Calculates effective resource rates for a specific work item taking into account:
+        - Centralized variant profile inheritance (variant_id) or custom work_steps
+        - Proportional reduction factor k_step for non-replacement materials and machines
+        - Replacement material exclusion rule:
+          Replacement materials (V82782, V82780, V82781, V82783) are NOT scaled by k_step.
+          If exclude_replacement is True, their rate is set to 0.0.
         """
         code = (item.get("norm_code") or "").strip()
         norm = self.get_norm(code)
         if not norm:
-            return {"k_step": 1.0, "materials": [], "labor": [], "machines": [], "active_steps": [], "total_steps": 0, "raw_steps": []}
+            return {
+                "k_step": 1.0, "materials": [], "labor": [], "machines": [],
+                "active_steps": [], "total_steps": 0, "raw_steps": [],
+                "variant_id": item.get("variant_id", ""), "variant_name": "",
+                "exclude_replacement": False
+            }
 
         import copy
-        raw_steps = item.get("work_steps")
-        if not raw_steps:
-            raw_steps = copy.deepcopy(norm.get("work_steps", []))
+        variant_id = item.get("variant_id")
+        variant_info = self.get_variant(variant_id) if variant_id else None
+        
+        exclude_replacement = bool(item.get("exclude_replacement", False))
+        variant_name = ""
+        if variant_info:
+            raw_steps = copy.deepcopy(variant_info.get("work_steps", []))
+            exclude_replacement = bool(variant_info.get("exclude_replacement", exclude_replacement))
+            variant_name = variant_info.get("variant_name", "")
+        elif item.get("work_steps"):
+            raw_steps = copy.deepcopy(item.get("work_steps"))
         else:
-            raw_steps = copy.deepcopy(raw_steps)
+            raw_steps = copy.deepcopy(norm.get("work_steps", []))
 
         total_base_labor = sum(float(s.get("rate_base", 0.0)) for s in raw_steps)
         active_steps = [s for s in raw_steps if int(s.get("apply_flag", 1)) == 1]
@@ -195,12 +338,28 @@ class NormManager:
 
         res = norm.get("resources", {})
         
-        # Effective Materials: base rate * k_step (proportional reduction)
+        # Effective Materials:
+        # Replacement materials (V82782, V82780, V82781, V82783) are NOT scaled by k_step.
+        # If exclude_replacement is True, rate is 0.0.
         eff_materials = []
         for m in res.get("materials", []):
             m_copy = dict(m)
-            if m_copy.get("code") != "V00750" and m_copy.get("unit") != "%":
+            m_code = m_copy.get("code")
+            if m_code in REPLACEMENT_MATERIAL_CODES:
+                m_copy["is_replacement"] = True
+                if exclude_replacement:
+                    m_copy["rate"] = 0.0
+                    m_copy["excluded"] = True
+                else:
+                    m_copy["rate"] = float(m.get("rate", 0.0))
+                    m_copy["excluded"] = False
+            elif m_copy.get("code") != "V00750" and m_copy.get("unit") != "%":
                 m_copy["rate"] = round(float(m.get("rate", 0.0)) * k_step, 4)
+                m_copy["is_replacement"] = False
+                m_copy["excluded"] = False
+            else:
+                m_copy["is_replacement"] = False
+                m_copy["excluded"] = False
             eff_materials.append(m_copy)
 
         # Effective Machines: base rate * k_step (proportional reduction)
@@ -230,7 +389,10 @@ class NormManager:
             "total_steps": len(raw_steps),
             "materials": eff_materials,
             "labor": eff_labor,
-            "machines": eff_machines
+            "machines": eff_machines,
+            "variant_id": variant_id or "A0",
+            "variant_name": variant_name,
+            "exclude_replacement": exclude_replacement
         }
 
     def calculate_item_unit_rate(
@@ -241,8 +403,9 @@ class NormManager:
     ) -> Dict[str, Any]:
         """
         Calculate horizontal unit rates for a single work item:
-        - Support item-level work_steps adjustment (k_step factor)
-        - Support hybrid norm + quote items (a work item can have both norm rate and pre-tax quote price)
+        - Accurately handles unit divisor between norm unit and item unit
+        - Supports centralized variant profile and exclude_replacement rule
+        - Supports hybrid norm + quote items
         """
         coeffs = coefficients or {
             "c": {"rate": 7.3},
@@ -265,6 +428,8 @@ class NormManager:
             dg_truoc_thue = quote_price * k_full if apply_factor else quote_price
             return {
                 "is_quote": True,
+                "variant_id": "",
+                "variant_name": "",
                 "tech_profile": item.get("tech_profile", "Công tác báo giá trọn gói"),
                 "k_step": 1.0,
                 "k_pct_str": "100%",
@@ -278,13 +443,16 @@ class NormManager:
                 "dg_dm_truoc_thue": 0.0,
                 "unit_price_quote": quote_price,
                 "dg_truoc_thue": dg_truoc_thue,
-                "thanh_tien_truoc_thue": vol * dg_truoc_thue
+                "thanh_tien_truoc_thue": vol * dg_truoc_thue,
+                "exclude_replacement": False
             }
 
         norm = self.get_norm(code)
         if not norm:
             return {
                 "is_quote": False,
+                "variant_id": "",
+                "variant_name": "",
                 "tech_profile": "Chưa xác định",
                 "k_step": 1.0,
                 "k_pct_str": "100%",
@@ -294,11 +462,13 @@ class NormManager:
                 "k_full": k_full, "dg_dm_truoc_thue": 0.0,
                 "unit_price_quote": unit_price_quote,
                 "dg_truoc_thue": unit_price_quote,
-                "thanh_tien_truoc_thue": vol * unit_price_quote
+                "thanh_tien_truoc_thue": vol * unit_price_quote,
+                "exclude_replacement": False
             }
 
-        unit_str = norm.get("unit", "")
-        divisor = 10.0 if "10" in unit_str else (5.0 if "5" in unit_str else 1.0)
+        norm_unit = norm.get("unit", "")
+        item_unit = item.get("unit", norm_unit)
+        divisor = get_unit_divisor(norm_unit, item_unit)
 
         # Resource price lookup maps
         prices_db = custom_prices or self.get_resource_prices()
@@ -306,16 +476,19 @@ class NormManager:
         nc_map = {l["code"]: l.get("price_current", 0) for l in prices_db.get("labor", [])}
         mac_map = {mac["code"]: mac.get("price_current", mac.get("price_notice", 0) + mac.get("price_diff", 0)) for mac in prices_db.get("machines", [])}
 
-        # Retrieve effective resource rates after applying item-level work_steps reduction factor
+        # Retrieve effective resource rates
         eff = self.get_effective_item_resources(item)
         k_step = eff["k_step"]
+        exclude_replacement = eff["exclude_replacement"]
         
         # 1. Material unit rate
         dg_vl = 0.0
         for m in eff.get("materials", []):
             m_code = m.get("code")
             if m_code and m_code != "V00750" and m.get("unit") != "%":
-                dg_vl += (float(m.get("rate", 0.0)) * float(vl_map.get(m_code, 0))) / divisor
+                rate_val = float(m.get("rate", 0.0))
+                price_val = 0.0 if (m_code in REPLACEMENT_MATERIAL_CODES and exclude_replacement) else float(vl_map.get(m_code, 0))
+                dg_vl += (rate_val * price_val) / divisor
         for m in eff.get("materials", []):
             if m.get("code") == "V00750" or m.get("unit") == "%":
                 pct = float(m.get("rate", 0.0)) / 100.0
@@ -345,11 +518,15 @@ class NormManager:
 
         return {
             "is_quote": False,
+            "variant_id": eff.get("variant_id", "A0"),
+            "variant_name": eff.get("variant_name", ""),
+            "exclude_replacement": exclude_replacement,
             "tech_profile": tech_p,
             "k_step": k_step,
             "k_pct_str": f"{round(k_step * 100)}%",
             "active_steps_count": len(eff["active_steps"]),
             "total_steps_count": eff["total_steps"],
+            "divisor": divisor,
             "dg_vl": round(dg_vl, 0),
             "dg_nc": round(dg_nc, 0),
             "dg_m": round(dg_m, 0),
@@ -360,6 +537,7 @@ class NormManager:
             "dg_truoc_thue": round(dg_truoc_thue, 0),
             "thanh_tien_truoc_thue": round(vol * dg_truoc_thue, 0)
         }
+
 
     def aggregate_resources_from_norms(self) -> Dict[str, Any]:
         """
