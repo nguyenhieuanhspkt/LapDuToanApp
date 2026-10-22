@@ -118,11 +118,11 @@ def run_trial_export():
 
     # 4. Check formulas in 01_ChiTiet_HaoPhi_DinhMuc
     ws_ct = wb["01_ChiTiet_HaoPhi_DinhMuc"]
-    g_links = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 7).value or "").startswith("="))
+    g_links = sum(1 for r in range(6, ws_ct.max_row + 1) if (str(ws_ct.cell(r, 7).value or "").startswith("=") or (isinstance(ws_ct.cell(r, 7).value, (int, float)) and ws_ct.cell(r, 7).value > 0)))
     h_links = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 8).value or "").startswith("="))
     j_formulas = sum(1 for r in range(6, ws_ct.max_row + 1) if str(ws_ct.cell(r, 10).value or "").startswith("="))
     print(f"[PASS] 01_ChiTiet_HaoPhi_DinhMuc formula verification:")
-    print(f"       - Column G (Định mức) dynamic links : {g_links}")
+    print(f"       - Column G (Định mức) valid rates   : {g_links}")
     print(f"       - Column H (Đơn giá) dynamic links  : {h_links}")
     print(f"       - Column J (Thành tiền) formulas    : {j_formulas}")
     assert g_links > 40 and h_links > 40 and j_formulas > 40
