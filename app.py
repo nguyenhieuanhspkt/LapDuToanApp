@@ -10,6 +10,7 @@ import io
 import openpyxl
 from pathlib import Path
 import sys
+import re
 
 # Ensure project root is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -494,15 +495,30 @@ def dialog_quick_intake_pakt():
             st.warning("Vui lòng dán dữ liệu vào ô trên trước khi phân tích.")
         else:
             parsed_rows = []
-            all_codes = mgr.get_all_norm_codes()
-            
-            # Build fast keyword lookup dict
+            all_codes = set(mgr.get_all_norm_codes())
+
+            def is_num(val):
+                s = re.sub(r'[^0-9.,]', '', str(val)).replace(',', '.')
+                if not s: return False
+                try:
+                    float(s)
+                    return True
+                except:
+                    return False
+
+            def to_num(val):
+                s = re.sub(r'[^0-9.,]', '', str(val)).replace(',', '.')
+                return float(s)
+
+            known_units = {'bộ', 'cái', 'đầu', 'bình', 'trung tâm', 'hệ thống', 'tủ', 'gói', 'm', 'mét', 'kg', 'tấm', 'cuộn', 'điểm', 'trạm'}
+
+            # Keyword mapping for smart recognition
             kw_map = {
                 "đầu báo khói": "BD.41111", "đầu báo nhiệt": "BD.41111", "báo khói": "BD.41111", "báo nhiệt": "BD.41111",
                 "đèn báo cháy": "BD.41121", "đèn báo": "BD.41121",
                 "nút nhấn": "BD.41131", "nút ấn": "BD.41131",
                 "chuông": "BD.41141",
-                "chuyển mạch": "BD.42201", "module điều khiển": "BD.42201",
+                "chuyển mạch": "BD.42201", "module điều khiển": "BD.42201", "module loop": "BD.42201", "bộ nguồn": "BD.42201", "module": "BD.42201",
                 "nút nhấn khẩn": "E6C.3.01",
                 "hiệu chỉnh đầu báo": "E6C.3.02", "độ nhạy đầu báo": "E6C.3.02", "bảo trì đầu báo": "E6C.3.02",
                 "dây báo cháy": "E6C.3.03", "dây nhiệt": "E6C.3.03",
@@ -517,54 +533,85 @@ def dialog_quick_intake_pakt():
                 line = line.strip()
                 if not line:
                     continue
-                # Split by tab or multiple spaces
+                # Split by tab or 2+ spaces
                 parts = [p.strip() for p in re.split(r"\t+| {2,}", line) if p.strip()]
                 if not parts:
                     continue
 
-                # Detect columns
-                stt_val = parts[0] if parts[0].isdigit() else str(len(parsed_rows) + 1)
-                job_name = parts[1] if len(parts) > 1 else parts[0]
-                unit_val = parts[2] if len(parts) > 2 else "Bộ"
-                vol_str = parts[3] if len(parts) > 3 else "1.0"
-                try:
-                    vol_float = float(re.sub(r"[^0-9.]", "", vol_str.replace(",", ".")))
-                except:
-                    vol_float = 1.0
+                # 1. Detect STT
+                stt_val = len(parsed_rows) + 1
+                if parts[0].isdigit():
+                    stt_val = int(parts[0])
+                    rem = parts[1:]
+                else:
+                    rem = parts[:]
 
-                code_given = parts[4] if len(parts) > 4 else ""
-                
-                # Auto detect norm code
-                matched_code = code_given if code_given in all_codes else ""
-                if not matched_code:
-                    j_lower = job_name.lower()
+                # 2. Check norm code in parts
+                found_code = ""
+                for p in list(rem):
+                    if p in all_codes or p.startswith("BD.") or p.startswith("E6") or p.startswith("BG."):
+                        found_code = p
+                        rem.remove(p)
+                        break
+
+                # 3. Detect Unit
+                found_unit = ""
+                for p in list(rem):
+                    if p.lower() in known_units:
+                        found_unit = p
+                        rem.remove(p)
+                        break
+                if not found_unit:
+                    for p in list(rem):
+                        if len(p) <= 12 and not is_num(p) and any(u in p.lower() for u in known_units):
+                            found_unit = p
+                            rem.remove(p)
+                            break
+                if not found_unit:
+                    found_unit = "Bộ"
+
+                # 4. Detect Volume (Khối lượng)
+                found_vol = 1.0
+                for p in reversed(list(rem)):
+                    if is_num(p):
+                        found_vol = to_num(p)
+                        rem.remove(p)
+                        break
+
+                # 5. Job name and Description
+                job_name = rem[0] if rem else f"Công tác {stt_val}"
+                desc = rem[1] if len(rem) > 1 else job_name
+
+                # Auto detect code by keyword if not provided
+                if not found_code:
+                    j_lower = (job_name + " " + desc).lower()
                     for kw, cd in kw_map.items():
                         if kw in j_lower:
-                            matched_code = cd
+                            found_code = cd
                             break
-                if not matched_code:
-                    matched_code = "BD.41111"  # fallback default
+                if not found_code:
+                    found_code = "BD.41111"
 
-                nm = mgr.get_norm(matched_code)
+                nm = mgr.get_norm(found_code)
                 norm_unit = nm.get("unit", "")
-                
+
                 # Auto compute conversion factor
                 conv = 1.0
-                if "10" in norm_unit and "10" not in unit_val:
+                if "10" in norm_unit and "10" not in found_unit:
                     conv = 0.1
-                elif "5" in norm_unit and "5" not in unit_val:
+                elif "5" in norm_unit and "5" not in found_unit:
                     conv = 0.2
 
                 parsed_rows.append({
-                    "stt": int(stt_val) if str(stt_val).isdigit() else len(parsed_rows) + 1,
+                    "stt": stt_val,
                     "job_name": job_name,
-                    "pakt_unit": unit_val,
-                    "pakt_vol": vol_float,
-                    "norm_code": matched_code,
+                    "pakt_unit": found_unit,
+                    "pakt_vol": found_vol,
+                    "norm_code": found_code,
                     "norm_unit": norm_unit,
                     "conv_factor": conv,
-                    "calc_vol": round(vol_float * conv, 4),
-                    "variant_id": "A1" if matched_code == "BD.41111" else "A0"
+                    "calc_vol": round(found_vol * conv, 4),
+                    "variant_id": "A1" if found_code == "BD.41111" else "A0"
                 })
 
             st.session_state["pakt_preview_rows"] = parsed_rows
