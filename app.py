@@ -40,52 +40,129 @@ st.set_page_config(
     page_title="Quản Lý & Lập Dự Toán PCCC - EVN",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Custom Styling (EVN Theme)
+# Custom Styling (EVN Theme - Tinh gọn, đẩy cao, nút nhỏ, ẩn sidebar)
 st.markdown("""
 <style>
-    .main-title {
-        font-size: 26px;
-        font-weight: 700;
-        color: #002060;
-        margin-bottom: 5px;
+    /* 1. ẨN HOÀN TOÀN SIDEBAR & HEADER MẶC ĐỊNH */
+    [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+        display: none !important;
     }
-    .sub-title {
-        font-size: 14px;
-        color: #555;
-        margin-bottom: 20px;
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
-    .metric-card {
-        background-color: #F2F7FC;
-        border-left: 5px solid #002060;
-        padding: 12px 18px;
-        border-radius: 6px;
-        margin-bottom: 15px;
+
+    /* 2. ĐẨY KHU VỰC CHÍNH LÊN SÁT ĐỈNH & TOÀN MÀN HÌNH */
+    .block-container {
+        padding-top: 0.8rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        max-width: 100% !important;
     }
-    .group-header {
-        background-color: #EBF1F5;
-        border-left: 4px solid #002060;
-        padding: 8px 14px;
-        font-weight: bold;
-        color: #002060;
-        border-radius: 4px;
-        margin-top: 10px;
-        margin-bottom: 10px;
+
+    /* 3. THIẾT KẾ CÁC NÚT BẤM SIÊU NHỎ GỌN (RIBBON TOOLBAR STYLE) */
+    div[data-testid="stButton"] button,
+    .stButton > button,
+    button[data-testid="baseButton-primary"],
+    button[data-testid="baseButton-secondary"] {
+        min-height: 26px !important;
+        height: 27px !important;
+        max-height: 28px !important;
+        padding: 2px 10px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        border-radius: 3px !important;
+        line-height: 1 !important;
+        box-shadow: none !important;
     }
+    div[data-testid="stButton"] button p,
+    .stButton > button p {
+        font-size: 12px !important;
+        line-height: 23px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 4. THANH ĐIỀU HƯỚNG TABS SIÊU TINH GỌN */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 3px !important;
+        margin-bottom: 3px !important;
     }
     .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        font-weight: 600;
+        padding: 3px 10px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
         background-color: #F8F9FA;
-        border-radius: 6px 6px 0 0;
+        border-radius: 3px 3px 0 0 !important;
+        height: 27px !important;
+        min-height: 27px !important;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        font-size: 12px !important;
+        margin: 0 !important;
+        line-height: 21px !important;
     }
     .stTabs [aria-selected="true"] {
         background-color: #002060 !important;
         color: white !important;
+    }
+
+    /* 5. THU GỌN SELECTBOX, RADIO & NHÃN */
+    div[data-testid="stSelectbox"] label,
+    div[data-testid="stRadio"] label {
+        font-size: 11.5px !important;
+        margin-bottom: 0px !important;
+        padding-bottom: 0 !important;
+    }
+    div[data-baseweb="select"] > div {
+        min-height: 27px !important;
+        height: 27px !important;
+        font-size: 12px !important;
+    }
+    div[data-testid="stRadio"] [role="radiogroup"] {
+        gap: 12px !important;
+        padding-top: 2px !important;
+    }
+    div[data-testid="stRadio"] label p {
+        font-size: 12px !important;
+    }
+
+    /* 6. TIÊU ĐỀ & METRIC CARDS GỌN GÀNG */
+    .main-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #002060;
+        margin-bottom: 0px;
+        line-height: 1.2;
+    }
+    .sub-title {
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 0px;
+    }
+    .metric-card {
+        background-color: #F2F7FC;
+        border-left: 3px solid #002060;
+        padding: 6px 12px;
+        border-radius: 3px;
+        margin-bottom: 6px;
+    }
+    .group-header {
+        background-color: #EBF1F5;
+        border-left: 3px solid #002060;
+        padding: 4px 10px;
+        font-weight: bold;
+        color: #002060;
+        border-radius: 3px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+    hr {
+        margin-top: 4px !important;
+        margin-bottom: 6px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -113,82 +190,40 @@ if "work_items" not in st.session_state:
     st.session_state.work_items = mgr.load_work_items()
 
 # =============================================================================
-# SIDEBAR
+# THÔNG TIN DỰ ÁN & ĐƠN GIÁ (KHÔNG DÙNG SIDEBAR ĐỂ TẬP TRUNG TOÀN MÀN HÌNH)
 # =============================================================================
-with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/EVN_Logo.svg/300px-EVN_Logo.svg.png", width=120)
-    st.markdown("### 🏢 THÔNG TIN DỰ ÁN")
-    project_name = st.text_area(
-        "Tên công trình:",
-        value="BẢO DƯỠNG, SỬA CHỮA VÀ THÍ NGHIỆM ĐỊNH KỲ HỆ THỐNG PCCC NĂM 2026 - NMNĐ VĨNH TÂN 4",
-        height=85
-    )
-    category_name = st.text_area(
-        "Hạng mục:",
-        value="Hệ thống báo cháy tự động & Chữa cháy (Định mức Thông tư 38/2026/TT-BXD & QĐ 45/QĐ-HĐTV)",
-        height=75
-    )
-    st.divider()
+if "project_name" not in st.session_state:
+    st.session_state.project_name = "BẢO DƯỠNG, SỬA CHỮA VÀ THÍ NGHIỆM ĐỊNH KỲ HỆ THỐNG PCCC NĂM 2026 - NMNĐ VĨNH TÂN 4"
+if "category_name" not in st.session_state:
+    st.session_state.category_name = "Hệ thống báo cháy tự động & Chữa cháy (Định mức Thông tư 38/2026/TT-BXD & QĐ 45/QĐ-HĐTV)"
+if "selected_province" not in st.session_state:
+    st.session_state.selected_province = "Lâm Đồng"
+if "selected_region" not in st.session_state:
+    st.session_state.selected_region = "Vùng IV"
+if "current_region_key" not in st.session_state:
+    st.session_state.current_region_key = "vung_4"
 
-    st.markdown("### 🗺️ ĐỊA BÀN & ĐƠN GIÁ ĐỊA PHƯƠNG")
-    selected_province = st.selectbox(
-        "Tỉnh / Địa bàn thực hiện:",
-        options=["Lâm Đồng (Mặc định)", "Khánh Hòa"],
-        index=0,
-        help="Mặc định áp dụng tỉnh Lâm Đồng khi chưa rõ địa điểm cụ thể."
-    )
-    is_lam_dong = "Lâm Đồng" in selected_province
-    
-    if is_lam_dong:
-        region_options = [
-            "Vùng IV (Đơn vị xã, huyện còn lại - MẶC ĐỊNH)",
-            "Vùng II (Đà Lạt, Bảo Lộc)",
-            "Vùng III (Đức Trọng, Đơn Dương...)"
-        ]
-        default_idx = 0
-    else:
-        region_options = [
-            "Vùng III (Địa bàn Khánh Hòa - MẶC ĐỊNH)",
-            "Vùng II (Nha Trang, Cam Ranh)",
-            "Vùng IV"
-        ]
-        default_idx = 0
-        
-    selected_region = st.selectbox(
-        "Vùng áp dụng đơn giá Nhân công & Ca máy:",
-        options=region_options,
-        index=default_idx
-    )
-    
-    if "Vùng II" in selected_region:
-        current_region_key = "vung_2"
-    elif "Vùng III" in selected_region:
-        current_region_key = "vung_3"
-    else:
-        current_region_key = "vung_4"
-        
-    st.caption(f"📌 Đang áp dụng: **{'Lâm Đồng' if is_lam_dong else 'Khánh Hòa'}** | **{selected_region.split('(')[0].strip()}**")
-    st.divider()
-
-    st.markdown("### 📈 THỐNG KÊ NHANH")
-    st.metric("Tổng số công tác", f"{len(st.session_state.work_items)} công việc")
-    st.metric("Định mức sẵn sàng", f"{len(mgr.get_all_norm_codes())} mã")
-    st.divider()
-
-    st.markdown("### ⚙️ HỆ THỐNG")
-    env = check_environment()
-    if env["status"]:
-        st.success("🟢 CSDL & Thư mục OneDrive: Sẵn sàng")
-    else:
-        st.error("🔴 Phát hiện lỗi kết nối dữ liệu")
-        for iss in env["issues"]:
-            st.caption(iss)
+project_name = st.session_state.project_name
+category_name = st.session_state.category_name
+selected_province = st.session_state.selected_province
+selected_region = st.session_state.selected_region
+current_region_key = st.session_state.current_region_key
+is_lam_dong = "Lâm Đồng" in selected_province
 
 # =============================================================================
-# MAIN HEADER
+# MAIN HEADER (TINH GỌN, ĐẨY SÁT ĐỈNH)
 # =============================================================================
-st.markdown('<div class="main-title">📊 HỆ THỐNG QUẢN LÝ ĐỊNH MỨC & LẬP DỰ TOÁN PCCC - EVN</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Tự động hóa lập dự toán, quản lý đơn giá trực quan và trích xuất minh chứng định mức 100% công thức động khép kín</div>', unsafe_allow_html=True)
+st.markdown("""
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid #002060;">
+    <div>
+        <span class="main-title">📊 HỆ THỐNG QUẢN LÝ ĐỊNH MỨC & LẬP DỰ TOÁN PCCC - EVN</span>
+        <span class="sub-title" style="margin-left: 10px; color: #555;">(TT 38/2026/TT-BXD & QĐ 45/QĐ-HĐTV)</span>
+    </div>
+    <div style="font-size: 12.5px; color: #333;">
+        🏢 <b>Vĩnh Tân 4 - 2026</b> | 📍 <b>Đơn giá:</b> Lâm Đồng (Vùng IV) | 📋 <b>{len(st.session_state.work_items)} công việc</b>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # =============================================================================
 # TABS
@@ -378,11 +413,14 @@ def dialog_add_work_item():
         with col_v2:
             st.caption(f"📌 Căn cứ pháp lý: *{selected_option['basis']}*")
 
+        if sel_code.startswith("BD."):
+            st.caption("💡 **Cơ chế dịch vụ kỹ thuật thuần túy (TT38):** Mặc định đã loại trừ thiết bị thay thế (V82782, V82780...). Chi phí định mức chỉ bao gồm nhân công, ca máy và vật tư phụ thi công. Nếu có mua sắm thay mới thiết bị, vui lòng nhập đơn giá thiết bị vào ô bên dưới để phản ánh riêng rẽ.")
+
         col_extra1, col_extra2 = st.columns([6, 6])
         with col_extra1:
-            inp_extra_quote = st.number_input("Đơn giá báo giá vật tư kèm theo trước thuế (đ - nếu có):", min_value=0, value=0, step=500000, key=f"dlg_extra_quote_{sel_code}")
+            inp_extra_quote = st.number_input("Đơn giá thiết bị / vật tư thay thế mua mới trước thuế (đ - nếu có):", min_value=0, value=0, step=500000, key=f"dlg_extra_quote_{sel_code}")
         with col_extra2:
-            inp_extra_basis = st.text_input("Căn cứ chào giá kèm theo (nếu có):", value="", key=f"dlg_extra_basis_{sel_code}", placeholder="Ví dụ: Theo Báo giá số...")
+            inp_extra_basis = st.text_input("Căn cứ chào giá thiết bị kèm theo (nếu có):", value="", key=f"dlg_extra_basis_{sel_code}", placeholder="Ví dụ: Theo Báo giá số...")
 
         if st.button("➕ Xác nhận thêm công tác định mức vào dự án", type="primary", use_container_width=True):
             new_stt = len(st.session_state.work_items) + 1
@@ -401,7 +439,7 @@ def dialog_add_work_item():
                 "unit_price_quote": float(inp_extra_quote),
                 "quote_basis": inp_extra_basis,
                 "variant_id": sel_var_id,
-                "exclude_replacement": avail_vars[sel_var_id].get("exclude_replacement", False)
+                "exclude_replacement": avail_vars[sel_var_id].get("exclude_replacement", True if sel_code.startswith("BD.") else False)
             })
             mgr.save_work_items(st.session_state.work_items)
             st.success(f"Đã thêm công tác '{inp_job_name}' vào nhóm '{final_group}' thành công!")
@@ -674,7 +712,7 @@ def dialog_quick_intake_pakt():
                         "unit_price_quote": 0.0,
                         "quote_basis": "",
                         "variant_id": v_id,
-                        "exclude_replacement": avail_v.get(v_id, {}).get("exclude_replacement", False)
+                        "exclude_replacement": avail_v.get(v_id, {}).get("exclude_replacement", True if cd.startswith("BD.") else False)
                     })
                 mgr.save_work_items(st.session_state.work_items)
                 del st.session_state["pakt_preview_rows"]
@@ -837,30 +875,139 @@ def dialog_manage_variants():
 # -----------------------------------------------------------------------------
 # TAB 1: KHỐI LƯỢNG TIÊN LƯỢNG (PHẲNG CHUẨN F1/EXCEL - KHÔNG EXPANDER)
 # -----------------------------------------------------------------------------
-with tab1:
-    # 1. ACTION TOOLBAR (THANH CÔNG CỤ NỔI - POPUP DIALOGS)
-    col_t1, col_t2, col_t3, col_t4 = st.columns([3, 3, 3, 2])
-    with col_t1:
-        if st.button("➕ THÊM CÔNG TÁC MỚI", type="primary", use_container_width=True):
-            dialog_add_work_item()
-    with col_t2:
-        if st.button("📥 NHẬP TỪ PAKT / EXCEL", use_container_width=True):
-            dialog_quick_intake_pakt()
-    with col_t3:
-        if st.button("⚙️ QUẢN LÝ BIẾN THỂ (A0/A1...)", use_container_width=True):
-            dialog_manage_variants()
-    with col_t4:
-        if st.button("🔄 LÀM MỚI BẢNG", use_container_width=True):
+
+@st.dialog("⚙️ ĐIỀU CHỈNH THÀNH PHẦN BƯỚC THI CÔNG & BIẾN THỂ (HỆ SỐ K)", width="large")
+def dialog_edit_work_steps(default_stt=None):
+    st.caption("Tùy chỉnh chọn/bỏ các bước thi công thực tế hoặc đổi biến thể để tự động tính lại hệ số k và hao phí định mức.")
+    if not st.session_state.work_items:
+        st.info("Chưa có công tác nào trong dự toán.")
+        return
+
+    avail_items = st.session_state.work_items
+    norm_items = [it for it in avail_items if not it.get("is_quote") and mgr.get_norm(it.get("norm_code", ""))]
+
+    if not norm_items:
+        st.info("Hiện không có công tác định mức nào có bước thi công để điều chỉnh.")
+        return
+
+    norm_stts = [it["stt"] for it in norm_items]
+    init_stt = default_stt if default_stt in norm_stts else norm_stts[0]
+    sel_stt_edit = st.selectbox(
+        "Chọn công tác cần điều chỉnh bước thi công:",
+        options=norm_stts,
+        index=norm_stts.index(init_stt),
+        format_func=lambda x: f"STT {x}: [{next(it.get('norm_code') for it in norm_items if it['stt'] == x)}] {next(it.get('job_name') for it in norm_items if it['stt'] == x)}"
+    )
+
+    it_edit = next(it for it in norm_items if it["stt"] == sel_stt_edit)
+    c_code = it_edit.get("norm_code", "")
+    eff_info = mgr.get_effective_item_resources(it_edit)
+    curr_steps = eff_info["raw_steps"]
+    avail_vars = mgr.get_variants_for_norm(c_code)
+    rates = mgr.calculate_item_unit_rate(it_edit, st.session_state.coefficients)
+
+    st.markdown(f"""
+    <div style="background-color: #EBF3FB; border-left: 5px solid #002060; padding: 10px 14px; border-radius: 4px; margin-bottom: 12px;">
+        <b>Công tác đang chỉnh sửa:</b> STT {it_edit['stt']} - <b>{it_edit['job_name']}</b><br/>
+        📌 <b>Mã hiệu:</b> <code>{c_code}</code> | 
+        <b>Khối lượng:</b> {it_edit.get('volume', 0.0):,.2f} {it_edit.get('unit', '')} | 
+        <b>Hệ số k hiện tại:</b> <span style="background-color:#002060; color:white; padding:2px 8px; border-radius:4px; font-weight:bold;">{rates['k_step']:.1%}</span> ({rates['active_steps_count']}/{rates['total_steps_count']} bước)
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_v1, col_v2 = st.columns([8, 4])
+    with col_v1:
+        cur_v = it_edit.get("variant_id", "A0")
+        sel_v = st.selectbox(
+            "Biến thể định mức áp dụng:",
+            options=list(avail_vars.keys()),
+            index=list(avail_vars.keys()).index(cur_v) if cur_v in avail_vars else 0,
+            format_func=lambda x: f"[{x}] {avail_vars[x].get('variant_name', '')}",
+            key=f"dlg_pick_v_{sel_stt_edit}"
+        )
+    with col_v2:
+        st.write("")
+        if st.button("Áp dụng biến thể này", key=f"dlg_btn_v_{sel_stt_edit}", use_container_width=True):
+            it_edit["variant_id"] = sel_v
+            it_edit["exclude_replacement"] = avail_vars[sel_v].get("exclude_replacement", False)
+            if "work_steps" in it_edit:
+                del it_edit["work_steps"]
+            mgr.save_work_items(st.session_state.work_items)
+            st.success(f"Đã gán biến thể [{sel_v}]!")
             st.rerun()
 
-    st.markdown("---")
+    st.markdown("##### 📋 Tích chọn các bước thực tế thi công:")
+    step_editor_data = []
+    for idx_s, s in enumerate(curr_steps, start=1):
+        step_editor_data.append({
+            "step_no": s.get("step") or s.get("step_no") or idx_s,
+            "step_name": s.get("name") or s.get("step_name") or "",
+            "rate_base": float(s.get("rate_base", 0.0)),
+            "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
+        })
+    df_step_edit = pd.DataFrame(step_editor_data)
+
+    edited_steps = st.data_editor(
+        df_step_edit,
+        column_config={
+            "step_no": st.column_config.NumberColumn("Bước", width="small", disabled=True),
+            "step_name": st.column_config.TextColumn("Tên bước công việc quy trình", width="large", disabled=True),
+            "rate_base": st.column_config.NumberColumn("Hao phí chuẩn", format="%.4f", width="small", disabled=True),
+            "apply_flag": st.column_config.CheckboxColumn("Làm (Áp dụng)", width="small")
+        },
+        use_container_width=True,
+        hide_index=True,
+        key=f"dlg_step_editor_{sel_stt_edit}"
+    )
+
+    col_save, col_reset = st.columns([6, 6])
+    with col_save:
+        if st.button(f"💾 Lưu bước & Cập nhật k cho STT {sel_stt_edit}", type="primary", use_container_width=True, key=f"dlg_save_st_{sel_stt_edit}"):
+            new_steps = []
+            for idx_s, row_s in edited_steps.iterrows():
+                orig_s = dict(curr_steps[idx_s])
+                orig_s["apply_flag"] = 1 if row_s["apply_flag"] else 0
+                new_steps.append(orig_s)
+            it_edit["work_steps"] = new_steps
+            mgr.save_work_items(st.session_state.work_items)
+            st.success("Đã lưu các bước thi công thành công!")
+            st.rerun()
+    with col_reset:
+        if st.button("🔄 Khôi phục 100% định mức gốc", use_container_width=True, key=f"dlg_reset_st_{sel_stt_edit}"):
+            if "work_steps" in it_edit:
+                del it_edit["work_steps"]
+            mgr.save_work_items(st.session_state.work_items)
+            st.success("Đã khôi phục định mức gốc!")
+            st.rerun()
+
+with tab1:
+    # 1. ACTION TOOLBAR (RIBBON GỌN GÀNG, KHÔNG GIÃN TOÀN MÀN HÌNH)
+    col_t1, col_t2, col_t3, col_t4, col_t5, col_t_rest = st.columns([1.3, 1.5, 1.6, 1.4, 1.0, 5.2])
+    with col_t1:
+        if st.button("➕ Thêm việc", type="primary", use_container_width=True):
+            dialog_add_work_item()
+    with col_t2:
+        if st.button("📥 Nhập PAKT", use_container_width=True):
+            dialog_quick_intake_pakt()
+    with col_t3:
+        if st.button("⚙️ Bước thi công (k)", use_container_width=True):
+            dialog_edit_work_steps(st.session_state.get("tab1_selected_stt"))
+    with col_t4:
+        if st.button("⚙️ Biến thể", use_container_width=True):
+            dialog_manage_variants()
+    with col_t5:
+        if st.button("🔄 Nạp lại", use_container_width=True):
+            st.rerun()
 
     # 2. GROUP MANAGEMENT & FILTER BAR
     existing_groups = list(dict.fromkeys([it.get("group", "Nhóm công việc chung").strip() for it in st.session_state.work_items if it.get("group")]))
     if not existing_groups:
         existing_groups = ["Nhóm công tác chung"]
 
-    col_flt_grp, col_flt_mode = st.columns([7, 5])
+    if "tab1_selected_stt" not in st.session_state and st.session_state.work_items:
+        st.session_state.tab1_selected_stt = st.session_state.work_items[0].get("stt", 1)
+
+    col_flt_grp, col_flt_mode = st.columns([5, 7])
     with col_flt_grp:
         group_filter_options = ["🌐 [Tất cả các nhóm công tác]"] + existing_groups
         selected_filter_group = st.selectbox(
@@ -872,7 +1019,11 @@ with tab1:
     with col_flt_mode:
         tab1_view_mode = st.radio(
             "Chế độ hiển thị Master Grid:",
-            ["📊 Bảng Đơn Giá Hàng Ngang (F1 Master)", "✏️ Chỉnh Sửa Trực Tiếp Dữ Liệu (F1 Editor)"],
+            [
+                "📊 Bảng Đơn Giá Hàng Ngang (F1 Master)",
+                "📑 Bảng Tiên Lượng & Chi Tiết Hao Phí (G8/F1)",
+                "✏️ Chỉnh Sửa Trực Tiếp Dữ Liệu (F1 Editor)"
+            ],
             horizontal=True,
             key="tab1_view_mode_choice"
         )
@@ -911,7 +1062,7 @@ with tab1:
                 st.rerun()
 
     # 3. TẦNG 1: MASTER GRID VIEW
-    st.markdown(f"#### 📋 TẦNG 1: BẢNG TIÊN LƯỢNG MASTER ({len(current_display_items)} công tác)")
+    st.markdown(f'<div style="font-size: 14px; font-weight: 700; color: #002060; margin: 4px 0 2px 0;">📋 BẢNG TIÊN LƯỢNG DỰ TOÁN ({len(current_display_items)} công tác)</div>', unsafe_allow_html=True)
 
     if not current_display_items:
         st.info("ℹ️ Hiện tại chưa có công tác nào. Hãy nhấn nút **'➕ THÊM CÔNG TÁC MỚI'** hoặc **'📥 NHẬP TỪ PAKT / EXCEL'** ở thanh công cụ phía trên.")
@@ -927,11 +1078,22 @@ with tab1:
                 tt_vl = round(vol * rates["dg_vl"])
                 tt_nc = round(vol * rates["dg_nc"])
                 tt_m = round(vol * rates["dg_m"])
+                k_val = rates.get("k_step", 1.0)
+                n_act = rates.get("active_steps_count", 0)
+                n_tot = rates.get("total_steps_count", 0)
+                if rates.get("is_quote"):
+                    k_disp = "-"
+                elif n_tot > 0:
+                    k_disp = f"{k_val:.1%} ({n_act}/{n_tot} bước)"
+                else:
+                    k_disp = f"{k_val:.1%}"
+
                 h_rows.append({
                     "STT": item.get("stt"),
                     "Nhóm": item.get("group", ""),
                     "Mã hiệu": item.get("norm_code"),
                     "Biến thể": var_label,
+                    "Hệ số k": k_disp,
                     "Bản chất kỹ thuật": item.get("tech_profile") or mgr.get_default_tech_profile(item.get("norm_code", "")),
                     "Tên công tác (PAKT)": item.get("job_name"),
                     "ĐVT": item.get("unit"),
@@ -950,7 +1112,7 @@ with tab1:
                 total_grid_amount += rates["thanh_tien_truoc_thue"]
 
             df_h = pd.DataFrame(h_rows)
-            st.dataframe(
+            grid_h_event = st.dataframe(
                 df_h.style.format({
                     "Khối lượng": "{:,.2f}",
                     "ĐG Vật liệu (đ)": "{:,.0f}",
@@ -965,16 +1127,315 @@ with tab1:
                     "Thành tiền trước thuế (đ)": "{:,.0f}"
                 }),
                 use_container_width=True,
-                hide_index=True
+                hide_index=True,
+                on_select="rerun",
+                selection_mode="single-row",
+                key="grid_h_table"
             )
+            if grid_h_event and hasattr(grid_h_event, "selection") and grid_h_event.selection and grid_h_event.selection.rows:
+                row_clicked = grid_h_event.selection.rows[0]
+                if 0 <= row_clicked < len(current_display_items):
+                    clicked_stt = current_display_items[row_clicked].get("stt")
+                    if clicked_stt and clicked_stt != st.session_state.get("tab1_selected_stt"):
+                        st.session_state.tab1_selected_stt = clicked_stt
+                        st.rerun()
 
-            st.markdown(f"""
-            <div class="metric-card">
-                <b>TỔNG CỘNG GIÁ TRỊ TRƯỚC THUẾ:</b> 
-                <span style="font-size:20px; color:#002060; font-weight:bold;">{total_grid_amount:,.0f} đồng</span> 
-                <i>(Bao gồm Đầy đủ Chi phí chung {st.session_state.coefficients['c']['rate']}%, TT {st.session_state.coefficients['tt']['rate']}%, Thu nhập chịu thuế tính trước {st.session_state.coefficients['tl']['rate']}%)</i>
-            </div>
-            """, unsafe_allow_html=True)
+            col_sum_h, col_act_h = st.columns([8, 4])
+            with col_sum_h:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <b>TỔNG CỘNG GIÁ TRỊ TRƯỚC THUẾ:</b> 
+                    <span style="font-size:20px; color:#002060; font-weight:bold;">{total_grid_amount:,.0f} đồng</span> 
+                    <i>(Bao gồm Đầy đủ Chi phí chung {st.session_state.coefficients['c']['rate']}%, TT {st.session_state.coefficients['tt']['rate']}%, Thu nhập chịu thuế tính trước {st.session_state.coefficients['tl']['rate']}%)</i>
+                </div>
+                """, unsafe_allow_html=True)
+            with col_act_h:
+                st.write("")
+                if st.button("⚙️ Điều chỉnh bước thi công (k)", key="btn_open_steps_h", use_container_width=True):
+                    dialog_edit_work_steps(st.session_state.get("tab1_selected_stt"))
+
+        elif "Bảng Tiên Lượng & Chi Tiết Hao Phí" in tab1_view_mode:
+            st.caption("💡 Chế độ phân tích chi tiết: Dòng mẹ hiển thị công tác tổng thể; các dòng con thụt lề hiển thị trực tiếp định mức, đơn giá và khối lượng tài nguyên Vật liệu, Nhân công, Máy thi công.")
+
+            c_tree1, c_tree2, c_tree3, c_tree4, c_tree5 = st.columns([2.5, 2.5, 2.5, 2.5, 2])
+            with c_tree1:
+                show_tree_steps = st.checkbox("⚙️ Quy trình các bước", value=True, key="tree_opt_steps")
+            with c_tree2:
+                show_tree_mat = st.checkbox("🧱 Vật liệu", value=True, key="tree_opt_mat")
+            with c_tree3:
+                show_tree_lab = st.checkbox("👷 Nhân công", value=True, key="tree_opt_lab")
+            with c_tree4:
+                show_tree_mac = st.checkbox("🚜 Ca máy", value=True, key="tree_opt_mac")
+            with c_tree5:
+                show_tree_nonzero = st.checkbox("Ẩn dòng = 0", value=True, key="tree_opt_nonzero")
+
+            all_prices = mgr.get_resource_prices()
+            mat_price_map = {m["code"]: m.get("price_notice", m.get("price_current", 0)) for m in all_prices.get("materials", [])}
+            lab_price_map = {l["code"]: l.get("price_current", 0) for l in all_prices.get("labor", [])}
+            mac_price_map = {m["code"]: m.get("price_current", m.get("price_notice", 0) + m.get("price_diff", 0)) for m in all_prices.get("machines", [])}
+
+            tree_rows = []
+            total_tree_amount = 0.0
+
+            for item in current_display_items:
+                rates = mgr.calculate_item_unit_rate(item, st.session_state.coefficients)
+                vol = float(item.get("volume", 0.0))
+                stt_num = item.get("stt")
+                code = item.get("norm_code", "")
+                job_name = item.get("job_name", "")
+                item_unit = item.get("unit", "")
+                var_id = rates.get("variant_id", "")
+                var_label = f"[{var_id}]" if var_id and var_id != "A0" else ("Gốc [A0]" if not rates.get("is_quote") else "-")
+                k_val = rates.get("k_step", 1.0)
+                n_act = rates.get("active_steps_count", 0)
+                n_tot = rates.get("total_steps_count", 0)
+                if rates.get("is_quote"):
+                    k_str_item = "-"
+                elif n_tot > 0:
+                    k_str_item = f"{k_val:.1%} ({n_act}/{n_tot})"
+                else:
+                    k_str_item = f"{k_val:.1%}"
+
+                var_tag = f"[{var_id}] " if var_id and var_id != "A0" else ""
+                thanh_tien_tt = rates["thanh_tien_truoc_thue"]
+                total_tree_amount += thanh_tien_tt
+
+                # Dòng mẹ: Công tác
+                is_this_selected = (stt_num == st.session_state.get("tab1_selected_stt"))
+                sel_prefix = "👉 [ĐANG CHỌN] " if is_this_selected else "🔷 "
+                tree_rows.append({
+                    "STT": str(stt_num),
+                    "Mã hiệu": code,
+                    "Biến thể": var_label,
+                    "Hệ số k": k_str_item,
+                    "Nội dung công tác & Thành phần hao phí": f"{sel_prefix}{var_tag}{job_name}",
+                    "ĐVT": item_unit,
+                    "Khối lượng": vol,
+                    "Định mức": None,
+                    "Đơn giá TT (đ)": rates["dg_tt"],
+                    "Thành tiền TT (đ)": round(vol * rates["dg_tt"]),
+                    "ĐG Trước thuế (đ)": rates["dg_truoc_thue"],
+                    "Thành tiền trước thuế (đ)": thanh_tien_tt,
+                    "Phân loại": "📌 Công tác",
+                    "item_stt": stt_num
+                })
+
+                if rates.get("is_quote"):
+                    q_price = rates.get("unit_price_quote", 0.0)
+                    q_basis = item.get("quote_basis") or "Theo báo giá nhà sản xuất / cung cấp"
+                    tree_rows.append({
+                        "STT": "",
+                        "Mã hiệu": code,
+                        "Biến thể": "-",
+                        "Hệ số k": "-",
+                        "Nội dung công tác & Thành phần hao phí": f"    └── 📝 [Báo giá] {q_basis}",
+                        "ĐVT": item_unit,
+                        "Khối lượng": vol,
+                        "Định mức": 1.0,
+                        "Đơn giá TT (đ)": q_price,
+                        "Thành tiền TT (đ)": round(vol * q_price),
+                        "ĐG Trước thuế (đ)": rates["dg_truoc_thue"],
+                        "Thành tiền trước thuế (đ)": thanh_tien_tt,
+                        "Phân loại": "📝 Báo giá",
+                        "item_stt": stt_num
+                    })
+                else:
+                    norm = mgr.get_norm(code)
+                    if norm:
+                        div = mgr.get_unit_divisor(norm.get("unit", ""), item_unit)
+                        eff = mgr.get_effective_item_resources(item)
+
+                        # 0. Thành phần công việc (Các bước quy trình thi công)
+                        if show_tree_steps:
+                            raw_stps = eff.get("raw_steps", [])
+                            for idx_s, s in enumerate(raw_stps, start=1):
+                                s_no = s.get("step") or s.get("step_no") or idx_s
+                                s_name = s.get("name") or s.get("step_name") or ""
+                                s_r_base = float(s.get("rate_base", 0.0))
+                                s_flag = bool(int(s.get("apply_flag", 1)) == 1)
+                                s_status = "✅ Làm" if s_flag else "❌ Bỏ bước"
+                                tree_rows.append({
+                                    "STT": "",
+                                    "Mã hiệu": f"Bước {s_no}",
+                                    "Biến thể": "",
+                                    "Hệ số k": f"{s_r_base * 100:.1f}%",
+                                    "Nội dung công tác & Thành phần hao phí": f"    ├── ⚙️ [Bước {s_no}] {s_name} ({s_status})",
+                                    "ĐVT": "bước",
+                                    "Khối lượng": None,
+                                    "Định mức": s_r_base,
+                                    "Đơn giá TT (đ)": None,
+                                    "Thành tiền TT (đ)": None,
+                                    "ĐG Trước thuế (đ)": None,
+                                    "Thành tiền trước thuế (đ)": None,
+                                    "Phân loại": "⚙️ Bước công việc",
+                                    "item_stt": stt_num
+                                })
+
+                        # 1. Vật liệu
+                        main_mat_tt = 0.0
+                        if show_tree_mat:
+                            for m in eff.get("materials", []):
+                                m_code = m.get("code")
+                                if m_code != "V00750" and m.get("unit") != "%":
+                                    rate_per_unit = float(m.get("rate", 0.0)) / div
+                                    tot_qty = vol * rate_per_unit
+                                    p = float(mat_price_map.get(m_code, 0))
+                                    if m.get("excluded"):
+                                        p = 0.0
+                                    tt = round(tot_qty * p)
+                                    main_mat_tt += tt
+                                    if show_tree_nonzero and tot_qty <= 0 and rate_per_unit <= 0:
+                                        continue
+                                    k_res_str = "-" if m.get("is_replacement") else f"{k_val:.1%}"
+                                    tree_rows.append({
+                                        "STT": "",
+                                        "Mã hiệu": m_code,
+                                        "Biến thể": "",
+                                        "Hệ số k": k_res_str,
+                                        "Nội dung công tác & Thành phần hao phí": f"    ├── 🧱 [VL] {m.get('name')}" + (" (Đã trừ thay thế)" if m.get("excluded") else ""),
+                                        "ĐVT": m.get("unit"),
+                                        "Khối lượng": tot_qty,
+                                        "Định mức": rate_per_unit,
+                                        "Đơn giá TT (đ)": p,
+                                        "Thành tiền TT (đ)": tt,
+                                        "ĐG Trước thuế (đ)": None,
+                                        "Thành tiền trước thuế (đ)": None,
+                                        "Phân loại": "🧱 Vật liệu",
+                                        "item_stt": stt_num
+                                    })
+                            for m in eff.get("materials", []):
+                                m_code = m.get("code")
+                                if m_code == "V00750" or m.get("unit") == "%":
+                                    pct = float(m.get("rate", 5.0))
+                                    tt_other = round(main_mat_tt * (pct / 100.0))
+                                    tree_rows.append({
+                                        "STT": "",
+                                        "Mã hiệu": m_code,
+                                        "Biến thể": "",
+                                        "Hệ số k": f"{pct}% VL chính",
+                                        "Nội dung công tác & Thành phần hao phí": f"    ├── 🧱 [VL] {m.get('name')} ({pct}%)",
+                                        "ĐVT": "%",
+                                        "Khối lượng": None,
+                                        "Định mức": pct,
+                                        "Đơn giá TT (đ)": None,
+                                        "Thành tiền TT (đ)": tt_other,
+                                        "ĐG Trước thuế (đ)": None,
+                                        "Thành tiền trước thuế (đ)": None,
+                                        "Phân loại": "🧱 Vật liệu",
+                                        "item_stt": stt_num
+                                    })
+
+                        # 2. Nhân công
+                        if show_tree_lab:
+                            for l in eff.get("labor", []):
+                                l_code = l.get("code")
+                                rate_per_unit = float(l.get("rate", 0.0)) / div
+                                tot_qty = vol * rate_per_unit
+                                p = float(lab_price_map.get(l_code, 0))
+                                tt = round(tot_qty * p)
+                                if show_tree_nonzero and tot_qty <= 0 and rate_per_unit <= 0:
+                                    continue
+                                tree_rows.append({
+                                    "STT": "",
+                                    "Mã hiệu": l_code,
+                                    "Biến thể": "",
+                                    "Hệ số k": f"{k_val:.1%}",
+                                    "Nội dung công tác & Thành phần hao phí": f"    ├── 👷 [NC] {l.get('name')}",
+                                    "ĐVT": l.get("unit"),
+                                    "Khối lượng": tot_qty,
+                                    "Định mức": rate_per_unit,
+                                    "Đơn giá TT (đ)": p,
+                                    "Thành tiền TT (đ)": tt,
+                                    "ĐG Trước thuế (đ)": None,
+                                    "Thành tiền trước thuế (đ)": None,
+                                    "Phân loại": "👷 Nhân công",
+                                    "item_stt": stt_num
+                                })
+
+                        # 3. Ca máy
+                        if show_tree_mac:
+                            for mc in eff.get("machines", []):
+                                mc_code = mc.get("code")
+                                rate_per_unit = float(mc.get("rate", 0.0)) / div
+                                tot_qty = vol * rate_per_unit
+                                p = float(mac_price_map.get(mc_code, 0))
+                                tt = round(tot_qty * p)
+                                if show_tree_nonzero and tot_qty <= 0 and rate_per_unit <= 0:
+                                    continue
+                                tree_rows.append({
+                                    "STT": "",
+                                    "Mã hiệu": mc_code,
+                                    "Biến thể": "",
+                                    "Hệ số k": f"{k_val:.1%}",
+                                    "Nội dung công tác & Thành phần hao phí": f"    ├── 🚜 [Máy] {mc.get('name')}",
+                                    "ĐVT": mc.get("unit"),
+                                    "Khối lượng": tot_qty,
+                                    "Định mức": rate_per_unit,
+                                    "Đơn giá TT (đ)": p,
+                                    "Thành tiền TT (đ)": tt,
+                                    "ĐG Trước thuế (đ)": None,
+                                    "Thành tiền trước thuế (đ)": None,
+                                    "Phân loại": "🚜 Ca máy",
+                                    "item_stt": stt_num
+                                })
+
+            df_tree = pd.DataFrame(tree_rows)
+            disp_tree_cols = [c for c in df_tree.columns if c != "item_stt"]
+            grid_tree_event = st.dataframe(
+                df_tree[disp_tree_cols],
+                column_config={
+                    "STT": st.column_config.TextColumn("STT", width="small"),
+                    "Mã hiệu": st.column_config.TextColumn("Mã hiệu", width="small"),
+                    "Biến thể": st.column_config.TextColumn("Biến thể", width="small"),
+                    "Hệ số k": st.column_config.TextColumn("Hệ số k", width="small"),
+                    "Nội dung công tác & Thành phần hao phí": st.column_config.TextColumn("Nội dung công tác & Thành phần hao phí", width="large"),
+                    "ĐVT": st.column_config.TextColumn("ĐVT", width="small"),
+                    "Khối lượng": st.column_config.NumberColumn("Khối lượng / Nhu cầu", format="%.3f"),
+                    "Định mức": st.column_config.NumberColumn("ĐM (1 ĐVT)", format="%.4f"),
+                    "Đơn giá TT (đ)": st.column_config.NumberColumn("Đơn giá TT (đ)", format="%d"),
+                    "Thành tiền TT (đ)": st.column_config.NumberColumn("Thành tiền TT (đ)", format="%d"),
+                    "ĐG Trước thuế (đ)": st.column_config.NumberColumn("ĐG Trước thuế (đ)", format="%d"),
+                    "Thành tiền trước thuế (đ)": st.column_config.NumberColumn("Thành tiền trước thuế (đ)", format="%d"),
+                    "Phân loại": st.column_config.TextColumn("Phân loại", width="small")
+                },
+                use_container_width=True,
+                hide_index=True,
+                on_select="rerun",
+                selection_mode="single-row",
+                key="grid_tree_table"
+            )
+            if grid_tree_event and hasattr(grid_tree_event, "selection") and grid_tree_event.selection and grid_tree_event.selection.rows:
+                row_clicked = grid_tree_event.selection.rows[0]
+                if 0 <= row_clicked < len(df_tree):
+                    clicked_stt = df_tree.iloc[row_clicked].get("item_stt")
+                    if clicked_stt and clicked_stt != st.session_state.get("tab1_selected_stt"):
+                        st.session_state.tab1_selected_stt = int(clicked_stt)
+                        st.rerun()
+
+            col_sum_tree, col_btn_tree, col_dl_tree = st.columns([5, 3.5, 3.5])
+            with col_sum_tree:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <b>TỔNG CỘNG GIÁ TRỊ TRƯỚC THUẾ:</b> 
+                    <span style="font-size:20px; color:#002060; font-weight:bold;">{total_tree_amount:,.0f} đồng</span> 
+                    <i>(Bao gồm Đầy đủ Chi phí chung {st.session_state.coefficients['c']['rate']}%, TT {st.session_state.coefficients['tt']['rate']}%, Thu nhập chịu thuế tính trước {st.session_state.coefficients['tl']['rate']}%)</i>
+                </div>
+                """, unsafe_allow_html=True)
+            with col_btn_tree:
+                st.write("")
+                if st.button("⚙️ Điều chỉnh bước thi công (k)", key="btn_open_steps_tree", use_container_width=True):
+                    dialog_edit_work_steps(st.session_state.get("tab1_selected_stt"))
+            with col_dl_tree:
+                buf_tree = io.BytesIO()
+                with pd.ExcelWriter(buf_tree, engine='openpyxl') as writer:
+                    df_tree[disp_tree_cols].to_excel(writer, index=False, sheet_name="TienLuong_ChiTietHaoPhi")
+                st.download_button(
+                    "📥 Tải Bảng Tiên Lượng Kèm Hao Phí (.xlsx)",
+                    data=buf_tree.getvalue(),
+                    file_name="TienLuong_Kem_ChiTiet_HaoPhi.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
 
         else:
             # Editor Mode
@@ -986,7 +1447,8 @@ with tab1:
             if "unit_price_quote" not in df_edit.columns:
                 df_edit["unit_price_quote"] = 0.0
 
-            disp_cols = ["stt", "group", "norm_code", "variant_id", "tech_profile", "job_name", "description", "volume", "unit", "unit_price_quote"]
+            df_edit["k_step_pct"] = [f"{mgr.calculate_item_unit_rate(it, st.session_state.coefficients).get('k_step', 1.0):.1%}" if not it.get("is_quote") else "-" for it in current_display_items]
+            disp_cols = ["stt", "group", "norm_code", "variant_id", "k_step_pct", "tech_profile", "job_name", "description", "volume", "unit", "unit_price_quote"]
             for c_req in disp_cols:
                 if c_req not in df_edit.columns:
                     df_edit[c_req] = ""
@@ -998,6 +1460,7 @@ with tab1:
                     "group": st.column_config.TextColumn("Nhóm công tác", width="medium", required=True),
                     "norm_code": st.column_config.TextColumn("Mã ĐM / BG", width="small", required=True),
                     "variant_id": st.column_config.TextColumn("Biến thể", width="small"),
+                    "k_step_pct": st.column_config.TextColumn("Hệ số k", width="small", disabled=True),
                     "tech_profile": st.column_config.TextColumn("Bản chất kỹ thuật", width="medium"),
                     "job_name": st.column_config.TextColumn("Danh mục công việc (Theo PAKT)", width="large", required=True),
                     "description": st.column_config.TextColumn("Mô tả công việc thực tế", width="medium"),
@@ -1011,9 +1474,9 @@ with tab1:
                 key="tab1_master_editor"
             )
 
-            col_s1, col_s2 = st.columns([6, 6])
-            with col_s1:
-                if st.button("💾 LƯU TẤT CẢ THAY ĐỔI VÀO DỰ ÁN", key="btn_save_master_edit", type="primary", use_container_width=True):
+            col_save_btn, col_hint = st.columns([2.5, 9.5])
+            with col_save_btn:
+                if st.button("💾 Lưu tất cả thay đổi", key="btn_save_master_edit", type="primary", use_container_width=True):
                     updated_records = edited_df.to_dict("records")
                     old_items_map = {it.get("stt"): it for it in current_display_items}
                     
@@ -1047,224 +1510,9 @@ with tab1:
                     st.success("✅ Đã lưu toàn bộ các thay đổi vào CSDL Dự án thành công!")
                     st.rerun()
 
-            with col_s2:
-                # Delete single item directly
-                del_opts = [it["stt"] for it in current_display_items]
-                col_d_sel, col_d_btn = st.columns([8, 4])
-                with col_d_sel:
-                    item_to_del_stt = st.selectbox(
-                        "Xóa một công tác:",
-                        options=del_opts,
-                        format_func=lambda x: f"STT {x}: {[it.get('job_name') for it in current_display_items if it.get('stt') == x][0]}",
-                        key="tab1_del_single_stt"
-                    )
-                with col_d_btn:
-                    st.write("")
-                    if st.button("🗑️ Xác nhận xóa", key="tab1_btn_del_single", use_container_width=True):
-                        st.session_state.work_items = [it for it in st.session_state.work_items if it.get("stt") != item_to_del_stt]
-                        for i, it in enumerate(st.session_state.work_items, start=1):
-                            it["stt"] = i
-                        mgr.save_work_items(st.session_state.work_items)
-                        st.success(f"Đã xóa công tác STT {item_to_del_stt}!")
-                        st.rerun()
+            with col_hint:
+                st.caption("💡 *Mẹo: Để xóa dòng, chỉ cần tích chọn ô vuông đầu dòng trên bảng rồi nhấn phím `Delete` (hoặc biểu tượng thùng rác 🗑️), sau đó bấm 'Lưu tất cả thay đổi'.*")
 
-    # 4. TẦNG 2: F1 DETAIL INSPECTOR (PHÂN RÃ HAO PHÍ & BƯỚC CÔNG VIỆC)
-    st.markdown("---")
-    st.markdown("#### 🔍 TẦNG 2: F1 DETAIL INSPECTOR - PHÂN RÃ CHI TIẾT HAO PHÍ & BƯỚC CÔNG VIỆC")
-    st.caption("Bảng dưới tự động đồng bộ hiển thị chi tiết Vật liệu, Nhân công, Máy thi công và các bước quy trình của công tác đang chọn mà không cần mở expander.")
-
-    if current_display_items:
-        avail_stt_inspect = [it["stt"] for it in current_display_items]
-        sel_insp_stt = st.selectbox(
-            "👉 Chọn công tác để soi chi tiết hao phí (Chuẩn F1/G8):",
-            options=avail_stt_inspect,
-            format_func=lambda x: f"STT {x}: [{next(it.get('norm_code') for it in current_display_items if it['stt'] == x)}] {next(it.get('job_name') for it in current_display_items if it['stt'] == x)} (KL: {next(it.get('volume') for it in current_display_items if it['stt'] == x)} {next(it.get('unit') for it in current_display_items if it['stt'] == x)})",
-            key="tab1_inspect_stt_sel"
-        )
-
-        insp_item = next(it for it in current_display_items if it["stt"] == sel_insp_stt)
-        insp_code = insp_item.get("norm_code", "")
-        insp_is_quote = insp_item.get("is_quote", False)
-        insp_rates = mgr.calculate_item_unit_rate(insp_item, st.session_state.coefficients)
-
-        # Overview Header Card for Inspected Item
-        st.markdown(f"""
-        <div style="background-color: #EBF3FB; border-left: 5px solid #002060; padding: 12px 18px; border-radius: 6px; margin-bottom: 12px;">
-            <b>CÔNG TÁC ĐANG SOI:</b> <span style="font-size:16px; color:#002060; font-weight:bold;">STT {insp_item.get('stt')} - {insp_item.get('job_name')}</span><br/>
-            📌 <b>Mã hiệu:</b> <code>{insp_code}</code> | 
-            <b>Biến thể:</b> <span style="background-color:#002060; color:white; padding:2px 8px; border-radius:4px;">{insp_rates.get('variant_id', 'A0')}</span> - {insp_rates.get('variant_name', 'Mặc định')} | 
-            <b>Khối lượng:</b> <b>{insp_item.get('volume', 0.0):,.2f} {insp_item.get('unit', '')}</b> | 
-            <b>Bản chất kỹ thuật:</b> <i>{insp_item.get('tech_profile') or mgr.get_default_tech_profile(insp_code)}</i>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if not insp_is_quote and mgr.get_norm(insp_code):
-            # Case Norm Item: 2 Columns (Steps & Resource Breakdown)
-            col_insp_steps, col_insp_res = st.columns([5, 7])
-
-            eff_info = mgr.get_effective_item_resources(insp_item)
-            curr_steps = eff_info["raw_steps"]
-            avail_vars_for_insp = mgr.get_variants_for_norm(insp_code)
-
-            with col_insp_steps:
-                st.markdown("##### ⚙️ Các bước quy trình & Tỷ lệ hao phí $k$")
-                
-                # Switch variant for this item directly
-                col_iv1, col_iv2 = st.columns([8, 4])
-                with col_iv1:
-                    cur_v_key = insp_item.get("variant_id", "A0")
-                    sel_v_for_item = st.selectbox(
-                        "Gán biến thể cho công tác này:",
-                        options=list(avail_vars_for_insp.keys()),
-                        index=list(avail_vars_for_insp.keys()).index(cur_v_key) if cur_v_key in avail_vars_for_insp else 0,
-                        format_func=lambda x: f"[{x}] {avail_vars_for_insp[x].get('variant_name', '')}",
-                        key=f"insp_pick_var_{sel_insp_stt}"
-                    )
-                with col_iv2:
-                    st.write("")
-                    if st.button("Áp dụng", key=f"btn_apply_v_{sel_insp_stt}", use_container_width=True):
-                        insp_item["variant_id"] = sel_v_for_item
-                        insp_item["exclude_replacement"] = avail_vars_for_insp[sel_v_for_item].get("exclude_replacement", False)
-                        if "work_steps" in insp_item:
-                            del insp_item["work_steps"]
-                        mgr.save_work_items(st.session_state.work_items)
-                        st.success(f"Đã gán biến thể [{sel_v_for_item}]!")
-                        st.rerun()
-
-                # Step Table
-                step_editor_data = []
-                for idx_s, s in enumerate(curr_steps, start=1):
-                    step_editor_data.append({
-                        "step_no": s.get("step") or s.get("step_no") or idx_s,
-                        "step_name": s.get("name") or s.get("step_name") or "",
-                        "rate_base": float(s.get("rate_base", 0.0)),
-                        "apply_flag": bool(int(s.get("apply_flag", 1)) == 1)
-                    })
-                df_step_edit = pd.DataFrame(step_editor_data)
-
-                edited_steps = st.data_editor(
-                    df_step_edit,
-                    column_config={
-                        "step_no": st.column_config.NumberColumn("Bước", width="small", disabled=True),
-                        "step_name": st.column_config.TextColumn("Tên bước công việc", width="large", disabled=True),
-                        "rate_base": st.column_config.NumberColumn("Hao phí chuẩn", format="%.4f", width="small", disabled=True),
-                        "apply_flag": st.column_config.CheckboxColumn("Làm", width="small")
-                    },
-                    use_container_width=True,
-                    hide_index=True,
-                    key=f"insp_step_editor_{sel_insp_stt}"
-                )
-
-                col_st_save, col_st_reset = st.columns([6, 6])
-                with col_st_save:
-                    if st.button(f"💾 Lưu bước cho STT {sel_insp_stt}", key=f"btn_save_steps_{sel_insp_stt}", type="primary", use_container_width=True):
-                        new_steps_list = []
-                        for idx_s, row_s in edited_steps.iterrows():
-                            orig_s = dict(curr_steps[idx_s])
-                            orig_s["apply_flag"] = 1 if row_s["apply_flag"] else 0
-                            new_steps_list.append(orig_s)
-                        insp_item["work_steps"] = new_steps_list
-                        mgr.save_work_items(st.session_state.work_items)
-                        st.success(f"Đã lưu các bước cho STT {sel_insp_stt}!")
-                        st.rerun()
-                with col_st_reset:
-                    if st.button(f"🔄 Khôi phục 100% gốc", key=f"btn_reset_steps_{sel_insp_stt}", use_container_width=True):
-                        if "work_steps" in insp_item:
-                            del insp_item["work_steps"]
-                        mgr.save_work_items(st.session_state.work_items)
-                        st.success("Đã khôi phục định mức gốc!")
-                        st.rerun()
-
-            with col_insp_res:
-                st.markdown(f"##### 📊 Phân rã hao phí tài nguyên (Hệ số $k$ = {eff_info.get('k_step', 1.0):.1%})")
-                
-                # Fetch price dicts for lookup
-                all_prices = mgr.get_resource_prices()
-                mat_price_map = {m["code"]: m.get("price_notice", m.get("price_current", 0)) for m in all_prices.get("materials", [])}
-                lab_price_map = {l["code"]: l.get("price_current", 0) for l in all_prices.get("labor", [])}
-                mac_price_map = {m["code"]: m.get("price_current", 0) for m in all_prices.get("machines", [])}
-
-                res_rows = []
-                for m in eff_info.get("materials", []):
-                    p = mat_price_map.get(m["code"], 0)
-                    r_val = float(m.get("rate", 0.0))
-                    res_rows.append({
-                        "Loại": "Vật liệu",
-                        "Mã hiệu": m["code"],
-                        "Tên tài nguyên": m["name"] + (" (Đã loại trừ thay thế)" if m.get("excluded") else ""),
-                        "ĐVT": m["unit"],
-                        "Định mức": r_val,
-                        "Đơn giá (đ)": p,
-                        "Thành tiền (đ)": round(r_val * p)
-                    })
-                for l in eff_info.get("labor", []):
-                    p = lab_price_map.get(l["code"], 0)
-                    r_val = float(l.get("rate", 0.0))
-                    res_rows.append({
-                        "Loại": "Nhân công",
-                        "Mã hiệu": l["code"],
-                        "Tên tài nguyên": l["name"],
-                        "ĐVT": l["unit"],
-                        "Định mức": r_val,
-                        "Đơn giá (đ)": p,
-                        "Thành tiền (đ)": round(r_val * p)
-                    })
-                for mc in eff_info.get("machines", []):
-                    p = mac_price_map.get(mc["code"], 0)
-                    r_val = float(mc.get("rate", 0.0))
-                    res_rows.append({
-                        "Loại": "Ca máy",
-                        "Mã hiệu": mc["code"],
-                        "Tên tài nguyên": mc["name"],
-                        "ĐVT": mc["unit"],
-                        "Định mức": r_val,
-                        "Đơn giá (đ)": p,
-                        "Thành tiền (đ)": round(r_val * p)
-                    })
-
-                df_res = pd.DataFrame(res_rows)
-                st.dataframe(
-                    df_res.style.format({
-                        "Định mức": "{:,.4f}",
-                        "Đơn giá (đ)": "{:,.0f}",
-                        "Thành tiền (đ)": "{:,.0f}"
-                    }),
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                # Rate summary pills
-                st.markdown(f"""
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
-                    <div style="background:#FFF3E0; padding:6px 12px; border-radius:4px; border:1px solid #FFE0B2;">
-                        <b>VL:</b> {insp_rates['dg_vl']:,.0f} đ
-                    </div>
-                    <div style="background:#E8F5E9; padding:6px 12px; border-radius:4px; border:1px solid #C8E6C9;">
-                        <b>NC:</b> {insp_rates['dg_nc']:,.0f} đ
-                    </div>
-                    <div style="background:#E1F5FE; padding:6px 12px; border-radius:4px; border:1px solid #B3E5FC;">
-                        <b>Máy:</b> {insp_rates['dg_m']:,.0f} đ
-                    </div>
-                    <div style="background:#EDE7F6; padding:6px 12px; border-radius:4px; border:1px solid #D1C4E9;">
-                        <b>ĐG Trực tiếp T:</b> {insp_rates['dg_tt']:,.0f} đ
-                    </div>
-                    <div style="background:#002060; color:white; padding:6px 14px; border-radius:4px;">
-                        <b>ĐG Trước thuế:</b> {insp_rates['dg_truoc_thue']:,.0f} đ/{insp_item.get('unit')}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        else:
-            # Case Quote Item
-            st.markdown("##### 📝 Chi tiết Báo giá trọn gói / Tạm tính")
-            q_cols = st.columns([4, 4, 4])
-            with q_cols[0]:
-                st.metric("Đơn giá báo giá trước thuế", f"{insp_rates['unit_price_quote']:,.0f} đ/{insp_item.get('unit')}")
-            with q_cols[1]:
-                st.metric("Khối lượng dự án", f"{insp_item.get('volume', 0.0):,.2f} {insp_item.get('unit')}")
-            with q_cols[2]:
-                st.metric("Thành tiền trước thuế", f"{insp_rates['thanh_tien_truoc_thue']:,.0f} đ")
-            st.info(f"📌 **Căn cứ báo giá:** {insp_item.get('quote_basis') or 'Theo báo giá nhà sản xuất / nhà cung cấp'}")
 
 # TAB 2: QUẢN LÝ ĐƠN GIÁ (VẬT LIỆU, NHÂN CÔNG, MÁY THI CÔNG & PHÁP LÝ)
 # -----------------------------------------------------------------------------
@@ -1704,8 +1952,21 @@ with tab2:
                             st.info("Các mã máy trong dự toán hiện tại không trùng khớp với danh mục máy chuẩn xây dựng của QĐ 21.")
 
     with sub_t4:
-        st.markdown("##### 4. QUẢN LÝ ĐƠN GIÁ THEO BẢN CHẤT KỸ THUẬT (CHUẨN HÓA ĐƠN GIÁ)")
-        st.caption("Đảm bảo nguyên tắc thẩm định dự toán EVN: Các công việc có CÙNG BẢN CHẤT KỸ THUẬT thì phải áp dụng CÙNG 1 ĐƠN GIÁ, không có sự sai lệch giá giữa các vị trí/nhóm công tác.")
+        st.markdown("##### 4. QUẢN LÝ ĐƠN GIÁ THEO BẢN CHẤT KỸ THUẬT & RÀ SOÁT TÍNH CHẤT CÔNG VIỆC DỊCH VỤ")
+        st.caption("Đảm bảo nguyên tắc thẩm định dự toán EVN: Các công việc có CÙNG BẢN CHẤT KỸ THUẬT thì phải áp dụng CÙNG 1 ĐƠN GIÁ. Đồng thời tách bạch 100% giữa Chi phí Dịch vụ Định mức và Chi phí Thiết bị Thay thế.")
+
+        with st.expander("🛡️ **BÁO CÁO RÀ SOÁT TÍNH CHẤT CÔNG VIỆC DỊCH VỤ THUẦN TÚY (TT38 & SCL EVN)**", expanded=True):
+            st.markdown("""
+            **1. Đối với định mức Sửa chữa lớn EVN (Mã bắt đầu bằng E..... theo QĐ 45/QĐ-HĐTV):**
+            - **Bản chất công việc:** Là dịch vụ kỹ thuật kiểm tra, đo lường, bảo dưỡng chuyên sâu (thuần túy nhân công bậc thợ và máy đo kiểm).
+            - **Chứng minh cơ sở dữ liệu App:** 100% các mã định mức bảo dưỡng PCCC (`E6C.1.31`, `E6C.3.01`, `E6C.3.02`, `E6C.3.03`, `E6C.3.04`, `E6C.3.05`, `E6C.3.06`) có thành phần hao phí vật liệu hoàn toàn rỗng (`materials: []`, đơn giá vật liệu `dg_vl = 0 đ`). Riêng mã `E6B.1.13.01` kiểm tra bình accu chỉ có 0.1L nước cất và mỡ bảo vệ cực (~1.500 đ).
+            - **Kết luận:** App đã phản ánh hoàn toàn đúng tính chất công việc SCL không bao gồm vật tư/thiết bị thay thế.
+
+            **2. Đối với định mức Thông tư 38 (Mã bắt đầu bằng BD..... theo TT 38/2026/TT-BXD):**
+            - **Bản chất định mức gốc:** Là định mức lắp đặt thiết bị có hao phí thiết bị thay thế (`V82782`, `V82780`, `V82781`, `V82783`) và vật tư phụ thi công (vít nở, cồn vệ sinh, 2% hao hụt).
+            - **Bản chất thực tế áp dụng tại Nhà máy (NMNĐ Vĩnh Tân 4 / EVN):** Là dịch vụ kỹ thuật thuần túy (thuê nhân công và phương tiện thi công, kiểm tra, căn chỉnh). Thiết bị thay thế mới (nếu có) được phản ánh riêng rẽ qua báo giá thị trường hoặc gói mua sắm riêng, **không được tính gộp vào định mức** để tránh đội chi phí chung sai lệch.
+            - **Setting mặc định xuyên suốt của App:** Đã kích hoạt mặc định cơ chế **Loại trừ thiết bị thay thế (`exclude_replacement = True`)** ngay từ lúc nạp dữ liệu. Đơn giá vật liệu trong định mức chỉ còn vật tư phụ thi công (~816 đ/đầu báo). Giá trị thiết bị thay thế mua mới được nhập riêng tại cột Báo giá thị trường.
+            """)
 
         tech_map_items = {}
         for it in st.session_state.work_items:
@@ -1911,32 +2172,88 @@ with tab4:
                     with c3:
                         st.metric("Định mức gốc tính cho", n_info.get("unit", ""))
 
+                    eff = mgr.get_effective_item_resources(it_sel)
+                    rates = mgr.calculate_item_unit_rate(it_sel, st.session_state.coefficients)
+                    norm_code_sel = str(it_sel.get("norm_code", ""))
+
+                    if norm_code_sel.startswith("E"):
+                        st.success("✅ **Chứng minh tính chất công việc SCL (QĐ 45/QĐ-HĐTV):** Định mức thuần túy là chi phí dịch vụ kỹ thuật kiểm tra, bảo dưỡng (nhân công kỹ thuật và thiết bị đo kiểm). 100% không chứa chi phí vật tư/thiết bị thay thế ngay từ gốc trong thành phần hao phí định mức!")
+                    elif norm_code_sel.startswith("BD."):
+                        if eff.get("exclude_replacement"):
+                            st.info(f"⚙️ **Tính chất công việc TT38 tại Nhà máy:** Dịch vụ kỹ thuật thuần túy. Phần thiết bị thay thế chính (V82782, V82780...) **ĐÃ ĐƯỢC TÁCH RIÊNG KHỎI ĐỊNH MỨC** theo setting chuẩn. Chi phí vật liệu trong định mức chỉ gồm vật tư phụ thi công (vít, cồn lau, 2% hao hụt phụ). Đơn giá thiết bị thay thế mua mới (nếu có): **{it_sel.get('unit_price_quote', 0):,.0f} đ** (được phản ánh riêng rẽ qua Báo giá thị trường).")
+                        else:
+                            st.warning("⚠️ Công tác này đang bao gồm chi phí thiết bị thay thế trong định mức.")
+
                     rows = []
                     t_vl, t_nc, t_m = 0.0, 0.0, 0.0
-                    res = n_info.get("resources", {})
-                    for m in res.get("materials", []):
-                        dg = vl_p_map.get(m["code"], 0)
-                        tt = m["rate"] * dg if m["code"] != "V00750" else 0
-                        rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m["code"], "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": m["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
-                        t_vl += tt
-                    for l in res.get("labor", []):
+                    sub_vl_main = 0.0
+                    for m in eff.get("materials", []):
+                        m_c = m.get("code")
+                        dg = vl_p_map.get(m_c, 0)
+                        is_rep = m.get("is_replacement", False)
+                        is_other = (m_c == "V00750" or m.get("unit") == "%")
+                        if is_rep and eff.get("exclude_replacement"):
+                            rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m_c, "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": 0.0, "Đơn giá (đ)": 0, "Thành tiền (đ)": 0, "Ghi chú": "Đã tách riêng (Thiết bị thay thế tính riêng qua Báo giá)"})
+                        elif not is_other:
+                            rate_v = float(m.get("rate", 0.0))
+                            tt = rate_v * dg
+                            sub_vl_main += tt
+                            t_vl += tt
+                            rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m_c, "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": rate_v, "Đơn giá (đ)": dg, "Thành tiền (đ)": tt, "Ghi chú": "Vật tư phụ thi công"})
+                    for m in eff.get("materials", []):
+                        m_c = m.get("code")
+                        if m_c == "V00750" or m.get("unit") == "%":
+                            pct = float(m.get("rate", 0.0))
+                            tt_pct = round(sub_vl_main * (pct / 100.0))
+                            t_vl += tt_pct
+                            rows.append({"Phân loại": "Vật liệu", "Mã hiệu": m_c, "Tên tài nguyên": m["name"], "ĐVT": m["unit"], "Định mức": pct, "Đơn giá (đ)": 0, "Thành tiền (đ)": tt_pct, "Ghi chú": f"{pct}% vật tư phụ khác theo ĐM"})
+
+                    for l in eff.get("labor", []):
                         dg = nc_p_map.get(l["code"], 0)
-                        tt = l["rate"] * dg
-                        rows.append({"Phân loại": "Nhân công", "Mã hiệu": l["code"], "Tên tài nguyên": l["name"], "ĐVT": l["unit"], "Định mức": l["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
+                        rate_l = float(l.get("rate", 0.0))
+                        tt = rate_l * dg
+                        rows.append({"Phân loại": "Nhân công", "Mã hiệu": l["code"], "Tên tài nguyên": l["name"], "ĐVT": l["unit"], "Định mức": rate_l, "Đơn giá (đ)": dg, "Thành tiền (đ)": tt, "Ghi chú": "Nhân công theo các bước áp dụng"})
                         t_nc += tt
-                    for mac in res.get("machines", []):
+                    for mac in eff.get("machines", []):
                         dg = mac_p_map.get(mac["code"], 0)
-                        tt = mac["rate"] * dg
-                        rows.append({"Phân loại": "Máy thi công", "Mã hiệu": mac["code"], "Tên tài nguyên": mac["name"], "ĐVT": mac["unit"], "Định mức": mac["rate"], "Đơn giá (đ)": dg, "Thành tiền (đ)": tt})
+                        rate_m = float(mac.get("rate", 0.0))
+                        tt = rate_m * dg
+                        rows.append({"Phân loại": "Máy thi công", "Mã hiệu": mac["code"], "Tên tài nguyên": mac["name"], "ĐVT": mac["unit"], "Định mức": rate_m, "Đơn giá (đ)": dg, "Thành tiền (đ)": tt, "Ghi chú": "Máy thi công theo tỷ lệ bước"})
                         t_m += tt
 
                     st.dataframe(
                         pd.DataFrame(rows).style.format({
-                            "Định mức": "{:,.2f}", "Đơn giá (đ)": "{:,.0f}", "Thành tiền (đ)": "{:,.0f}"
+                            "Định mức": "{:,.4f}", "Đơn giá (đ)": "{:,.0f}", "Thành tiền (đ)": "{:,.0f}"
                         }),
                         use_container_width=True, hide_index=True
                     )
-                    st.info(f"Tổng đơn giá cho 1 đơn vị định mức: **{(t_vl + t_nc + t_m):,.0f} đ** (Vật liệu: {t_vl:,.0f} đ | Nhân công: {t_nc:,.0f} đ | Máy: {t_m:,.0f} đ)")
+                    
+                    col_det1, col_det2, col_det3 = st.columns([4, 4, 4])
+                    with col_det1:
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <b>Đơn giá định mức trực tiếp (T):</b><br>
+                            <span style="font-size:16px; color:#002060; font-weight:bold;">{rates['dg_tt']:,.0f} đ/{it_sel.get('unit', '')}</span><br>
+                            <span style="font-size:12px; color:#555;">(VL: {rates['dg_vl']:,.0f} đ | NC: {rates['dg_nc']:,.0f} đ | M: {rates['dg_m']:,.0f} đ)</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col_det2:
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <b>Đơn giá dịch vụ ĐM trước thuế:</b><br>
+                            <span style="font-size:16px; color:#002060; font-weight:bold;">{rates['dg_dm_truoc_thue']:,.0f} đ/{it_sel.get('unit', '')}</span><br>
+                            <span style="font-size:12px; color:#555;">(Bao gồm CP chung C + Thu nhập TL)</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col_det3:
+                        u_quote = float(it_sel.get('unit_price_quote', 0.0))
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <b>Báo giá thiết bị thay thế riêng:</b><br>
+                            <span style="font-size:16px; color:#c00000; font-weight:bold;">{u_quote:,.0f} đ/{it_sel.get('unit', '')}</span><br>
+                            <span style="font-size:12px; color:#555;">(Tách riêng, không nhân CP chung)</span>
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
                     st.info(f"💡 Công tác '{it_sel.get('job_name', '')}' ({it_sel.get('norm_code', '')}) là công tác áp dụng báo giá trọn gói / tạm tính, không phân tích chiết tính định mức tài nguyên.")
 

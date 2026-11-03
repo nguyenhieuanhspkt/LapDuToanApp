@@ -46,3 +46,7 @@ $RECYCLE.BIN/
 output/*.xlsx
 output/*.pdf
 output/*.csv
+
+*.lnk
+debug_output.txt
+DU_TOAN_PCCC_2026_AP_MA_CHUAN_*.xlsx

@@ -62,5 +62,393 @@
         "rate_ks": 0.00435
       }
     ]
+  },
+  "E6C.3.01_A1": {
+    "variant_id": "E6C.3.01_A1",
+    "variant_name": "Tháo và bảo quản tổ hợp chuông, còi, đèn (Bước 5)",
+    "norm_code": "E6C.3.01",
+    "exclude_replacement": true,
+    "k_step": 0.2727,
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 0,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 0,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 0,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 0,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh các chi tiết.",
+        "dvt_step": "0.3",
+        "rate_base": 0.09,
+        "apply_flag": 1,
+        "rate_calculated": 0.09
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện",
+        "dvt_step": "0.15",
+        "rate_base": 0.05,
+        "apply_flag": 0,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu điều khiển",
+        "dvt_step": "0.2",
+        "rate_base": 0.06,
+        "apply_flag": 0,
+        "rate_calculated": 0.06
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.08",
+        "rate_base": 0.02,
+        "apply_flag": 0,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của thiết bị",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 0,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.02,
+        "apply_flag": 0,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 0,
+        "rate_calculated": 0.01
+      }
+    ]
+  },
+  "E6C.3.01_A2": {
+    "variant_id": "E6C.3.01_A2",
+    "variant_name": "Bảo dưỡng, kiểm tra, hiệu chỉnh tổ hợp chuông còi đèn (Bước 1–4, 6–11)",
+    "norm_code": "E6C.3.01",
+    "exclude_replacement": true,
+    "k_step": 0.7273,
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh các chi tiết.",
+        "dvt_step": "0.3",
+        "rate_base": 0.09,
+        "apply_flag": 0,
+        "rate_calculated": 0.09
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện",
+        "dvt_step": "0.15",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu điều khiển",
+        "dvt_step": "0.2",
+        "rate_base": 0.06,
+        "apply_flag": 1,
+        "rate_calculated": 0.06
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.08",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của thiết bị",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      }
+    ]
+  },
+  "E6C.3.02_A1": {
+    "variant_id": "E6C.3.02_A1",
+    "variant_name": "Tháo và bảo quản thiết bị đầu báo khói/nhiệt (Bước 5)",
+    "norm_code": "E6C.3.02",
+    "exclude_replacement": true,
+    "k_step": 0.3,
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 0,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 0,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 0,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 0,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh cảm biến",
+        "dvt_step": "0.3",
+        "rate_base": 0.6,
+        "apply_flag": 1,
+        "rate_calculated": 0.6
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện của cảm biến",
+        "dvt_step": "0.15",
+        "rate_base": 0.3,
+        "apply_flag": 0,
+        "rate_calculated": 0.3
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu đến và đi của cảm biến",
+        "dvt_step": "0.2",
+        "rate_base": 0.4,
+        "apply_flag": 0,
+        "rate_calculated": 0.4
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 0,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của cảm biến",
+        "dvt_step": "0.08",
+        "rate_base": 0.16,
+        "apply_flag": 0,
+        "rate_calculated": 0.16
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.12,
+        "apply_flag": 0,
+        "rate_calculated": 0.12
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 0,
+        "rate_calculated": 0.04
+      }
+    ]
+  },
+  "E6C.3.02_A2": {
+    "variant_id": "E6C.3.02_A2",
+    "variant_name": "Bảo trì, sửa chữa, hiệu chỉnh cảm biến báo cháy (Bước 1–4, 6–11)",
+    "norm_code": "E6C.3.02",
+    "exclude_replacement": true,
+    "k_step": 0.7,
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh cảm biến",
+        "dvt_step": "0.3",
+        "rate_base": 0.6,
+        "apply_flag": 0,
+        "rate_calculated": 0.6
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện của cảm biến",
+        "dvt_step": "0.15",
+        "rate_base": 0.3,
+        "apply_flag": 1,
+        "rate_calculated": 0.3
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu đến và đi của cảm biến",
+        "dvt_step": "0.2",
+        "rate_base": 0.4,
+        "apply_flag": 1,
+        "rate_calculated": 0.4
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của cảm biến",
+        "dvt_step": "0.08",
+        "rate_base": 0.16,
+        "apply_flag": 1,
+        "rate_calculated": 0.16
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.12,
+        "apply_flag": 1,
+        "rate_calculated": 0.12
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      }
+    ]
   }
 }

@@ -85,11 +85,15 @@ class NormManager:
         norm = self.get_norm(code)
         if norm and "evidence_image" in norm:
             img_rel = norm["evidence_image"]
-            # Look in IMAGES_DIR
             filename = Path(img_rel).name
+            # 1. Check OneDrive IMAGES_DIR
             img_path = IMAGES_DIR / filename
             if img_path.exists():
                 return img_path
+            # 2. Check local workspace images_evidence directory
+            local_path = Path(__file__).resolve().parent.parent / "images_evidence" / filename
+            if local_path.exists():
+                return local_path
         return None
 
     def get_resource_prices(self) -> Dict[str, Any]:
@@ -257,11 +261,12 @@ class NormManager:
             norm = self.get_norm(code)
             if norm:
                 base_steps = norm.get("work_steps", [])
+                is_bd = code.startswith("BD.")
                 results.insert(0, {
                     "variant_id": "A0",
-                    "variant_name": "Định mức gốc chuẩn 100% (Bao gồm vật tư thay thế)",
+                    "variant_name": "Dịch vụ định mức chuẩn (Thuần túy nhân công và ca máy, không gồm thiết bị thay thế)" if is_bd else "Định mức gốc chuẩn 100% (Thuần dịch vụ SCL)",
                     "norm_code": code,
-                    "exclude_replacement": False,
+                    "exclude_replacement": True if is_bd else False,
                     "k_step": 1.0,
                     "work_steps": base_steps
                 })
@@ -316,11 +321,18 @@ class NormManager:
         variant_id = item.get("variant_id")
         variant_info = self.get_variant(variant_id) if variant_id else None
         
-        exclude_replacement = bool(item.get("exclude_replacement", False))
+        is_bd = code.startswith("BD.")
+        # Setting mặc định cho BD.: Dịch vụ kỹ thuật thuần túy loại trừ vật tư/thiết bị thay thế
+        if "exclude_replacement" in item and item["exclude_replacement"] is not None:
+            exclude_replacement = bool(item["exclude_replacement"])
+        elif variant_info and "exclude_replacement" in variant_info and variant_info["exclude_replacement"] is not None:
+            exclude_replacement = bool(variant_info["exclude_replacement"])
+        else:
+            exclude_replacement = True if is_bd else False
+
         variant_name = ""
         if variant_info:
             raw_steps = copy.deepcopy(variant_info.get("work_steps", []))
-            exclude_replacement = bool(variant_info.get("exclude_replacement", exclude_replacement))
             variant_name = variant_info.get("variant_name", "")
         elif item.get("work_steps"):
             raw_steps = copy.deepcopy(item.get("work_steps"))

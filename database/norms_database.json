@@ -1,0 +1,2432 @@
+{
+  "BD.41111": {
+    "code": "BD.41111",
+    "name": "Lắp đặt thiết bị đầu báo và đầu báo cháy (Đầu báo khói, báo nhiệt)",
+    "unit": "10 đầu",
+    "legal_basis": "Căn cứ: Mã gốc BD.41110 - Phụ lục Thông tư số 38/2026/TT-BXD của Bộ Xây dựng",
+    "evidence_image": "images_evidence/BD.41111.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0261,
+        "apply_flag": 1,
+        "rate_calculated": 0.0261,
+        "pct": "15%",
+        "rate_nc": 0.01305,
+        "rate_ks": 0.01305
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0783,
+        "apply_flag": 1,
+        "rate_calculated": 0.0783,
+        "pct": "45%",
+        "rate_nc": 0.03915,
+        "rate_ks": 0.03915
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0435,
+        "apply_flag": 1,
+        "rate_calculated": 0.0435,
+        "pct": "25%",
+        "rate_nc": 0.02175,
+        "rate_ks": 0.02175
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0174,
+        "apply_flag": 1,
+        "rate_calculated": 0.0174,
+        "pct": "10%",
+        "rate_nc": 0.0087,
+        "rate_ks": 0.0087
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 đầu",
+        "rate_base": 0.0087,
+        "apply_flag": 1,
+        "rate_calculated": 0.0087,
+        "pct": "5%",
+        "rate_nc": 0.00435,
+        "rate_ks": 0.00435
+      }
+    ],
+    "total_labor_steps": 0.174,
+    "resources": {
+      "materials": [
+        {
+          "code": "V20647",
+          "name": "Đinh vít nở M8",
+          "unit": "bộ",
+          "rate": 20.0,
+          "formula_ref": "",
+          "spec": "Vật tư phụ liên kết",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 14
+        },
+        {
+          "code": "V82782",
+          "name": "Đế đầu báo và đầu báo cháy",
+          "unit": "bộ",
+          "rate": 10.0,
+          "formula_ref": "",
+          "spec": "Thiết bị chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 15
+        },
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1,
+          "formula_ref": "",
+          "spec": "Vệ sinh tiếp điểm",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 16
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 2.0,
+          "formula_ref": "",
+          "spec": "2% trên chi phí VL chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 17
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3",
+          "unit": "công",
+          "rate": 0.87,
+          "formula_ref": "",
+          "spec": "Bậc 3,5/7",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 19
+        },
+        {
+          "code": "N96885",
+          "name": "Kỹ sư",
+          "unit": "công",
+          "rate": 0.87,
+          "formula_ref": "",
+          "spec": "Bậc 5,0/8",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 20
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan bê tông cầm tay",
+          "unit": "ca",
+          "rate": 0.68,
+          "formula_ref": "",
+          "spec": "Công suất: 1,00 kW",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 22
+        }
+      ]
+    },
+    "labor_split": {
+      "nc_name": "NC nhóm 3 (Bậc 3,5/7)",
+      "ks_name": "Kỹ sư (Bậc 5,0/8)",
+      "nc_total_per_unit": 0.087,
+      "ks_total_per_unit": 0.087,
+      "total_per_unit": 0.174
+    }
+  },
+  "BD.41121": {
+    "code": "BD.41121",
+    "name": "Lắp đặt đèn báo cháy",
+    "unit": "5 đèn",
+    "legal_basis": "Căn cứ: Mã gốc BD.41120 - Phụ lục Thông tư số 38/2026/TT-BXD của Bộ Xây dựng",
+    "evidence_image": "images_evidence/BD.41121.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 đèn",
+        "rate_base": 0.0351,
+        "apply_flag": 1,
+        "rate_calculated": 0.0351,
+        "pct": "15%",
+        "rate_nc": 0.0246,
+        "rate_ks": 0.0105
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 đèn",
+        "rate_base": 0.1053,
+        "apply_flag": 1,
+        "rate_calculated": 0.1053,
+        "pct": "45%",
+        "rate_nc": 0.0738,
+        "rate_ks": 0.0315
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 đèn",
+        "rate_base": 0.0585,
+        "apply_flag": 1,
+        "rate_calculated": 0.0585,
+        "pct": "25%",
+        "rate_nc": 0.041,
+        "rate_ks": 0.0175
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 đèn",
+        "rate_base": 0.0234,
+        "apply_flag": 1,
+        "rate_calculated": 0.0234,
+        "pct": "10%",
+        "rate_nc": 0.0164,
+        "rate_ks": 0.007
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 đèn",
+        "rate_base": 0.0117,
+        "apply_flag": 1,
+        "rate_calculated": 0.0117,
+        "pct": "5%",
+        "rate_nc": 0.0082,
+        "rate_ks": 0.0035
+      }
+    ],
+    "total_labor_steps": 0.234,
+    "resources": {
+      "materials": [
+        {
+          "code": "V20647",
+          "name": "Đinh vít nở M8",
+          "unit": "bộ",
+          "rate": 10.0,
+          "formula_ref": "",
+          "spec": "Vật tư phụ liên kết",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 14
+        },
+        {
+          "code": "V82780",
+          "name": "Đèn báo cháy",
+          "unit": "bộ",
+          "rate": 5.0,
+          "formula_ref": "",
+          "spec": "Thiết bị chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 15
+        },
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1,
+          "formula_ref": "",
+          "spec": "Vệ sinh tiếp điểm",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 16
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 2.0,
+          "formula_ref": "",
+          "spec": "2% trên chi phí VL chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 17
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3",
+          "unit": "công",
+          "rate": 0.82,
+          "formula_ref": "",
+          "spec": "Bậc 3,5/7",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 19
+        },
+        {
+          "code": "N96885",
+          "name": "Kỹ sư",
+          "unit": "công",
+          "rate": 0.35,
+          "formula_ref": "",
+          "spec": "Bậc 5,0/8",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 20
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan bê tông cầm tay",
+          "unit": "ca",
+          "rate": 0.75,
+          "formula_ref": "",
+          "spec": "Công suất: 1,00 kW",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 22
+        }
+      ]
+    },
+    "labor_split": {
+      "nc_name": "NC nhóm 3 (Bậc 3,5/7)",
+      "ks_name": "Kỹ sư (Bậc 5,0/8)",
+      "nc_total_per_unit": 0.164,
+      "ks_total_per_unit": 0.07,
+      "total_per_unit": 0.234
+    }
+  },
+  "BD.41131": {
+    "code": "BD.41131",
+    "name": "Lắp đặt nút ấn báo cháy khẩn cấp",
+    "unit": "5 nút",
+    "legal_basis": "Căn cứ: Mã gốc BD.41130 - Phụ lục Thông tư số 38/2026/TT-BXD của Bộ Xây dựng",
+    "evidence_image": "images_evidence/BD.41131.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 cái",
+        "rate_base": 0.09,
+        "apply_flag": 1,
+        "rate_calculated": 0.09,
+        "pct": "15%",
+        "rate_nc": 0.045,
+        "rate_ks": 0.045
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 cái",
+        "rate_base": 0.27,
+        "apply_flag": 1,
+        "rate_calculated": 0.27,
+        "pct": "45%",
+        "rate_nc": 0.135,
+        "rate_ks": 0.135
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 cái",
+        "rate_base": 0.15,
+        "apply_flag": 1,
+        "rate_calculated": 0.15,
+        "pct": "25%",
+        "rate_nc": 0.075,
+        "rate_ks": 0.075
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 cái",
+        "rate_base": 0.06,
+        "apply_flag": 1,
+        "rate_calculated": 0.06,
+        "pct": "10%",
+        "rate_nc": 0.03,
+        "rate_ks": 0.03
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 cái",
+        "rate_base": 0.03,
+        "apply_flag": 1,
+        "rate_calculated": 0.03,
+        "pct": "5%",
+        "rate_nc": 0.015,
+        "rate_ks": 0.015
+      }
+    ],
+    "total_labor_steps": 0.6,
+    "resources": {
+      "materials": [
+        {
+          "code": "V20646",
+          "name": "Đinh vít nở M6",
+          "unit": "bộ",
+          "rate": 10.0,
+          "formula_ref": "",
+          "spec": "Vật tư phụ liên kết",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 14
+        },
+        {
+          "code": "V82781",
+          "name": "Nút báo cháy khẩn cấp",
+          "unit": "bộ",
+          "rate": 5.0,
+          "formula_ref": "",
+          "spec": "Thiết bị chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 15
+        },
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1,
+          "formula_ref": "",
+          "spec": "Vệ sinh tiếp điểm",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 16
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 2.0,
+          "formula_ref": "",
+          "spec": "2% trên chi phí VL chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 17
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3",
+          "unit": "công",
+          "rate": 1.5,
+          "formula_ref": "",
+          "spec": "Bậc 3,5/7",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 19
+        },
+        {
+          "code": "N96885",
+          "name": "Kỹ sư",
+          "unit": "công",
+          "rate": 1.5,
+          "formula_ref": "",
+          "spec": "Bậc 5,0/8",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 20
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan bê tông cầm tay",
+          "unit": "ca",
+          "rate": 0.37,
+          "formula_ref": "",
+          "spec": "Công suất: 1,00 kW",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 22
+        },
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng (VOM)",
+          "unit": "ca",
+          "rate": 0.37,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 23
+        }
+      ]
+    },
+    "labor_split": {
+      "nc_name": "NC nhóm 3 (Bậc 3,5/7)",
+      "ks_name": "Kỹ sư (Bậc 5,0/8)",
+      "nc_total_per_unit": 0.3,
+      "ks_total_per_unit": 0.3,
+      "total_per_unit": 0.6
+    }
+  },
+  "BD.41141": {
+    "code": "BD.41141",
+    "name": "Lắp đặt chuông báo cháy",
+    "unit": "5 chuông",
+    "legal_basis": "Căn cứ: Mã gốc BD.41140 - Phụ lục Thông tư số 38/2026/TT-BXD của Bộ Xây dựng",
+    "evidence_image": "images_evidence/BD.41141.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 cái",
+        "rate_base": 0.0492,
+        "apply_flag": 1,
+        "rate_calculated": 0.0492,
+        "pct": "15%",
+        "rate_nc": 0.0246,
+        "rate_ks": 0.0246
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 cái",
+        "rate_base": 0.1476,
+        "apply_flag": 1,
+        "rate_calculated": 0.1476,
+        "pct": "45%",
+        "rate_nc": 0.0738,
+        "rate_ks": 0.0738
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 cái",
+        "rate_base": 0.082,
+        "apply_flag": 1,
+        "rate_calculated": 0.082,
+        "pct": "25%",
+        "rate_nc": 0.041,
+        "rate_ks": 0.041
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 cái",
+        "rate_base": 0.0328,
+        "apply_flag": 1,
+        "rate_calculated": 0.0328,
+        "pct": "10%",
+        "rate_nc": 0.0164,
+        "rate_ks": 0.0164
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 cái",
+        "rate_base": 0.0164,
+        "apply_flag": 1,
+        "rate_calculated": 0.0164,
+        "pct": "5%",
+        "rate_nc": 0.0082,
+        "rate_ks": 0.0082
+      }
+    ],
+    "total_labor_steps": 0.328,
+    "resources": {
+      "materials": [
+        {
+          "code": "V20646",
+          "name": "Đinh vít nở M6",
+          "unit": "bộ",
+          "rate": 10.0,
+          "formula_ref": "",
+          "spec": "Vật tư phụ liên kết",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 14
+        },
+        {
+          "code": "V82783",
+          "name": "Chuông báo cháy",
+          "unit": "bộ",
+          "rate": 5.0,
+          "formula_ref": "",
+          "spec": "Thiết bị chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 15
+        },
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1,
+          "formula_ref": "",
+          "spec": "Vệ sinh tiếp điểm",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 16
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 5.0,
+          "formula_ref": "",
+          "spec": "5% trên chi phí VL chính",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 17
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3",
+          "unit": "công",
+          "rate": 0.82,
+          "formula_ref": "",
+          "spec": "Bậc 3,5/7",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 19
+        },
+        {
+          "code": "N96885",
+          "name": "Kỹ sư",
+          "unit": "công",
+          "rate": 0.82,
+          "formula_ref": "",
+          "spec": "Bậc 5,0/8",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 20
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan bê tông cầm tay",
+          "unit": "ca",
+          "rate": 0.41,
+          "formula_ref": "",
+          "spec": "Công suất: 1,00 kW",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 22
+        },
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng (VOM)",
+          "unit": "ca",
+          "rate": 0.75,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 23
+        }
+      ]
+    },
+    "labor_split": {
+      "nc_name": "NC nhóm 3 (Bậc 3,5/7)",
+      "ks_name": "Kỹ sư (Bậc 5,0/8)",
+      "nc_total_per_unit": 0.164,
+      "ks_total_per_unit": 0.164,
+      "total_per_unit": 0.328
+    }
+  },
+  "BD.42201": {
+    "code": "BD.42201",
+    "name": "Lắp đặt bộ điều khiển, bộ chuyển mạch và đầu báo từ của hệ thống PCCC",
+    "unit": "1 bộ",
+    "legal_basis": "Căn cứ: Mã gốc BD.42200 - Phụ lục Thông tư số 38/2026/TT-BXD của Bộ Xây dựng",
+    "evidence_image": "images_evidence/BD.42201.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, định vị vị trí lắp đặt",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.258,
+        "apply_flag": 1,
+        "rate_calculated": 0.258,
+        "pct": "15%",
+        "rate_nc": 0.129,
+        "rate_ks": 0.129
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt thiết bị/đế vào trần/tường/giá đỡ",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.774,
+        "apply_flag": 1,
+        "rate_calculated": 0.774,
+        "pct": "45%",
+        "rate_nc": 0.387,
+        "rate_ks": 0.387
+      },
+      {
+        "step": 3,
+        "name": "3. Đấu nối dây tín hiệu, dây điều khiển vào thiết bị",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.43,
+        "apply_flag": 1,
+        "rate_calculated": 0.43,
+        "pct": "25%",
+        "rate_nc": 0.215,
+        "rate_ks": 0.215
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra thông mạch, đo điện trở cách điện",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.172,
+        "apply_flag": 1,
+        "rate_calculated": 0.172,
+        "pct": "10%",
+        "rate_nc": 0.086,
+        "rate_ks": 0.086
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh mặt bằng và bàn giao nghiệm thu",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.086,
+        "apply_flag": 1,
+        "rate_calculated": 0.086,
+        "pct": "5%",
+        "rate_nc": 0.043,
+        "rate_ks": 0.043
+      }
+    ],
+    "total_labor_steps": 1.72,
+    "resources": {
+      "materials": [
+        {
+          "code": "V00001",
+          "name": "Vật tư phụ đấu nối",
+          "unit": "bộ",
+          "rate": 1.0,
+          "formula_ref": "",
+          "spec": "Băng dính, đầu cos, cầu đấu",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 14
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3",
+          "unit": "công",
+          "rate": 0.86,
+          "formula_ref": "",
+          "spec": "Bậc 3,5/7",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 16
+        },
+        {
+          "code": "N96885",
+          "name": "Kỹ sư",
+          "unit": "công",
+          "rate": 0.86,
+          "formula_ref": "",
+          "spec": "Bậc 5,0/8",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 17
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng (VOM)",
+          "unit": "ca",
+          "rate": 0.29,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, nguồn cấp",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 19
+        },
+        {
+          "code": "M108.0201",
+          "name": "Vôn mét điện tử",
+          "unit": "ca",
+          "rate": 0.86,
+          "formula_ref": "",
+          "spec": "Đo kiểm tra điện áp",
+          "note": "TT 38/2026/TT-BXD",
+          "row_in_sheet": 20
+        }
+      ]
+    },
+    "labor_split": {
+      "nc_name": "NC nhóm 3 (Bậc 3,5/7)",
+      "ks_name": "Kỹ sư (Bậc 5,0/8)",
+      "nc_total_per_unit": 0.86,
+      "ks_total_per_unit": 0.86,
+      "total_per_unit": 1.72
+    }
+  },
+  "E6C.3.01": {
+    "code": "E6C.3.01",
+    "name": "Kiểm tra và bảo dưỡng nút nhấn báo cháy, bộ còi đèn/ chuông báo cháy",
+    "unit": "1 cái",
+    "legal_basis": "Đơn vị tính: 1 cái | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 448",
+    "evidence_image": "images_evidence/E6C.3.01.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh các chi tiết.",
+        "dvt_step": "0.3",
+        "rate_base": 0.09,
+        "apply_flag": 1,
+        "rate_calculated": 0.09
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện",
+        "dvt_step": "0.15",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu điều khiển",
+        "dvt_step": "0.2",
+        "rate_base": 0.06,
+        "apply_flag": 1,
+        "rate_calculated": 0.06
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.08",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của thiết bị",
+        "dvt_step": "0.05",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.01,
+        "apply_flag": 1,
+        "rate_calculated": 0.01
+      }
+    ],
+    "total_labor_steps": 0.33,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 0.33,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Hao phí gốc theo QĐ 45 (hoặc =T15 nếu phân tách)",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.06,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, điện trở tiếp xúc",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "Megohmmeter",
+          "name": "Mê gôm mét 1000V",
+          "unit": "ca",
+          "rate": 0.06,
+          "formula_ref": "",
+          "spec": "Đo điện trở cách điện thiết bị & cáp",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        }
+      ]
+    }
+  },
+  "E6C.3.02": {
+    "code": "E6C.3.02",
+    "name": "Kiểm tra và bảo dưỡng cảm biến báo cháy dạng nhiệt/ khói",
+    "unit": "1 cái",
+    "legal_basis": "Đơn vị tính: 1 cái | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 449",
+    "evidence_image": "images_evidence/E6C.3.02.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 5,
+        "name": "5. Tháo, vệ sinh cảm biến",
+        "dvt_step": "0.3",
+        "rate_base": 0.6,
+        "apply_flag": 1,
+        "rate_calculated": 0.6
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện của cảm biến",
+        "dvt_step": "0.15",
+        "rate_base": 0.3,
+        "apply_flag": 1,
+        "rate_calculated": 0.3
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu đến và đi của cảm biến",
+        "dvt_step": "0.2",
+        "rate_base": 0.4,
+        "apply_flag": 1,
+        "rate_calculated": 0.4
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của cảm biến",
+        "dvt_step": "0.08",
+        "rate_base": 0.16,
+        "apply_flag": 1,
+        "rate_calculated": 0.16
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.12,
+        "apply_flag": 1,
+        "rate_calculated": 0.12
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      }
+    ],
+    "total_labor_steps": 2.0,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 2.0,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Hao phí gốc theo QĐ 45 (hoặc =T15 nếu phân tách)",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0401",
+          "name": "Đầu thử nhiệt Solo 461",
+          "unit": "ca",
+          "rate": 1.0,
+          "formula_ref": "",
+          "spec": "Thử nghiệm độ nhạy cảm biến",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 1.0,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        }
+      ]
+    }
+  },
+  "E6C.3.03": {
+    "code": "E6C.3.03",
+    "name": "Kiểm tra và bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng dây báo cháy",
+    "unit": "1 bộ",
+    "legal_basis": "Đơn vị tính: 1 bộ | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 450",
+    "evidence_image": "images_evidence/E6C.3.03.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.14,
+        "apply_flag": 1,
+        "rate_calculated": 0.14
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.14,
+        "apply_flag": 1,
+        "rate_calculated": 0.14
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh module",
+        "dvt_step": "0.3",
+        "rate_base": 0.81,
+        "apply_flag": 1,
+        "rate_calculated": 0.81
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra cách điện, điện trở của dây báo cháy (thay mới nếu cần)",
+        "dvt_step": "0.1",
+        "rate_base": 0.27,
+        "apply_flag": 1,
+        "rate_calculated": 0.27
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu đến và đi của module",
+        "dvt_step": "0.15",
+        "rate_base": 0.41,
+        "apply_flag": 1,
+        "rate_calculated": 0.41
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.08",
+        "rate_base": 0.22,
+        "apply_flag": 1,
+        "rate_calculated": 0.22
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của module",
+        "dvt_step": "0.15",
+        "rate_base": 0.41,
+        "apply_flag": 1,
+        "rate_calculated": 0.41
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.16,
+        "apply_flag": 1,
+        "rate_calculated": 0.16
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      }
+    ],
+    "total_labor_steps": 2.71,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 2.71,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Hao phí gốc theo QĐ 45 (hoặc =T15 nếu phân tách)",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.25,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "M108.0302",
+          "name": "Mê gôm mét 500V",
+          "unit": "ca",
+          "rate": 0.125,
+          "formula_ref": "",
+          "spec": "Đo điện trở cách điện",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        }
+      ]
+    }
+  },
+  "E6C.3.04": {
+    "code": "E6C.3.04",
+    "name": "Kiểm tra và bảo dưỡng bộ module giám sát tín hiệu cháy sử dụng cảm biến kiểu gương phản xạ (beam)",
+    "unit": "1 bộ",
+    "legal_basis": "Đơn vị tính: 1 bộ | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 451",
+    "evidence_image": "images_evidence/E6C.3.04.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.13,
+        "apply_flag": 1,
+        "rate_calculated": 0.13
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.1",
+        "rate_base": 0.25,
+        "apply_flag": 1,
+        "rate_calculated": 0.25
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh module",
+        "dvt_step": "0.3",
+        "rate_base": 0.75,
+        "apply_flag": 1,
+        "rate_calculated": 0.75
+      },
+      {
+        "step": 6,
+        "name": "6. Vệ sinh thấu kính của gương phản xạ",
+        "dvt_step": "0.1",
+        "rate_base": 0.25,
+        "apply_flag": 1,
+        "rate_calculated": 0.25
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra tín hiệu đến và đi của module",
+        "dvt_step": "0.15",
+        "rate_base": 0.38,
+        "apply_flag": 1,
+        "rate_calculated": 0.38
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.1",
+        "rate_base": 0.25,
+        "apply_flag": 1,
+        "rate_calculated": 0.25
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của module",
+        "dvt_step": "0.08",
+        "rate_base": 0.2,
+        "apply_flag": 1,
+        "rate_calculated": 0.2
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.15,
+        "apply_flag": 1,
+        "rate_calculated": 0.15
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      }
+    ],
+    "total_labor_steps": 2.51,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 2.51,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Hao phí gốc theo QĐ 45 (hoặc =T15 nếu phân tách)",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0402",
+          "name": "Đầu thử khói Solo 330",
+          "unit": "ca",
+          "rate": 0.21,
+          "formula_ref": "",
+          "spec": "Thử nghiệm tạo khói cảm biến",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.21,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        },
+        {
+          "code": "M108.0402",
+          "name": "Dụng cụ gỡ đầu báo khói Solo 200",
+          "unit": "ca",
+          "rate": 0.21,
+          "formula_ref": "",
+          "spec": "Tháo lắp đầu báo trên cao",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 23
+        }
+      ]
+    }
+  },
+  "E6C.3.05": {
+    "code": "E6C.3.05",
+    "name": "Kiểm tra và bảo dưỡng tủ điều khiển chữa cháy tại chỗ, tủ điều khiển và tủ trung gian của các thiết bị ĐLĐK",
+    "unit": "1 tủ",
+    "legal_basis": "Đơn vị tính: 1 tủ | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 452",
+    "evidence_image": "images_evidence/E6C.3.05.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công theo yêu cầu kỹ thuật",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn trước khi thực hiện công tác",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện của cáp tín hiệu",
+        "dvt_step": "0.05",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "rate_calculated": 0.1
+      },
+      {
+        "step": 5,
+        "name": "5. Vệ sinh tủ và các thiết bị liên quan",
+        "dvt_step": "0.3",
+        "rate_base": 0.6,
+        "apply_flag": 1,
+        "rate_calculated": 0.6
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra tín hiệu đến và đi của tủ",
+        "dvt_step": "0.15",
+        "rate_base": 0.3,
+        "apply_flag": 1,
+        "rate_calculated": 0.3
+      },
+      {
+        "step": 7,
+        "name": "7. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.15",
+        "rate_base": 0.3,
+        "apply_flag": 1,
+        "rate_calculated": 0.3
+      },
+      {
+        "step": 8,
+        "name": "8. Hiệu chỉnh lại tủ giám sát",
+        "dvt_step": "0.08",
+        "rate_base": 0.16,
+        "apply_flag": 1,
+        "rate_calculated": 0.16
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra chức năng làm việc của tủ",
+        "dvt_step": "0.1",
+        "rate_base": 0.2,
+        "apply_flag": 1,
+        "rate_calculated": 0.2
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu gửi lên tủ điều khiển trung tâm",
+        "dvt_step": "0.06",
+        "rate_base": 0.12,
+        "apply_flag": 1,
+        "rate_calculated": 0.12
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.04,
+        "apply_flag": 1,
+        "rate_calculated": 0.04
+      }
+    ],
+    "total_labor_steps": 2.0,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 2.0,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Hao phí gốc theo QĐ 45 (hoặc =T15 nếu phân tách)",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 1.0,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, tín hiệu",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "M109.0101",
+          "name": "Máy thổi bụi",
+          "unit": "ca",
+          "rate": 1.0,
+          "formula_ref": "",
+          "spec": "Vệ sinh công nghiệp tủ điều khiển",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        }
+      ]
+    }
+  },
+  "E6C.3.06": {
+    "code": "E6C.3.06",
+    "name": "Kiểm tra và bảo dưỡng phần điện van Deluge, Wet, Pre-action hệ thống PCCC",
+    "unit": "1 cái",
+    "legal_basis": "Đơn vị tính: 1 cái | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 453",
+    "evidence_image": "images_evidence/E6C.3.06.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.01",
+        "rate_base": 0.07,
+        "apply_flag": 1,
+        "rate_calculated": 0.07
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công",
+        "dvt_step": "0.01",
+        "rate_base": 0.07,
+        "apply_flag": 1,
+        "rate_calculated": 0.07
+      },
+      {
+        "step": 3,
+        "name": "3. Kiểm tra an toàn trước khi thực hiện",
+        "dvt_step": "0.01",
+        "rate_base": 0.07,
+        "apply_flag": 1,
+        "rate_calculated": 0.07
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, điện trở cách điện cáp nguồn",
+        "dvt_step": "0.01",
+        "rate_base": 0.07,
+        "apply_flag": 1,
+        "rate_calculated": 0.07
+      },
+      {
+        "step": 5,
+        "name": "5. Kiểm tra bảo dưỡng van điện từ (solenoid)",
+        "dvt_step": "0.15",
+        "rate_base": 1.05,
+        "apply_flag": 1,
+        "rate_calculated": 1.05
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra bảo dưỡng đồng hồ đo áp suất",
+        "dvt_step": "0.22",
+        "rate_base": 1.54,
+        "apply_flag": 1,
+        "rate_calculated": 1.54
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra bảo dưỡng công tắc áp suất (pressure switch)",
+        "dvt_step": "0.2",
+        "rate_base": 1.4,
+        "apply_flag": 1,
+        "rate_calculated": 1.4
+      },
+      {
+        "step": 8,
+        "name": "8. Kiểm tra bảo dưỡng công tắc hành trình",
+        "dvt_step": "0.12",
+        "rate_base": 0.84,
+        "apply_flag": 1,
+        "rate_calculated": 0.84
+      },
+      {
+        "step": 9,
+        "name": "9. Kiểm tra bảo dưỡng chuông báo động thủy lực",
+        "dvt_step": "0.1",
+        "rate_base": 0.7,
+        "apply_flag": 1,
+        "rate_calculated": 0.7
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra rò rỉ đường ống điều khiển",
+        "dvt_step": "0.08",
+        "rate_base": 0.56,
+        "apply_flag": 1,
+        "rate_calculated": 0.56
+      },
+      {
+        "step": 11,
+        "name": "11. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.04",
+        "rate_base": 0.28,
+        "apply_flag": 1,
+        "rate_calculated": 0.28
+      },
+      {
+        "step": 12,
+        "name": "12. Kiểm tra chức năng van từ phòng điều khiển",
+        "dvt_step": "0.03",
+        "rate_base": 0.21,
+        "apply_flag": 1,
+        "rate_calculated": 0.21
+      },
+      {
+        "step": 13,
+        "name": "13. Vệ sinh mặt bằng và nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.14,
+        "apply_flag": 1,
+        "rate_calculated": 0.14
+      }
+    ],
+    "total_labor_steps": 7.0,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 7.0,
+          "formula_ref": "=T17",
+          "spec": "Bậc: 5,0/7",
+          "note": "Bảo dưỡng định kỳ van PCCC Deluge/Wet",
+          "row_in_sheet": 21
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0303",
+          "name": "Máy đo điện trở cách điện",
+          "unit": "ca",
+          "rate": 0.2,
+          "formula_ref": "",
+          "spec": "Đo cách điện cuộn hút van",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 23
+        },
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.5,
+          "formula_ref": "",
+          "spec": "Đo thông mạch, điện áp điều khiển",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 24
+        },
+        {
+          "code": "M109.0201",
+          "name": "Bàn cân áp suất",
+          "unit": "ca",
+          "rate": 0.3,
+          "formula_ref": "",
+          "spec": "Kiểm định, hiệu chỉnh đồng hồ áp suất",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 25
+        }
+      ]
+    }
+  },
+  "E6B.1.13.01": {
+    "code": "E6B.1.13.01",
+    "name": "Kiểm tra bình accu (Ắc quy hệ thống PCCC & nguồn điều khiển)",
+    "unit": "1 bình",
+    "legal_basis": "Đơn vị tính: 1 bình | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 5 trang 383-384",
+    "evidence_image": "images_evidence/E6B.1.13.01.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu; Chuẩn bị vật tư dụng cụ",
+        "dvt_step": "0.05",
+        "rate_base": 0.08,
+        "apply_flag": 1,
+        "rate_calculated": 0.08
+      },
+      {
+        "step": 2,
+        "name": "2. Kiểm tra bên ngoài bình accu",
+        "dvt_step": "0.01",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      },
+      {
+        "step": 3,
+        "name": "3. Kiểm tra bình acquy, vệ sinh vô mỡ các cọc bình",
+        "dvt_step": "0.05",
+        "rate_base": 0.08,
+        "apply_flag": 1,
+        "rate_calculated": 0.08
+      },
+      {
+        "step": 4,
+        "name": "4. Vệ sinh, kiểm tra, siết lại thanh nối giữa các accu",
+        "dvt_step": "0.13",
+        "rate_base": 0.2,
+        "apply_flag": 1,
+        "rate_calculated": 0.2
+      },
+      {
+        "step": 5,
+        "name": "5. Châm nước cất, kiểm tra tỷ trọng dung dịch, nạp cân bằng",
+        "dvt_step": "0.17",
+        "rate_base": 0.26,
+        "apply_flag": 1,
+        "rate_calculated": 0.26
+      },
+      {
+        "step": 6,
+        "name": "6. Đo điện áp các bình accu",
+        "dvt_step": "0.05",
+        "rate_base": 0.08,
+        "apply_flag": 1,
+        "rate_calculated": 0.08
+      },
+      {
+        "step": 7,
+        "name": "7. Vệ sinh bôi mỡ các cọc bình",
+        "dvt_step": "0.05",
+        "rate_base": 0.08,
+        "apply_flag": 1,
+        "rate_calculated": 0.08
+      },
+      {
+        "step": 8,
+        "name": "8. Sơn chống sét khung đỡ bình accu",
+        "dvt_step": "0.02",
+        "rate_base": 0.03,
+        "apply_flag": 1,
+        "rate_calculated": 0.03
+      },
+      {
+        "step": 9,
+        "name": "9. Đánh giá dung lượng và thử tải phóng xả",
+        "dvt_step": "0.4",
+        "rate_base": 0.6,
+        "apply_flag": 1,
+        "rate_calculated": 0.6
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra hệ thống nạp và phục hồi dung dịch",
+        "dvt_step": "0.05",
+        "rate_base": 0.05,
+        "apply_flag": 1,
+        "rate_calculated": 0.05
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.02,
+        "apply_flag": 1,
+        "rate_calculated": 0.02
+      }
+    ],
+    "total_labor_steps": 1.5,
+    "resources": {
+      "materials": [
+        {
+          "code": "V_ACCU",
+          "name": "Nước cất nạp accu, mỡ bôi cọc bình",
+          "unit": "kg",
+          "rate": 0.1,
+          "formula_ref": "",
+          "spec": "Bảo dưỡng cọc bình & châm nước",
+          "note": "ĐMSCL Tập 5 P.384",
+          "row_in_sheet": 20
+        }
+      ],
+      "labor": [
+        {
+          "code": "NC_457",
+          "name": "Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 1.5,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 4,5/7",
+          "note": "Tổng công từ các bước thực hiện",
+          "row_in_sheet": 22
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0501",
+          "name": "Thiết bị đo nội trở và dung lượng accu",
+          "unit": "ca",
+          "rate": 0.25,
+          "formula_ref": "",
+          "spec": "Đo dung lượng Ah, nội trở mΩ",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 24
+        },
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng (VOM)",
+          "unit": "ca",
+          "rate": 0.2,
+          "formula_ref": "",
+          "spec": "Đo điện áp từng bình",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 25
+        }
+      ]
+    }
+  },
+  "E6C.1.31": {
+    "code": "E6C.1.31",
+    "name": "Kiểm tra và bảo dưỡng thiết bị đo khí NH3, Clo, H2",
+    "unit": "1 bộ",
+    "legal_basis": "Đơn vị tính: 1 bộ | Tiêu chuẩn: QĐ 45/QĐ-HĐTV Tập 6 trang 436",
+    "evidence_image": "images_evidence/E6C.1.31.png",
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu",
+        "dvt_step": "0.02",
+        "rate_base": 0.11,
+        "apply_flag": 1,
+        "rate_calculated": 0.11
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị dụng cụ, vật tư, nhân lực, máy thi công",
+        "dvt_step": "0.05",
+        "rate_base": 0.27,
+        "apply_flag": 1,
+        "rate_calculated": 0.27
+      },
+      {
+        "step": 3,
+        "name": "3. Thực hiện đầy đủ các bước kiểm tra an toàn",
+        "dvt_step": "0.02",
+        "rate_base": 0.11,
+        "apply_flag": 1,
+        "rate_calculated": 0.11
+      },
+      {
+        "step": 4,
+        "name": "4. Đo thông mạch, đo điện trở cách điện cáp nguồn/điều khiển",
+        "dvt_step": "0.05",
+        "rate_base": 0.27,
+        "apply_flag": 1,
+        "rate_calculated": 0.27
+      },
+      {
+        "step": 5,
+        "name": "5. Kiểm tra, vệ sinh sensor đo nồng độ khí",
+        "dvt_step": "0.2",
+        "rate_base": 1.06,
+        "apply_flag": 1,
+        "rate_calculated": 1.06
+      },
+      {
+        "step": 6,
+        "name": "6. Kiểm tra bo mạch xử lý của thiết bị",
+        "dvt_step": "0.15",
+        "rate_base": 0.8,
+        "apply_flag": 1,
+        "rate_calculated": 0.8
+      },
+      {
+        "step": 7,
+        "name": "7. Kiểm tra màn hình giám sát của thiết bị",
+        "dvt_step": "0.1",
+        "rate_base": 0.53,
+        "apply_flag": 1,
+        "rate_calculated": 0.53
+      },
+      {
+        "step": 8,
+        "name": "8. Xử lý điện trở các điểm nối dây",
+        "dvt_step": "0.1",
+        "rate_base": 0.53,
+        "apply_flag": 1,
+        "rate_calculated": 0.53
+      },
+      {
+        "step": 9,
+        "name": "9. Bơm khí chuẩn hiệu chuẩn điểm Zero và Span",
+        "dvt_step": "0.2",
+        "rate_base": 1.06,
+        "apply_flag": 1,
+        "rate_calculated": 1.06
+      },
+      {
+        "step": 10,
+        "name": "10. Kiểm tra tín hiệu truyền về hệ thống điều khiển trung tâm",
+        "dvt_step": "0.09",
+        "rate_base": 0.48,
+        "apply_flag": 1,
+        "rate_calculated": 0.48
+      },
+      {
+        "step": 11,
+        "name": "11. Vệ sinh mặt bằng và tiến hành nghiệm thu",
+        "dvt_step": "0.02",
+        "rate_base": 0.08,
+        "apply_flag": 1,
+        "rate_calculated": 0.08
+      }
+    ],
+    "total_labor_steps": 5.3,
+    "resources": {
+      "materials": [],
+      "labor": [
+        {
+          "code": "NC_507",
+          "name": "1. Nhân công trực tiếp",
+          "unit": "Công",
+          "rate": 5.3,
+          "formula_ref": "=T15",
+          "spec": "Bậc: 5,0/7",
+          "note": "Kiểm tra hiệu chuẩn đầu dò khí chuyên dụng",
+          "row_in_sheet": 19
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0601",
+          "name": "Bình khí mẫu hiệu chuẩn (Zero & Span gas)",
+          "unit": "ca",
+          "rate": 0.5,
+          "formula_ref": "",
+          "spec": "Hiệu chuẩn độ nhạy sensor",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 21
+        },
+        {
+          "code": "VOM",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.5,
+          "formula_ref": "",
+          "spec": "Đo tín hiệu dòng 4-20mA",
+          "note": "QĐ 45/QĐ-HĐTV",
+          "row_in_sheet": 22
+        }
+      ]
+    }
+  },
+  "BD.41151": {
+    "name": "Lắp đặt trung tâm xử lý tín hiệu báo cháy",
+    "unit": "1 trung tâm",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 268 PL3)",
+    "tech_profile": "Trung tâm xử lý tín hiệu báo cháy (Lắp đặt / Bảo dưỡng)",
+    "resources": {
+      "materials": [
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1
+        },
+        {
+          "code": "V20647",
+          "name": "Đinh vít nở M8",
+          "unit": "bộ",
+          "rate": 4.0
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 5.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N96885",
+          "name": "Kỹ sư 5,0/8",
+          "unit": "công",
+          "rate": 1.3
+        },
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 1.3
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan 1 kW",
+          "unit": "ca",
+          "rate": 0.12
+        },
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.86
+        }
+      ]
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc và lấy dấu để lắp đặt tủ trung tâm xử lý tín hiệu báo cháy tự động",
+        "dvt_step": "1 trung tâm",
+        "rate_base": 0.26,
+        "apply_flag": 1,
+        "pct": "10%"
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt tủ trung tâm, lắp bảng mạch và ắc quy biến áp vào trung tâm",
+        "dvt_step": "1 trung tâm",
+        "rate_base": 0.78,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 3,
+        "name": "3. Kiểm tra cáp tín hiệu toàn bộ hệ thống, kiểm tra bộ nạp ắc quy",
+        "dvt_step": "1 trung tâm",
+        "rate_base": 0.78,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 4,
+        "name": "4. Kiểm tra chế độ toàn hệ thống, luồn cáp từ tủ ra ngoài, đo điện trở cách điện",
+        "dvt_step": "1 trung tâm",
+        "rate_base": 0.52,
+        "apply_flag": 1,
+        "pct": "20%"
+      },
+      {
+        "step": 5,
+        "name": "5. Thu dọn, vệ sinh mặt bằng",
+        "dvt_step": "1 trung tâm",
+        "rate_base": 0.26,
+        "apply_flag": 1,
+        "pct": "10%"
+      }
+    ],
+    "evidence_image": "images_evidence/BD.41151.png"
+  },
+  "BD.41171": {
+    "name": "Lắp đặt đèn thoát hiểm",
+    "unit": "5 đèn",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 270 PL3)",
+    "tech_profile": "Đèn thoát hiểm EXIT, đèn sự cố (Lắp đặt / Kiểm tra)",
+    "resources": {
+      "materials": [
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.1
+        },
+        {
+          "code": "V20646",
+          "name": "Đinh vít nở M6",
+          "unit": "bộ",
+          "rate": 10.0
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 5.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N96885",
+          "name": "Kỹ sư 5,0/8",
+          "unit": "công",
+          "rate": 0.73
+        },
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 0.73
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan 1 kW",
+          "unit": "ca",
+          "rate": 0.34
+        },
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.78
+        }
+      ]
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Đo đạc lấy dấu, lắp đèn thoát hiểm vào vị trí",
+        "dvt_step": "5 đèn",
+        "rate_base": 0.73,
+        "apply_flag": 1,
+        "pct": "50%"
+      },
+      {
+        "step": 2,
+        "name": "2. Đấu nối dây nguồn và lắp đặt ắc quy vào đèn",
+        "dvt_step": "5 đèn",
+        "rate_base": 0.58,
+        "apply_flag": 1,
+        "pct": "40%"
+      },
+      {
+        "step": 3,
+        "name": "3. Vệ sinh, thu dọn",
+        "dvt_step": "5 đèn",
+        "rate_base": 0.15,
+        "apply_flag": 1,
+        "pct": "10%"
+      }
+    ],
+    "evidence_image": "images_evidence/BD.41171.png"
+  },
+  "BD.42401": {
+    "name": "Lắp đặt thiết bị điều khiển báo động (van FM-200 / xả khí)",
+    "unit": "5 tủ",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 274 PL3)",
+    "tech_profile": "Thiết bị điều khiển báo động / van PCCC (Lắp đặt / Bảo trì)",
+    "resources": {
+      "materials": [
+        {
+          "code": "V09505",
+          "name": "Cồn công nghiệp",
+          "unit": "kg",
+          "rate": 0.3
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 2.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N96885",
+          "name": "Kỹ sư 4,0/8",
+          "unit": "công",
+          "rate": 2.0
+        },
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 2.0
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy khoan 1 kW",
+          "unit": "ca",
+          "rate": 1.25
+        },
+        {
+          "code": "M108.0201",
+          "name": "Vôn mét điện tử",
+          "unit": "ca",
+          "rate": 0.71
+        }
+      ]
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Nghiên cứu tài liệu kỹ thuật, hồ sơ thiết kế, lập phương án thi công",
+        "dvt_step": "5 tủ",
+        "rate_base": 0.4,
+        "apply_flag": 1,
+        "pct": "10%"
+      },
+      {
+        "step": 2,
+        "name": "2. Chuẩn bị mặt bằng, dụng cụ thi công",
+        "dvt_step": "5 tủ",
+        "rate_base": 0.4,
+        "apply_flag": 1,
+        "pct": "10%"
+      },
+      {
+        "step": 3,
+        "name": "3. Nhận, kiểm tra toàn bộ thiết bị, vật tư vận chuyển tới vị trí",
+        "dvt_step": "5 tủ",
+        "rate_base": 0.8,
+        "apply_flag": 1,
+        "pct": "20%"
+      },
+      {
+        "step": 4,
+        "name": "4. Lắp đặt thiết bị, đấu nối dây nguồn vào trung tâm, dây tín hiệu",
+        "dvt_step": "5 tủ",
+        "rate_base": 2.0,
+        "apply_flag": 1,
+        "pct": "50%"
+      },
+      {
+        "step": 5,
+        "name": "5. Kiểm tra công việc đã lắp đặt, vệ sinh",
+        "dvt_step": "5 tủ",
+        "rate_base": 0.4,
+        "apply_flag": 1,
+        "pct": "10%"
+      }
+    ],
+    "evidence_image": "images_evidence/BD.42401.png"
+  },
+  "SB.822": {
+    "name": "Sơn sắt thép, van và đường ống kim loại bằng sơn các loại",
+    "unit": "100 m2",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 111 PL6)",
+    "tech_profile": "Sơn bảo dưỡng kim loại, van và đường ống PCCC",
+    "resources": {
+      "materials": [
+        {
+          "code": "V00002",
+          "name": "Sơn chống rỉ và sơn phủ",
+          "unit": "kg",
+          "rate": 32.9
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 1.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 10.8
+        }
+      ],
+      "machines": []
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Chuẩn bị, vệ sinh bề mặt bộ phận kết cấu van, đường ống",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 2,
+        "name": "2. Sơn 1 nước lót chống gỉ",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 3,
+        "name": "3. Sơn 2 nước phủ bảo vệ bề mặt đảm bảo yêu cầu kỹ thuật",
+        "dvt_step": "100 m2",
+        "rate_base": 4.32,
+        "apply_flag": 1,
+        "pct": "40%"
+      }
+    ],
+    "evidence_image": "images_evidence/SB.822.png"
+  },
+  "BA.18405": {
+    "name": "Lắp đặt rơ le, công tắc dòng chảy, linh kiện chống rò điện",
+    "unit": "1 bộ",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 18 PL3)",
+    "tech_profile": "Công tắc dòng chảy, linh kiện điện PCCC (Lắp đặt / Bảo trì)",
+    "resources": {
+      "materials": [
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 2.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 0.45
+        }
+      ],
+      "machines": [
+        {
+          "code": "M108.0101",
+          "name": "Đồng hồ vạn năng",
+          "unit": "ca",
+          "rate": 0.25
+        }
+      ]
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Kiểm tra vị trí lắp đặt, đấu nối dây tín hiệu công tắc dòng chảy",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.35,
+        "apply_flag": 1,
+        "pct": "80%"
+      },
+      {
+        "step": 2,
+        "name": "2. Đo thử thông mạch, kiểm tra hoạt động khi có dòng chảy",
+        "dvt_step": "1 bộ",
+        "rate_base": 0.1,
+        "apply_flag": 1,
+        "pct": "20%"
+      }
+    ],
+    "evidence_image": "images_evidence/BA.18405.png"
+  },
+  "BB.86104": {
+    "name": "Lắp đặt van mặt bích, van chặn, y lọc đường ống",
+    "unit": "1 cái",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 174 PL3)",
+    "tech_profile": "Van mặt bích, van một chiều, y lọc PCCC (Bảo dưỡng)",
+    "resources": {
+      "materials": [
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác (gioăng đệm, bulong)",
+          "unit": "%",
+          "rate": 3.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 0.62
+        }
+      ],
+      "machines": [
+        {
+          "code": "M112.1704",
+          "name": "Máy xiết bu lông",
+          "unit": "ca",
+          "rate": 0.15
+        }
+      ]
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Kiểm tra bề mặt bích, vệ sinh thân van và lưới lọc",
+        "dvt_step": "1 cái",
+        "rate_base": 0.31,
+        "apply_flag": 1,
+        "pct": "50%"
+      },
+      {
+        "step": 2,
+        "name": "2. Lắp đặt van vào đường ống, cân chỉnh, xiết đều bu lông",
+        "dvt_step": "1 cái",
+        "rate_base": 0.31,
+        "apply_flag": 1,
+        "pct": "50%"
+      }
+    ],
+    "evidence_image": "images_evidence/BB.86104.png"
+  },
+  "SB.82633": {
+    "name": "Sơn chống rỉ, sơn phủ – sơn trực tiếp lên vỏ thiết bị trong nhà (DN50 - DN100)",
+    "unit": "100 m2",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 111 PL6)",
+    "tech_profile": "Sơn bảo dưỡng kim loại, van và đường ống PCCC",
+    "resources": {
+      "materials": [
+        {
+          "code": "V00002",
+          "name": "Sơn chống rỉ và sơn phủ",
+          "unit": "kg",
+          "rate": 32.9
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 1.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 10.8
+        }
+      ],
+      "machines": []
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Chuẩn bị, vệ sinh bề mặt bộ phận kết cấu van, đường ống",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 2,
+        "name": "2. Sơn 1 nước lót chống gỉ",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 3,
+        "name": "3. Sơn 2 nước phủ bảo vệ bề mặt đảm bảo yêu cầu kỹ thuật",
+        "dvt_step": "100 m2",
+        "rate_base": 4.32,
+        "apply_flag": 1,
+        "pct": "40%"
+      }
+    ],
+    "evidence_image": "images_evidence/SB.822.png",
+    "code": "SB.82633"
+  },
+  "SB.82634": {
+    "name": "Sơn chống rỉ, sơn phủ – sơn trực tiếp lên vỏ thiết bị ngoài nhà (DN125 - DN200)",
+    "unit": "100 m2",
+    "legal_basis": "Thông tư 38/2026/TT-BXD (Trang 111 PL6)",
+    "tech_profile": "Sơn bảo dưỡng kim loại, van và đường ống PCCC",
+    "resources": {
+      "materials": [
+        {
+          "code": "V00002",
+          "name": "Sơn chống rỉ và sơn phủ",
+          "unit": "kg",
+          "rate": 32.9
+        },
+        {
+          "code": "V00750",
+          "name": "Vật liệu khác",
+          "unit": "%",
+          "rate": 1.0
+        }
+      ],
+      "labor": [
+        {
+          "code": "N97791",
+          "name": "Nhân công nhóm 3 (Bậc 3,5/7)",
+          "unit": "công",
+          "rate": 10.8
+        }
+      ],
+      "machines": []
+    },
+    "work_steps": [
+      {
+        "step": 1,
+        "name": "1. Chuẩn bị, vệ sinh bề mặt bộ phận kết cấu van, đường ống",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 2,
+        "name": "2. Sơn 1 nước lót chống gỉ",
+        "dvt_step": "100 m2",
+        "rate_base": 3.24,
+        "apply_flag": 1,
+        "pct": "30%"
+      },
+      {
+        "step": 3,
+        "name": "3. Sơn 2 nước phủ bảo vệ bề mặt đảm bảo yêu cầu kỹ thuật",
+        "dvt_step": "100 m2",
+        "rate_base": 4.32,
+        "apply_flag": 1,
+        "pct": "40%"
+      }
+    ],
+    "evidence_image": "images_evidence/SB.822.png",
+    "code": "SB.82634"
+  }
+}
