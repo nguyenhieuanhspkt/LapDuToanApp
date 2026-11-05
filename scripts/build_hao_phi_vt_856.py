@@ -178,9 +178,9 @@ def get_components_for_code(code_str):
     # 10. E6C.3.03 (Module loop)
     elif 'E6C.3.03' in c:
         return [
-            ('NC_E6C.3.03', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra module loop)', 'công', 'I', "='Định mức áp dụng'!D132", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
-            ('M_E6C.3.03_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D133", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
-            ('M_E6C.3.03_MEG', 'MÁY THI CÔNG', 'Hiện trường', '- Mê gôm mét 500V', 'ca', 'K', "='Định mức áp dụng'!D134", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450')
+            ('NC_E6C.3.03', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra module loop)', 'công', 'I', "='Định mức áp dụng'!D134", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
+            ('M_E6C.3.03_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D135", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
+            ('M_E6C.3.03_MEG', 'MÁY THI CÔNG', 'Hiện trường', '- Mê gôm mét 500V', 'ca', 'K', "='Định mức áp dụng'!D136", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450')
         ]
 
     # 11. E6C.2.04 (Solenoid)
@@ -207,18 +207,18 @@ def get_components_for_code(code_str):
     # 14. E6C.3.06 (Van Deluge)
     elif 'E6C.3.06' in c:
         return [
-            ('NC_E6C.3.06', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Cụm van Deluge phần điện)', 'công', 'I', "='Định mức áp dụng'!D152", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
-            ('M_E6C.3.06_CD', 'MÁY THI CÔNG', 'Hiện trường', '- Máy đo điện trở cách điện', 'ca', 'K', "='Định mức áp dụng'!D153", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
-            ('M_E6C.3.06_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D154", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
-            ('M_E6C.3.06_BAN', 'MÁY THI CÔNG', 'Hiện trường', '- Bàn cân áp suất / Bơm tạo áp', 'ca', 'K', "='Định mức áp dụng'!D155", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453')
+            ('NC_E6C.3.06', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Cụm van Deluge phần điện)', 'công', 'I', "='Định mức áp dụng'!D154", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
+            ('M_E6C.3.06_CD', 'MÁY THI CÔNG', 'Hiện trường', '- Máy đo điện trở cách điện', 'ca', 'K', "='Định mức áp dụng'!D155", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
+            ('M_E6C.3.06_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D156", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
+            ('M_E6C.3.06_BAN', 'MÁY THI CÔNG', 'Hiện trường', '- Bàn cân áp suất / Bơm tạo áp', 'ca', 'K', "='Định mức áp dụng'!D157", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453')
         ]
 
     # 15. E6C.1.31 (Đo khí H2)
     elif 'E6C.1.31' in c:
         return [
-            ('NC_E6C.1.31', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Hiệu chuẩn đầu đo khí H2)', 'công', 'I', "='Định mức áp dụng'!D171", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
-            ('M_E6C.1.31_GAS', 'MÁY THI CÔNG', 'Hiện trường', '- Bình khí mẫu hiệu chuẩn (Zero & Span gas)', 'ca', 'K', "='Định mức áp dụng'!D172", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
-            ('M_E6C.1.31_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng kỹ thuật số (VOM)', 'ca', 'K', "='Định mức áp dụng'!D173", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436')
+            ('NC_E6C.1.31', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Hiệu chuẩn đầu đo khí H2)', 'công', 'I', "='Định mức áp dụng'!D173", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
+            ('M_E6C.1.31_GAS', 'MÁY THI CÔNG', 'Hiện trường', '- Bình khí mẫu hiệu chuẩn (Zero & Span gas)', 'ca', 'K', "='Định mức áp dụng'!D174", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
+            ('M_E6C.1.31_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng kỹ thuật số (VOM)', 'ca', 'K', "='Định mức áp dụng'!D175", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436')
         ]
 
     # 16. E6B.1.13.01 (Bình ắc quy)
