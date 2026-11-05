@@ -74,37 +74,79 @@ for r in range(7, ws_hp.max_row + 1):
                 'dvt': dvt
             })
 
-# Prices map (Tạm thời áp theo cảm tính theo yêu cầu 3)
+# Prices map: Đơn giá nhân công chuẩn theo Quyết định số 177/QĐ-HĐTV ngày 29/10/2026 của HĐTV EVN
+# kết hợp Quyết định số 311/QĐ-SXD ngày 22/12/2023 của Sở Xây dựng Bình Thuận (Vùng IV - NMNĐ Vĩnh Tân 4)
+# tính theo hệ số cấp bậc quy định tại Thông tư số 13/2021/TT-BXD của Bộ Xây dựng.
 nc_prices = {
-    'Nhân công kỹ thuật bậc 5,0/7 (Trọn bộ 11 bước công nghệ)': 420000,
-    'Nhân công tháo dỡ trên cao (E6C.3.01 bước 5)': 380000,
-    'Nhân công bảo dưỡng, kiểm chuẩn sàn (Bước 1-4, 6-11)': 420000,
-    'Nhân công tháo dỡ trên cao (E6C.3.02 bước 5)': 380000,
-    'Nhân công hiệu chuẩn, thử nghiệm sàn (Bước 1-4, 6-11)': 420000,
-    'Nhân công tháo dỡ beam trên cao (Vận dụng E6C.3.02 bước 5)': 400000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Trọn bộ 11 bước)': 420000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra module loop)': 420000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Cân chỉnh beam quang)': 450000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Bảo dưỡng van điện từ solenoid)': 420000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra công tắc áp lực)': 420000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra đo lưu lượng)': 420000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Cụm van Deluge phần điện)': 450000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Hiệu chuẩn đầu đo khí H2)': 480000,
-    'Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra bình ắc quy)': 400000,
-    'Thợ cơ khí sửa chữa bậc 4,0/7 (Đại tu van nước PCCC)': 360000,
-    'Thợ cơ khí sửa chữa bậc 4,5/7 (Đại tu van an toàn)': 390000,
-    'Kỹ sư công nghệ thí nghiệm điện bậc 5,0/8': 520000,
-    'Thợ lắp đặt thiết bị PCCC bậc 3,5/7': 320000,
-    'Thợ lắp đặt đường ống PCCC bậc 3,5/7': 320000,
-    'Thợ cơ điện bậc 4,0/7 (Bơm chữa cháy)': 350000,
-    'Thợ lắp đặt thiết bị PCCC bậc 3,0/7 (Đầu phun xả tràn)': 290000,
-    'Thợ điện công nghiệp bậc 3,0/7 (Đèn sự cố & EXIT)': 290000,
-    'Thợ điện bậc 3,0/7 (Tháo chuông còi báo cháy)': 290000,
-    'Thợ sơn bậc 3,5/7': 310000,
-    'Thợ sơn bậc 3,5/7 (Làm việc ngoài trời)': 330000,
-    'Thợ lắp đặt bậc 3,5/7 (Lắp van ren ≤ DN25)': 320000,
-    'Thợ lắp đặt bậc 3,5/7 (Lắp van bích DN80)': 320000,
-    'Thợ lắp đặt bậc 3,5/7 (Lắp đồng hồ áp suất)': 320000
+    # 1. Nhóm 3 (Bậc 5,0/7) theo QĐ 177/QĐ-HĐTV & QĐ 45/QĐ-HĐTV: 262.300 * 1.94 / 1.52 = 334.778 đ/công
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 theo QĐ 177 & QĐ 45)': 334778,
+    'Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.01 bước 5)': 334778,
+    'Nhân công bảo dưỡng, kiểm chuẩn sàn (Nhóm 3 - Bậc 5,0/7)': 334778,
+    'Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.02 bước 5)': 334778,
+    'Nhân công hiệu chuẩn, thử nghiệm sàn (Nhóm 3 - Bậc 5,0/7)': 334778,
+    'Nhân công tháo dỡ beam trên cao (Vận dụng E6C.3.02 bước 5)': 334778,
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cân chỉnh beam)': 334778,
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Module loop)': 334778,
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cụm van Deluge)': 334778,
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Đại tu van nước)': 334778,
+    'Thợ cơ khí sửa chữa bậc 4,0/7 (Đại tu van nước PCCC)': 334778,
+
+    # 2. Nhóm 4 (Bậc 5,0/7) theo QĐ 177/QĐ-HĐTV & QĐ 45/QĐ-HĐTV: 272.100 * 1.94 / 1.52 = 347.286 đ/công
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van Solenoid)': 347286,
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Công tắc áp lực)': 347286,
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Đo lưu lượng)': 347286,
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Hiệu chuẩn khí H2)': 347286,
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Kiểm tra ắc quy)': 347286,
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van an toàn)': 347286,
+    'Thợ cơ khí sửa chữa bậc 4,5/7 (Đại tu van an toàn)': 347286,
+
+    # 3. Nhân công theo Thông tư 38/2026/TT-BXD & TT 13/2021/TT-BXD (Bình Thuận Vùng IV):
+    'Thợ lắp đặt thiết bị PCCC bậc 3,5/7': 262300, # Nhóm 3 bậc 3,5/7: 262.300
+    'Thợ lắp đặt đường ống PCCC bậc 3,5/7': 262300, # Nhóm 3 bậc 3,5/7: 262.300
+    'Thợ lắp đặt bậc 3,5/7 (Lắp van ren ≤ DN25)': 262300, # Nhóm 3 bậc 3,5/7: 262.300
+    'Thợ lắp đặt bậc 3,5/7 (Lắp van bích DN80)': 262300, # Nhóm 3 bậc 3,5/7: 262.300
+    'Thợ lắp đặt bậc 3,5/7 (Lắp đồng hồ áp suất)': 262300, # Nhóm 3 bậc 3,5/7: 262.300
+    'Thợ lắp đặt thiết bị PCCC bậc 3,0/7 (Đầu phun xả tràn)': 239866, # Nhóm 3 bậc 3,0/7: 262.300 * 1.39 / 1.52 = 239.866
+    'Thợ cơ điện bậc 4,0/7 (Bơm chữa cháy)': 276809, # Nhóm 2 bậc 4,0/7: 255.000 * 1.65 / 1.52 = 276.809
+    'Thợ điện công nghiệp bậc 3,0/7 (Đèn sự cố & EXIT)': 233191, # Nhóm 2 bậc 3,0/7: 255.000 * 1.39 / 1.52 = 233.191
+    'Thợ điện bậc 3,0/7 (Tháo chuông còi báo cháy)': 233191, # Nhóm 2 bậc 3,0/7: 255.000 * 1.39 / 1.52 = 233.191
+    'Thợ sơn bậc 3,5/7': 231200, # Nhóm 1 bậc 3,5/7: 231.200
+    'Thợ sơn bậc 3,5/7 (Làm việc ngoài trời)': 231200, # Nhóm 1 bậc 3,5/7: 231.200
+    'Kỹ sư công nghệ thí nghiệm điện bậc 5,0/8': 312339 # Kỹ sư bậc 5/8: 285.800 * 1.53 / 1.40 = 312.339
+}
+
+# Legal basis mapping for Master Rows
+nc_basis = {
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 theo QĐ 177 & QĐ 45)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.01 bước 5)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công bảo dưỡng, kiểm chuẩn sàn (Nhóm 3 - Bậc 5,0/7)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.02 bước 5)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công hiệu chuẩn, thử nghiệm sàn (Nhóm 3 - Bậc 5,0/7)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công tháo dỡ beam trên cao (Vận dụng E6C.3.02 bước 5)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cân chỉnh beam)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Module loop)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cụm van Deluge)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Đại tu van nước)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Thợ cơ khí sửa chữa bậc 4,0/7 (Đại tu van nước PCCC)': 'QĐ 177/QĐ-HĐTV (Nhóm 3) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van Solenoid)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Công tắc áp lực)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Đo lưu lượng)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Hiệu chuẩn khí H2)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Kiểm tra ắc quy)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van an toàn)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Thợ cơ khí sửa chữa bậc 4,5/7 (Đại tu van an toàn)': 'QĐ 177/QĐ-HĐTV (Nhóm 4) & QĐ 311/QĐ-SXD Bình Thuận Vùng IV',
+    'Thợ lắp đặt thiết bị PCCC bậc 3,5/7': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,5/7)',
+    'Thợ lắp đặt đường ống PCCC bậc 3,5/7': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,5/7)',
+    'Thợ lắp đặt bậc 3,5/7 (Lắp van ren ≤ DN25)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,5/7)',
+    'Thợ lắp đặt bậc 3,5/7 (Lắp van bích DN80)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,5/7)',
+    'Thợ lắp đặt bậc 3,5/7 (Lắp đồng hồ áp suất)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,5/7)',
+    'Thợ lắp đặt thiết bị PCCC bậc 3,0/7 (Đầu phun xả tràn)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 3 bậc 3,0/7)',
+    'Thợ cơ điện bậc 4,0/7 (Bơm chữa cháy)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 2 bậc 4,0/7)',
+    'Thợ điện công nghiệp bậc 3,0/7 (Đèn sự cố & EXIT)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 2 bậc 3,0/7)',
+    'Thợ điện bậc 3,0/7 (Tháo chuông còi báo cháy)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 2 bậc 3,0/7)',
+    'Thợ sơn bậc 3,5/7': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 1 bậc 3,5/7)',
+    'Thợ sơn bậc 3,5/7 (Làm việc ngoài trời)': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Nhóm 1 bậc 3,5/7)',
+    'Kỹ sư công nghệ thí nghiệm điện bậc 5,0/8': 'TT 38/2026 & QĐ 311/QĐ-SXD Bình Thuận Vùng IV (Kỹ sư bậc 5,0/8)'
 }
 
 may_prices = {
@@ -254,7 +296,11 @@ def create_resource_sheet(wb, sheet_title, resource_type_label, groups_dict, pri
         c_amount_master.alignment = align_right
         c_amount_master.number_format = '#,##0'
         
-        ws.cell(row=curr_r, column=9, value=f"Tổng hao phí {len(details)} công tác").alignment = align_left
+        if resource_type_label == 'Nhân công':
+            basis_text = nc_basis.get(res_name, f"Tổng hao phí {len(details)} công tác")
+        else:
+            basis_text = f"Tổng hao phí {len(details)} công tác"
+        ws.cell(row=curr_r, column=9, value=basis_text).alignment = align_left
         
         for c in range(1, 10):
             cell = ws.cell(row=curr_r, column=c)

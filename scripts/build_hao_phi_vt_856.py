@@ -101,7 +101,7 @@ def get_components_for_code(code_str):
     # 1. Tủ trung tâm E6C.3.05
     if c == 'E6C.3.05':
         return [
-            ('NC_E6C.3.05', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Trọn bộ 11 bước công nghệ)', 'công', 'I', "='Định mức áp dụng'!D61", 1.0, 'Quyết định 45/QĐ-HĐTV Tập 6 trang 451'),
+            ('NC_E6C.3.05', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 theo QĐ 177 & QĐ 45)', 'công', 'I', "='Định mức áp dụng'!D61", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV ngày 29/10/2026 (Nhóm 3)'),
             ('M_E6C.3.05_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng kỹ thuật số (VOM)', 'ca', 'K', "='Định mức áp dụng'!D62", 1.0, 'Quyết định 45/QĐ-HĐTV Tập 6 trang 451'),
             ('M_E6C.3.05_BUI', 'MÁY THI CÔNG', 'Hiện trường', '- Máy thổi bụi công nghiệp cầm tay', 'ca', 'K', "='Định mức áp dụng'!D63", 1.0, 'Quyết định 45/QĐ-HĐTV Tập 6 trang 451')
         ]
@@ -109,7 +109,7 @@ def get_components_for_code(code_str):
     # 2. Không áp mã (đã gồm trong E6C.3.05)
     elif 'Không áp mã (đã gồm trong E6C.3.05)' in c:
         return [
-            ('NC_E6C.3.05', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Đã gồm trong tủ E6C.3.05)', 'công', 'I', "='Định mức áp dụng'!D61", 0.0, 'Đã tính trong tủ trung tâm E6C.3.05 (Hệ số = 0)'),
+            ('NC_E6C.3.05', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7) (Đã gồm trong tủ E6C.3.05)', 'công', 'I', "='Định mức áp dụng'!D61", 0.0, 'Đã tính trong tủ trung tâm E6C.3.05 (Hệ số = 0)'),
             ('M_E6C.3.05_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM) (Đã gồm trong tủ E6C.3.05)', 'ca', 'K', "='Định mức áp dụng'!D62", 0.0, 'Đã tính trong tủ trung tâm E6C.3.05 (Hệ số = 0)'),
             ('M_E6C.3.05_BUI', 'MÁY THI CÔNG', 'Hiện trường', '- Máy thổi bụi cầm tay (Đã gồm trong tủ E6C.3.05)', 'ca', 'K', "='Định mức áp dụng'!D63", 0.0, 'Đã tính trong tủ trung tâm E6C.3.05 (Hệ số = 0)')
         ]
@@ -117,8 +117,8 @@ def get_components_for_code(code_str):
     # 3. E6C.3.01 (bước 5) - Pha 1 tháo dỡ
     elif 'E6C.3.01' in c and 'bước 5' in c:
         return [
-            ('NC_E6C.3.01_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (E6C.3.01 bước 5)', 'công', 'I', "='Định mức áp dụng'!D71", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448 (Bước 5: 30%)'),
-            ('NC_E6C.3.01_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công bảo dưỡng, kiểm chuẩn sàn (Bước 1-4, 6-11)', 'công', 'I', 0.24, 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
+            ('NC_E6C.3.01_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.01 bước 5)', 'công', 'I', "='Định mức áp dụng'!D71", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3: 30%)'),
+            ('NC_E6C.3.01_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công bảo dưỡng, kiểm chuẩn sàn (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', 0.24, 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
             ('M_E6C.3.01_VOM', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D80", 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
             ('M_E6C.3.01_MEG', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Mê gôm mét 1000V', 'ca', 'K', "='Định mức áp dụng'!D81", 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)')
         ]
@@ -126,8 +126,8 @@ def get_components_for_code(code_str):
     # 4. E6C.3.01 (bước 1–4, 6–11) - Pha 2 kiểm chuẩn sàn
     elif 'E6C.3.01' in c and ('1-4' in c or '1–4' in c):
         return [
-            ('NC_E6C.3.01_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (E6C.3.01 bước 5)', 'công', 'I', "='Định mức áp dụng'!D71", 0.0, 'Đã tính tại pha tháo dỡ (Hệ số = 0)'),
-            ('NC_E6C.3.01_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công bảo dưỡng, kiểm chuẩn sàn (Bước 1-4, 6-11)', 'công', 'I', 0.24, 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448 (Bước 1-4,6-11: 70%)'),
+            ('NC_E6C.3.01_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', "='Định mức áp dụng'!D71", 0.0, 'Đã tính tại pha tháo dỡ (Hệ số = 0)'),
+            ('NC_E6C.3.01_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công bảo dưỡng, kiểm chuẩn sàn (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', 0.24, 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3: 70%)'),
             ('M_E6C.3.01_VOM', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D80", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448'),
             ('M_E6C.3.01_MEG', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Mê gôm mét 1000V', 'ca', 'K', "='Định mức áp dụng'!D81", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448')
         ]
@@ -135,7 +135,7 @@ def get_components_for_code(code_str):
     # 5. E6C.3.01 trọn gói
     elif c == 'E6C.3.01':
         return [
-            ('NC_E6C.3.01', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Trọn bộ 11 bước)', 'công', 'I', "='Định mức áp dụng'!D79", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448'),
+            ('NC_E6C.3.01', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 theo QĐ 177 & QĐ 45)', 'công', 'I', "='Định mức áp dụng'!D79", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6C.3.01_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D80", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448'),
             ('M_E6C.3.01_MEG', 'MÁY THI CÔNG', 'Hiện trường', '- Mê gôm mét 1000V', 'ca', 'K', "='Định mức áp dụng'!D81", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 448')
         ]
@@ -143,8 +143,8 @@ def get_components_for_code(code_str):
     # 6. E6C.3.02 (bước 5) - Pha 1 tháo dỡ
     elif 'E6C.3.02' in c and 'bước 5' in c:
         return [
-            ('NC_E6C.3.02_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (E6C.3.02 bước 5)', 'công', 'I', "='Định mức áp dụng'!D89", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449 (Bước 5: 30%)'),
-            ('NC_E6C.3.02_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công hiệu chuẩn, thử nghiệm sàn (Bước 1-4, 6-11)', 'công', 'I', 1.40, 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
+            ('NC_E6C.3.02_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7 - E6C.3.02 bước 5)', 'công', 'I', "='Định mức áp dụng'!D89", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3: 30%)'),
+            ('NC_E6C.3.02_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công hiệu chuẩn, thử nghiệm sàn (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', 1.40, 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
             ('M_E6C.3.02_SOLO', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Đầu thử nhiệt Solo 461 / Đầu thử khói', 'ca', 'K', "='Định mức áp dụng'!D98", 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)'),
             ('M_E6C.3.02_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D99", 0.0, 'Không áp dụng tại pha tháo dỡ (Hệ số = 0)')
         ]
@@ -152,8 +152,8 @@ def get_components_for_code(code_str):
     # 7. E6C.3.02 (bước 1–4, 6–11) - Pha 2 kiểm chuẩn sàn
     elif 'E6C.3.02' in c and ('1-4' in c or '1–4' in c):
         return [
-            ('NC_E6C.3.02_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (E6C.3.02 bước 5)', 'công', 'I', "='Định mức áp dụng'!D89", 0.0, 'Đã tính tại pha tháo dỡ (Hệ số = 0)'),
-            ('NC_E6C.3.02_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công hiệu chuẩn, thử nghiệm sàn (Bước 1-4, 6-11)', 'công', 'I', 1.40, 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449 (Bước 1-4,6-11: 70%)'),
+            ('NC_E6C.3.02_B5', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công tháo dỡ trên cao (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', "='Định mức áp dụng'!D89", 0.0, 'Đã tính tại pha tháo dỡ (Hệ số = 0)'),
+            ('NC_E6C.3.02_B1-11', 'NHÂN CÔNG', 'Phòng kiểm chuẩn', '- Nhân công hiệu chuẩn, thử nghiệm sàn (Nhóm 3 - Bậc 5,0/7)', 'công', 'I', 1.40, 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3: 70%)'),
             ('M_E6C.3.02_SOLO', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Đầu thử nhiệt Solo 461 / Đầu thử khói', 'ca', 'K', "='Định mức áp dụng'!D98", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449'),
             ('M_E6C.3.02_VOM', 'MÁY THI CÔNG', 'Phòng kiểm chuẩn', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D99", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449')
         ]
@@ -161,7 +161,7 @@ def get_components_for_code(code_str):
     # 8. E6C.3.02 trọn gói
     elif c == 'E6C.3.02':
         return [
-            ('NC_E6C.3.02', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Trọn bộ 11 bước)', 'công', 'I', "='Định mức áp dụng'!D97", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449'),
+            ('NC_E6C.3.02', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 theo QĐ 177 & QĐ 45)', 'công', 'I', "='Định mức áp dụng'!D97", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6C.3.02_SOLO', 'MÁY THI CÔNG', 'Hiện trường', '- Đầu thử nhiệt Solo 461 / Đầu thử khói', 'ca', 'K', "='Định mức áp dụng'!D98", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449'),
             ('M_E6C.3.02_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D99", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 449')
         ]
@@ -169,7 +169,7 @@ def get_components_for_code(code_str):
     # 9. E6C.3.04 (Beam cân chỉnh)
     elif 'E6C.3.04' in c:
         return [
-            ('NC_E6C.3.04', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Cân chỉnh beam quang)', 'công', 'I', "='Định mức áp dụng'!D115", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 451'),
+            ('NC_E6C.3.04', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cân chỉnh beam)', 'công', 'I', "='Định mức áp dụng'!D115", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6C.3.04_SOLO', 'MÁY THI CÔNG', 'Hiện trường', '- Đầu thử khói Solo 330 / Kính ngắm laser', 'ca', 'K', "='Định mức áp dụng'!D116", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 451'),
             ('M_E6C.3.04_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D117", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 451'),
             ('DC_E6C.3.04_S200', 'DỤNG CỤ', 'Hiện trường', '- Dụng cụ gỡ đầu báo khói Solo 200', 'ca', 'J', "='Định mức áp dụng'!D118", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 451')
@@ -178,7 +178,7 @@ def get_components_for_code(code_str):
     # 10. E6C.3.03 (Module loop)
     elif 'E6C.3.03' in c:
         return [
-            ('NC_E6C.3.03', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra module loop)', 'công', 'I', "='Định mức áp dụng'!D134", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
+            ('NC_E6C.3.03', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Module loop)', 'công', 'I', "='Định mức áp dụng'!D134", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6C.3.03_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D135", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450'),
             ('M_E6C.3.03_MEG', 'MÁY THI CÔNG', 'Hiện trường', '- Mê gôm mét 500V', 'ca', 'K', "='Định mức áp dụng'!D136", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 450')
         ]
@@ -186,28 +186,28 @@ def get_components_for_code(code_str):
     # 11. E6C.2.04 (Solenoid)
     elif 'E6C.2.04' in c:
         return [
-            ('NC_E6C.2.04', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Bảo dưỡng van điện từ solenoid)', 'công', 'I', "='Định mức áp dụng'!D197", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 440'),
+            ('NC_E6C.2.04', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van Solenoid)', 'công', 'I', "='Định mức áp dụng'!D197", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6C.2.04_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng VOM & Thiết bị kích', 'ca', 'K', "='Định mức áp dụng'!D198", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 440')
         ]
 
     # 12. E6C.1.23 (Công tắc áp lực/dòng chảy)
     elif 'E6C.1.23' in c:
         return [
-            ('NC_E6C.1.23', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra công tắc áp lực)', 'công', 'I', "='Định mức áp dụng'!D201", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 428'),
+            ('NC_E6C.1.23', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Công tắc áp lực)', 'công', 'I', "='Định mức áp dụng'!D201", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6C.1.23_BOM', 'MÁY THI CÔNG', 'Hiện trường', '- Bơm tạo áp cầm tay & Đồng hồ VOM', 'ca', 'K', "='Định mức áp dụng'!D202", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 428')
         ]
 
     # 13. E6C.1.18 (Đồng hồ lưu lượng)
     elif 'E6C.1.18' in c:
         return [
-            ('NC_E6C.1.18', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra đo lưu lượng)', 'công', 'I', "='Định mức áp dụng'!D205", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 425'),
+            ('NC_E6C.1.18', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Đo lưu lượng)', 'công', 'I', "='Định mức áp dụng'!D205", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6C.1.18_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng VOM', 'ca', 'K', "='Định mức áp dụng'!D206", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 425')
         ]
 
     # 14. E6C.3.06 (Van Deluge)
     elif 'E6C.3.06' in c:
         return [
-            ('NC_E6C.3.06', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Cụm van Deluge phần điện)', 'công', 'I', "='Định mức áp dụng'!D154", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
+            ('NC_E6C.3.06', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Cụm van Deluge)', 'công', 'I', "='Định mức áp dụng'!D154", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6C.3.06_CD', 'MÁY THI CÔNG', 'Hiện trường', '- Máy đo điện trở cách điện', 'ca', 'K', "='Định mức áp dụng'!D155", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
             ('M_E6C.3.06_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D156", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453'),
             ('M_E6C.3.06_BAN', 'MÁY THI CÔNG', 'Hiện trường', '- Bàn cân áp suất / Bơm tạo áp', 'ca', 'K', "='Định mức áp dụng'!D157", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 453')
@@ -216,7 +216,7 @@ def get_components_for_code(code_str):
     # 15. E6C.1.31 (Đo khí H2)
     elif 'E6C.1.31' in c:
         return [
-            ('NC_E6C.1.31', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Hiệu chuẩn đầu đo khí H2)', 'công', 'I', "='Định mức áp dụng'!D173", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
+            ('NC_E6C.1.31', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Hiệu chuẩn khí H2)', 'công', 'I', "='Định mức áp dụng'!D173", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6C.1.31_GAS', 'MÁY THI CÔNG', 'Hiện trường', '- Bình khí mẫu hiệu chuẩn (Zero & Span gas)', 'ca', 'K', "='Định mức áp dụng'!D174", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436'),
             ('M_E6C.1.31_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng kỹ thuật số (VOM)', 'ca', 'K', "='Định mức áp dụng'!D175", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 436')
         ]
@@ -224,7 +224,7 @@ def get_components_for_code(code_str):
     # 16. E6B.1.13.01 (Bình ắc quy)
     elif 'E6B.1.13.01' in c:
         return [
-            ('NC_E6B.1.13.01', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật bậc 5,0/7 (Kiểm tra bình ắc quy)', 'công', 'I', "='Định mức áp dụng'!D191", 1.0, 'QĐ 45/QĐ-HĐTV Tập 5 trang 383'),
+            ('NC_E6B.1.13.01', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Kiểm tra ắc quy)', 'công', 'I', "='Định mức áp dụng'!D191", 1.0, 'QĐ 45/QĐ-HĐTV Tập 5 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6B.1.13.01_TR', 'MÁY THI CÔNG', 'Hiện trường', '- Thiết bị đo nội trở và dung lượng accu', 'ca', 'K', "='Định mức áp dụng'!D192", 1.0, 'QĐ 45/QĐ-HĐTV Tập 5 trang 383'),
             ('M_E6B.1.13.01_VOM', 'MÁY THI CÔNG', 'Hiện trường', '- Đồng hồ vạn năng (VOM)', 'ca', 'K', "='Định mức áp dụng'!D193", 1.0, 'QĐ 45/QĐ-HĐTV Tập 5 trang 383'),
             ('VL_E6B.1.13.01', 'VẬT LIỆU', 'Hiện trường', '- Nước cất nạp accu, mỡ bôi cọc bình', 'kg', 'H', "='Định mức áp dụng'!D194", 1.0, 'QĐ 45/QĐ-HĐTV Tập 5 trang 383')
@@ -233,14 +233,14 @@ def get_components_for_code(code_str):
     # 17. E6BOP.1.03 (Đại tu van nước cơ khí)
     elif 'E6BOP.1.03' in c or 'E6BOP.2.01' in c or 'E6BOP.2.16' in c or 'E6BOP.5.03' in c or 'E6BOP.6.01' in c:
         return [
-            ('NC_E6BOP.1.03', 'NHÂN CÔNG', 'Hiện trường', '- Thợ cơ khí sửa chữa bậc 4,0/7 (Đại tu van nước PCCC)', 'công', 'I', "='Định mức áp dụng'!D209", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 312'),
+            ('NC_E6BOP.1.03', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 3 - Bậc 5,0/7 - Đại tu van nước)', 'công', 'I', "='Định mức áp dụng'!D209", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 3)'),
             ('M_E6BOP.1.03', 'MÁY THI CÔNG', 'Hiện trường', '- Thiết bị nâng hạ / Palăng xích & Cờ lê lực', 'ca', 'K', "='Định mức áp dụng'!D210", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 312')
         ]
 
     # 18. E6BOP.1.01 (Đại tu van an toàn)
     elif 'E6BOP.1.01' in c:
         return [
-            ('NC_E6BOP.1.01', 'NHÂN CÔNG', 'Hiện trường', '- Thợ cơ khí sửa chữa bậc 4,5/7 (Đại tu van an toàn)', 'công', 'I', "='Định mức áp dụng'!D213", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 308'),
+            ('NC_E6BOP.1.01', 'NHÂN CÔNG', 'Hiện trường', '- Nhân công kỹ thuật (Nhóm 4 - Bậc 5,0/7 - Van an toàn)', 'công', 'I', "='Định mức áp dụng'!D213", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 & QĐ 177/QĐ-HĐTV (Nhóm 4)'),
             ('M_E6BOP.1.01', 'MÁY THI CÔNG', 'Hiện trường', '- Bàn thử áp lực van an toàn chuyên dùng', 'ca', 'K', "='Định mức áp dụng'!D214", 1.0, 'QĐ 45/QĐ-HĐTV Tập 6 trang 308')
         ]
 
