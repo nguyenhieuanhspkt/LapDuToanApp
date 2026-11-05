@@ -362,54 +362,58 @@ def rebuild_resource_sheet(sheet_name, is_nc=True):
     # Clear data rows from row 6 downwards
     old_ws.delete_rows(6, old_ws.max_row - 5)
     
-    # Mapping for Khanh Hoa KV3 Ninh Phuoc (Row coordinates in KH_01_DonGia_NhanCong Table B, Col G):
-    # Nhóm 3:
-    # Bậc 3,0/7: G44 (261.678 đ)
-    # Bậc 3,5/7: G45 (286.151 đ)
-    # Bậc 4,0/7: G46 (310.624 đ)
-    # Bậc 5,0/7: G47 (367.102 đ)
+    # Đơn giá nhân công áp dụng THEO NHÓM (không phân biệt theo bậc) theo yêu cầu:
+    # - Lâm Đồng Vùng IV:
+    #   + Nhóm 3: 312.490 đ/công (Link '01_DonGia_NhanCong'!G9)
+    #   + Nhóm 4: 328.116 đ/công (Link '01_DonGia_NhanCong'!G10)
+    #   + Kỹ sư KS-TN: 313.000 đ/công (Link '01_DonGia_NhanCong'!G19)
+    # - Khánh Hòa KV3 Ninh Phước:
+    #   + Nhóm 3: 286.151 đ/công (Link 'KH_01_DonGia_NhanCong'!F9)
+    #   + Nhóm 4: 307.450 đ/công (Link 'KH_01_DonGia_NhanCong'!F10)
+    #   + Kỹ sư KS-TN: 296.438 đ/công (Link 'KH_01_DonGia_NhanCong'!F18)
+    
     kh_nc_map = {
-        "NC_E6C.3.05": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_E6C.3.02_B5": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_E6C.3.02_B1-11": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_BD.41111": ("='KH_01_DonGia_NhanCong'!G45", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 3,5/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G45"),
-        "NC_E6C.3.01_B5": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_E6C.3.01_B1-11": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_BD.41131": ("='KH_01_DonGia_NhanCong'!G46", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 4,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G46"),
-        "NC_BD.41141": ("='KH_01_DonGia_NhanCong'!G44", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 3,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G44"),
-        "NC_E6C.3.03": ("='KH_01_DonGia_NhanCong'!G47", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 5,0/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G47"),
-        "NC_BD.41121": ("='KH_01_DonGia_NhanCong'!G45", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3, Bậc 3,5/7 KV3 Ninh Phước) - Link 'KH_01_DonGia_NhanCong'!G45"),
+        "NC_E6C.3.05": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_E6C.3.02_B5": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_E6C.3.02_B1-11": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_BD.41111": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_E6C.3.01_B5": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_E6C.3.01_B1-11": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_BD.41131": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_BD.41141": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_E6C.3.03": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
+        "NC_BD.41121": ("='KH_01_DonGia_NhanCong'!F9", "QĐ 646/QĐ-SXD Khánh Hòa (Nhóm 3 KV3 Ninh Phước - Đơn giá theo nhóm: 286.151 đ) - Link 'KH_01_DonGia_NhanCong'!F9"),
     }
     
-    # Lâm Đồng Vùng IV mapping for NC (Col H in 01_DonGia_NhanCong):
+    # Lâm Đồng Vùng IV mapping for NC (theo nhóm):
     ld_nc_map = {
-        "NC_E6C.3.05": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_E6C.3.02_B5": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_E6C.3.02_B1-11": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_BD.41111": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_E6C.3.01_B5": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_E6C.3.01_B1-11": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_BD.41131": ("='01_DonGia_NhanCong'!H46", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 4,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H46"),
-        "NC_BD.41141": ("='01_DonGia_NhanCong'!H44", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H44"),
-        "NC_E6C.3.03": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_BD.41121": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_E6C.1.23": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_E6C.1.31": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_E6C.2.04": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_E6C.1.18": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_BA.18405": ("='01_DonGia_NhanCong'!H52", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 3,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H52"),
-        "NC_E6C.3.04": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_E6B.1.13.01": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_E6C.3.06": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_DB.24001": ("='01_DonGia_NhanCong'!G19", "VB 5898/SXD-QLXD Lâm Đồng (Kỹ sư KS-TN VÙNG IV) - Link '01_DonGia_NhanCong'!G19"),
-        "NC_E6BOP.1.03": ("='01_DonGia_NhanCong'!H47", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H47"),
-        "NC_E6BOP.1.01": ("='01_DonGia_NhanCong'!H55", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 5,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H55"),
-        "NC_BD.41171": ("='01_DonGia_NhanCong'!H52", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4, Bậc 3,0/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H52"),
-        "NC_SB.82633": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_BB.86601": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_BB.86103": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_BB.85201": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
-        "NC_SB.82634": ("='01_DonGia_NhanCong'!H45", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3, Bậc 3,5/7 VÙNG IV) - Link '01_DonGia_NhanCong'!H45"),
+        "NC_E6C.3.05": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.3.02_B5": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.3.02_B1-11": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BD.41111": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.3.01_B5": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.3.01_B1-11": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BD.41131": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BD.41141": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.3.03": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BD.41121": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6C.1.23": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_E6C.1.31": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_E6C.2.04": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_E6C.1.18": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_BA.18405": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_E6C.3.04": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6B.1.13.01": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_E6C.3.06": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_DB.24001": ("='01_DonGia_NhanCong'!G19", "VB 5898/SXD-QLXD Lâm Đồng (Kỹ sư KS-TN VÙNG IV - Đơn giá theo nhóm: 313.000 đ) - Link '01_DonGia_NhanCong'!G19"),
+        "NC_E6BOP.1.03": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_E6BOP.1.01": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_BD.41171": ("='01_DonGia_NhanCong'!G10", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 4 VÙNG IV - Đơn giá theo nhóm: 328.116 đ) - Link '01_DonGia_NhanCong'!G10"),
+        "NC_SB.82633": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BB.86601": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BB.86103": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_BB.85201": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
+        "NC_SB.82634": ("='01_DonGia_NhanCong'!G9", "VB 5898/SXD-QLXD Lâm Đồng (Nhóm 3 VÙNG IV - Đơn giá theo nhóm: 312.490 đ) - Link '01_DonGia_NhanCong'!G9"),
     }
     
     # Mapping for Ca máy
